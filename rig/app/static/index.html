@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pawse Studio</title>
+<meta name="description" content="Describe a moment and get an animated mascot sticker for Telegram, WhatsApp and more.">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie_svg.min.js" defer></script>
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+<svg width="0" height="0" aria-hidden="true" class="defs">
+  <!-- die-cut: grow the sticker's silhouette into a white border, then lay a soft shadow under it -->
+  <filter id="diecut" x="-10%" y="-10%" width="120%" height="120%">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="7" result="grown"/>
+    <feFlood flood-color="#ffffff"/>
+    <feComposite in2="grown" operator="in" result="border"/>
+    <feGaussianBlur in="grown" stdDeviation="5" result="blur"/>
+    <feOffset in="blur" dy="5" result="drop"/>
+    <feFlood flood-color="#0b2a22" flood-opacity="0.35"/>
+    <feComposite in2="drop" operator="in" result="shadow"/>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+</svg>
+
+<header class="top">
+  <a class="brand" href="/">Pawse Studio</a>
+  <nav class="top-actions" aria-label="Account">
+    <button type="button" class="link" id="open-collection" hidden>My stickers</button>
+    <button type="button" class="link" id="open-pricing">Pricing</button>
+    <button type="button" class="pill" id="open-account">Sign in</button>
+  </nav>
+</header>
+
+<main class="studio">
+  <section class="mat" aria-label="Your sticker">
+    <div class="mat-inner">
+      <div class="stage" id="stage" aria-live="polite">
+        <div class="sticker" id="sticker" role="img" aria-label="Sticker preview"></div>
+        <p class="stage-state" id="stage-state">Type a moment on the right and your sticker appears here.</p>
+      </div>
+      <ul class="notes" id="notes" aria-label="What the studio changed"></ul>
+      <button type="button" class="link on-mat" id="open-report" hidden>Not what you meant? Tell us</button>
+      <div class="downloads" id="downloads" aria-label="Download">
+        <p class="downloads-head">Download</p>
+        <div class="download-row" id="download-row"></div>
+        <p class="downloads-hint" id="downloads-hint"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="paper" aria-label="Make and edit">
+    <form class="ask" id="ask">
+      <label for="prompt" class="ask-label">Describe your sticker</label>
+      <div class="ask-row">
+        <input id="prompt" name="prompt" maxlength="200" autocomplete="off" spellcheck="true"
+               placeholder="a sleepy cat with coffee saying 'monday again'">
+        <button type="submit" class="primary" id="make">Make sticker</button>
+      </div>
+      <div class="ideas" id="ideas" aria-label="Ideas to try"></div>
+    </form>
+
+    <div class="understood" id="understood" hidden></div>
+
+    <div class="editor" id="editor" hidden>
+      <fieldset class="group" data-slot="base"><legend>Mascot</legend><div class="chips big" data-kind="single"></div></fieldset>
+      <fieldset class="group" data-slot="colour"><legend>Colour</legend><div class="swatches"></div></fieldset>
+      <fieldset class="group" data-slot="face"><legend>Face</legend><div class="chips" data-kind="single"></div></fieldset>
+      <fieldset class="group" data-slot="motion"><legend>Movement</legend><div class="chips" data-kind="single"></div></fieldset>
+      <fieldset class="group" data-slot="stance"><legend>Pose</legend><div class="chips" data-kind="single"></div></fieldset>
+      <fieldset class="group" data-slot="props" data-max="2"><legend>Holding <span class="limit">up to 2</span></legend><div class="chips" data-kind="multi"></div></fieldset>
+      <fieldset class="group" data-slot="accessories" data-max="3"><legend>Wearing <span class="limit">up to 3</span></legend><div class="chips" data-kind="multi"></div></fieldset>
+      <fieldset class="group" data-slot="effects" data-max="3"><legend>Around it <span class="limit">up to 3</span></legend><div class="chips" data-kind="multi"></div></fieldset>
+      <fieldset class="group caption-group">
+        <legend>Caption</legend>
+        <input id="caption" maxlength="60" placeholder="Words on the sticker (optional)" autocomplete="off">
+        <div class="caption-opts">
+          <div class="chips small" data-slot="caption_style" data-kind="single"></div>
+          <div class="chips small" data-slot="caption_pos" data-kind="single"></div>
+        </div>
+      </fieldset>
+      <fieldset class="group sliders">
+        <legend>Feel</legend>
+        <label>Strength <input type="range" id="intensity" min="0.5" max="1.6" step="0.05"></label>
+        <label>Length <input type="range" id="seconds" min="1" max="3" step="0.5"><output id="seconds-out"></output></label>
+      </fieldset>
+      <div class="editor-actions">
+        <button type="button" class="secondary" id="save">Save to my stickers</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog id="account-dialog" aria-labelledby="account-title">
+  <form method="dialog" class="dialog-close"><button aria-label="Close">×</button></form>
+  <div id="account-out">
+    <h2 id="account-title">Sign in</h2>
+    <p class="dialog-lead" id="account-lead">Download stickers and keep the ones you make.</p>
+    <form id="auth-form" class="stack">
+      <label>Email <input type="email" name="email" required autocomplete="email"></label>
+      <label>Password <input type="password" name="password" required minlength="8" autocomplete="current-password"></label>
+      <label id="invite-label" hidden>Invite code <input name="invite" autocomplete="off" spellcheck="false" placeholder="PAWS-XXXXXX"></label>
+      <p class="form-error" id="auth-error" role="alert"></p>
+      <button type="submit" class="primary" id="auth-submit">Sign in</button>
+    </form>
+    <p class="switch"><span id="auth-switch-text">New here?</span> <button type="button" class="link" id="auth-switch">Create a free account</button></p>
+    <p class="switch" id="forgot-line"><button type="button" class="link" id="forgot-open">Forgot your password?</button></p>
+  </div>
+  <div id="account-forgot" hidden>
+    <h2>Reset your password</h2>
+    <p class="dialog-lead">Enter your account's email. We'll send a link to choose a new password; it works for an hour.</p>
+    <form id="forgot-form" class="stack">
+      <label>Email <input type="email" name="email" required autocomplete="email"></label>
+      <p class="form-error" id="forgot-error" role="alert"></p>
+      <button type="submit" class="primary">Send the link</button>
+    </form>
+    <p class="switch"><button type="button" class="link" id="forgot-back">Back to sign in</button></p>
+  </div>
+  <div id="account-reset" hidden>
+    <h2>Choose a new password</h2>
+    <p class="dialog-lead">This signs you out on your other devices.</p>
+    <form id="reset-form" class="stack">
+      <label>New password <input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+      <p class="form-error" id="reset-error" role="alert"></p>
+      <button type="submit" class="primary">Save new password</button>
+    </form>
+  </div>
+  <div id="account-in" hidden>
+    <h2>Your account</h2>
+    <p class="dialog-lead" id="account-summary"></p>
+    <div class="stack">
+      <button type="button" class="secondary" id="manage-billing" hidden>Manage subscription</button>
+      <button type="button" class="secondary" id="sign-out">Sign out</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="pricing-dialog" aria-labelledby="pricing-title">
+  <form method="dialog" class="dialog-close"><button aria-label="Close">×</button></form>
+  <h2 id="pricing-title">Pricing</h2>
+  <div class="plans">
+    <div class="plan">
+      <h3>Free</h3>
+      <p class="price">$0</p>
+      <p>Unlimited previews. <span id="free-daily">5</span> PNG or WebP downloads a day, with a small mark.</p>
+    </div>
+    <div class="plan">
+      <h3>Credit pack</h3>
+      <p class="price" id="price-pack">$2.99</p>
+      <p><span id="pack-credits">20</span> downloads in any format, no mark. Credits don't expire.</p>
+      <button type="button" class="secondary buy" data-kind="pack">Buy credits</button>
+    </div>
+    <div class="plan plan-pro">
+      <h3>Pro</h3>
+      <p class="price" id="price-pro">$4.99 a month</p>
+      <p>Every format with no mark, Lottie files, and whole packs for Telegram and WhatsApp in one zip.</p>
+      <button type="button" class="primary buy" data-kind="pro">Get Pro</button>
+    </div>
+  </div>
+  <p class="form-error" id="pricing-error" role="alert"></p>
+</dialog>
+
+<dialog id="collection-dialog" class="wide" aria-labelledby="collection-title">
+  <form method="dialog" class="dialog-close"><button aria-label="Close">×</button></form>
+  <h2 id="collection-title">My stickers</h2>
+  <div class="pack-actions" id="pack-actions"></div>
+  <ul class="sheet" id="sheet"></ul>
+  <p class="empty" id="sheet-empty" hidden>Nothing saved yet. Make a sticker and choose “Save to my stickers”.</p>
+</dialog>
+
+<dialog id="report-dialog" aria-labelledby="report-title">
+  <form method="dialog" class="dialog-close"><button aria-label="Close">×</button></form>
+  <h2 id="report-title">Not what you meant?</h2>
+  <p class="dialog-lead">Your words and this sticker's settings come with the report, so we can teach the studio.</p>
+  <form id="report-form" class="stack">
+    <fieldset class="kinds">
+      <legend class="sr-only">What happened</legend>
+      <label><input type="radio" name="kind" value="wrong" checked> It made the wrong sticker</label>
+      <label><input type="radio" name="kind" value="idea"> I wish it could do something</label>
+      <label><input type="radio" name="kind" value="bug"> Something is broken</label>
+    </fieldset>
+    <label>What did you expect? <textarea name="note" rows="3" maxlength="500"></textarea></label>
+    <button type="submit" class="primary">Send</button>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

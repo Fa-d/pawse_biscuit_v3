@@ -19,7 +19,9 @@ from .clip import Clip
 
 def characters():
     from .characters.biscuit import Biscuit
-    return {"biscuit": Biscuit}
+    from .characters.bruno import Bruno
+    from .characters.mochi import Mochi
+    return {"biscuit": Biscuit, "mochi": Mochi, "bruno": Bruno}
 
 
 def registry():

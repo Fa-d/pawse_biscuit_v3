@@ -1,0 +1,7 @@
+numpy
+scipy
+pillow
+rlottie-python
+fonttools
+pyyaml
+anthropic   # only for the optional --llm fallback

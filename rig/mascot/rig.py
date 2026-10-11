@@ -74,6 +74,10 @@ FACES = {
                   "mouth.smile": 1, "mouth.open": 0, "mouth.o": 0, "tongue": 0, "blush": 1},
     "surprised": {"eye.open": 1, "eye.arc": -0.45, "eye.w": 1.14, "eye.h": 1.12, "look.x": 0, "look.y": 0, "brow.show": 1, "brow.y": 10, "brow.tilt": 6,
                   "mouth.smile": 0.3, "mouth.open": 0, "mouth.o": 1.15, "tongue": 0, "blush": 1},
+    "angry":     {"eye.open": 1, "eye.arc": -0.45, "eye.w": 0.96, "eye.h": 0.76, "look.x": 0, "look.y": 0.1, "brow.show": 1, "brow.y": -6, "brow.tilt": -24,
+                  "mouth.smile": -1, "mouth.open": 0, "mouth.o": 0, "tongue": 0, "blush": 0},
+    "wink":      {"eye.open": 1, "eye.arc": 1.0, "eye.w": 1, "eye.h": 1, "look.x": 0, "look.y": 0, "brow.show": 0, "brow.y": 0, "brow.tilt": 0,
+                  "mouth.smile": 1, "mouth.open": 0.85, "mouth.o": 0, "tongue": 0, "blush": 1.1, "eye.L.blink": 1},
     "focused":   {"eye.open": 0.6, "eye.arc": -0.45, "eye.w": 1, "eye.h": 1, "look.x": 0, "look.y": 0.35, "brow.show": 1, "brow.y": -4, "brow.tilt": -10,
                   "mouth.smile": 0.8, "mouth.open": 0, "mouth.o": 0, "tongue": 0, "blush": 0},
 }

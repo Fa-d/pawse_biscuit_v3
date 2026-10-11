@@ -1,0 +1,96 @@
+# Real-world prompts and what a sticker for them must show.  Only the listed slots are checked; props/effects are
+# "must include".  Run:  python3 -m studio.tests.eval_parser       (target: 90 % or more without the LLM)
+- {prompt: "good morning!", expect: {motion: wave, props: [mug]}}
+- {prompt: "gm", expect: {props: [mug]}}
+- {prompt: "good night", expect: {face: sleep, effects: [zzz]}}
+- {prompt: "nighty night sweet dreams", expect: {face: sleep}}
+- {prompt: "monday mood", expect: {face: sleep, props: [mug]}}
+- {prompt: "ugh mondays", expect: {face: sleep}}
+- {prompt: "need coffee", expect: {props: [mug]}}
+- {prompt: "sipping tea and chilling", expect: {props: [mug], face: smiley}}
+- {prompt: "happy birthday!", expect: {props: [gift]}}
+- {prompt: "hbd bestie", expect: {props: [gift]}}
+- {prompt: "thank you so much", expect: {props: [heart]}}
+- {prompt: "thanks!", expect: {props: [heart]}}
+- {prompt: "sorry :(", expect: {face: worried}}
+- {prompt: "my bad", expect: {face: worried}}
+- {prompt: "love you", expect: {effects: [hearts]}}
+- {prompt: "i miss you", expect: {face: worried}}
+- {prompt: "sending hugs", expect: {effects: [hearts]}}
+- {prompt: "congrats!!", expect: {face: joy, effects: [confetti]}}
+- {prompt: "well done, proud of you", expect: {face: joy}}
+- {prompt: "achievement unlocked", expect: {props: [badge]}}
+- {prompt: "hello there", expect: {motion: wave}}
+- {prompt: "hi!", expect: {motion: wave}}
+- {prompt: "bye bye", expect: {motion: wave}}
+- {prompt: "see you later", expect: {motion: wave}}
+- {prompt: "ok", expect: {motion: nod}}
+- {prompt: "sounds good", expect: {motion: nod}}
+- {prompt: "yes!", expect: {motion: nod}}
+- {prompt: "thumbs up", expect: {motion: nod}}
+- {prompt: "nope", expect: {motion: "no"}}
+- {prompt: "absolutely not", expect: {motion: "no"}}
+- {prompt: "omg", expect: {face: surprised}}
+- {prompt: "wow really?", expect: {face: surprised}}
+- {prompt: "lol", expect: {face: joy}}
+- {prompt: "hahaha so funny", expect: {face: joy}}
+- {prompt: "so busy today", expect: {props: [clipboard]}}
+- {prompt: "working on my report", expect: {props: [clipboard]}}
+- {prompt: "deadline stress", expect: {face: worried}}
+- {prompt: "on my way", expect: {motion: walk}}
+- {prompt: "running late sorry", expect: {motion: walk}}
+- {prompt: "call me", expect: {props: [phone]}}
+- {prompt: "text me later", expect: {props: [phone]}}
+- {prompt: "don't forget!", expect: {props: [bell]}}
+- {prompt: "dinner time", expect: {}}
+- {prompt: "hmm let me think", expect: {motion: think}}
+- {prompt: "confused", expect: {face: curious}}
+- {prompt: "it's friday!", expect: {motion: dance}}
+- {prompt: "party time", expect: {motion: dance}}
+- {prompt: "dancing to music", expect: {motion: dance, effects: [notes]}}
+- {prompt: "lazy sunday on the couch", expect: {face: sleep}}
+- {prompt: "self care day", expect: {face: calm}}
+- {prompt: "meditating", expect: {face: calm, stance: lotus}}
+- {prompt: "keep calm", expect: {face: calm}}
+- {prompt: "scared", expect: {face: worried, motion: shiver}}
+- {prompt: "so cold", expect: {motion: shiver}}
+- {prompt: "shy", expect: {motion: hide}}
+- {prompt: "don't look at me", expect: {motion: hide}}
+- {prompt: "bad day", expect: {effects: [rain]}}
+- {prompt: "feeling down", expect: {face: worried}}
+- {prompt: "crying", expect: {effects: [tear]}}
+- {prompt: "not happy", expect: {face: worried}}
+- {prompt: "not sad at all", expect: {face: joy}}
+- {prompt: "done!", expect: {props: [cloud]}}
+- {prompt: "finally finished", expect: {props: [cloud]}}
+- {prompt: "hungry", expect: {arm_L: belly}}
+- {prompt: "gym time", expect: {motion: jump}}
+- {prompt: "leg day", expect: {face: focused}}
+- {prompt: "a gift for you", expect: {props: [gift]}}
+- {prompt: "jumping for joy", expect: {motion: jump, face: joy}}
+- {prompt: "waving with a phone", expect: {motion: wave, props: [phone]}}
+- {prompt: "purple fox waving", expect: {motion: wave, palette: true}}
+- {prompt: "sitting and drinking coffee", expect: {stance: sit, props: [mug]}}
+- {prompt: "very excited", expect: {face: joy}}
+- {prompt: "a bit sleepy", expect: {face: sleep}}
+- {prompt: "hands on hips, confident", expect: {arm_L: hip}}
+- {prompt: "celebrating my win", expect: {motion: cheer}}
+- {prompt: "new year party", expect: {effects: [confetti]}}
+- {prompt: "rainy day blues", expect: {effects: [rain]}}
+- {prompt: "sparkly magic fox", expect: {effects: [sparkles]}}
+- {prompt: "slepy fox", expect: {face: sleep}}
+- {prompt: "coffe please", expect: {props: [mug]}}
+- {prompt: "grumpy cat", expect: {base: mochi, face: angry, effects: [anger]}}
+- {prompt: "so annoyed rn", expect: {face: angry}}
+- {prompt: "teddy bear hug", expect: {base: bruno, effects: [hearts]}}
+- {prompt: "kitten waving hi", expect: {base: mochi, motion: wave}}
+- {prompt: "cool fox in shades", expect: {accessories: [sunglasses]}}
+- {prompt: "birthday bear", expect: {base: bruno, accessories: [party_hat], props: [gift]}}
+- {prompt: "nerdy cat studying", expect: {base: mochi, accessories: [glasses], props: [clipboard]}}
+- {prompt: "queen vibes", expect: {accessories: [crown]}}
+- {prompt: "winter mood, cold", expect: {accessories: [scarf], motion: shiver}}
+- {prompt: "wink ;)", expect: {face: wink}}
+- {prompt: "gaming all night", expect: {accessories: [headphones]}}
+- {prompt: "spring flowers", expect: {accessories: [flower]}}
+- {prompt: "grumpy cat with sunglasses saying 'no.'", expect: {base: mochi, face: angry, accessories: [sunglasses]}}
+- {prompt: "sad bear in a party hat", expect: {base: bruno, face: worried, accessories: [party_hat]}}

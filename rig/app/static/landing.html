@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pawse Studio</title>
+<meta name="description" content="Type a moment and get an animated sticker of a fox, cat or bear, ready for Telegram and WhatsApp.">
+<meta property="og:title" content="Pawse Studio">
+<meta property="og:description" content="Type a moment. Get an animated sticker for Telegram and WhatsApp.">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/landing.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie_svg.min.js" defer></script>
+<script src="/static/landing.js" defer></script>
+</head>
+<body class="landing">
+<svg width="0" height="0" aria-hidden="true" class="defs">
+  <filter id="diecut" x="-10%" y="-10%" width="120%" height="120%">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="7" result="grown"/>
+    <feFlood flood-color="#ffffff"/>
+    <feComposite in2="grown" operator="in" result="border"/>
+    <feGaussianBlur in="grown" stdDeviation="5" result="blur"/>
+    <feOffset in="blur" dy="5" result="drop"/>
+    <feFlood flood-color="#0b2a22" flood-opacity="0.35"/>
+    <feComposite in2="drop" operator="in" result="shadow"/>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="border"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+</svg>
+
+<header class="top">
+  <a class="brand" href="/">Pawse Studio</a>
+  <nav class="top-actions" aria-label="Site">
+    <a class="link" href="#how">How it works</a>
+    <a class="link" href="#pricing">Pricing</a>
+    <a class="pill" href="/studio">Open the studio</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero mat">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <h1>Type a moment.<br>Get a sticker.</h1>
+        <p class="hero-lead">Describe what you want to say, like “sleepy bear with coffee saying monday”. Pawse Studio draws and animates it in seconds, ready for Telegram and WhatsApp.</p>
+        <div class="cta" id="cta-open">
+          <a class="cta-button" href="/studio">Make your first sticker</a>
+          <p class="cta-note">Free to try. No account needed until you download.</p>
+        </div>
+        <form class="cta waitlist" id="waitlist" hidden>
+          <label for="wl-email">We're in beta. Join the waitlist and we'll send you an invite.</label>
+          <div class="waitlist-row">
+            <input id="wl-email" type="email" required autocomplete="email" placeholder="you@example.com">
+            <button type="submit" class="cta-button">Join the waitlist</button>
+          </div>
+          <p class="cta-note" id="wl-note">Have an invite? <a href="/studio">Open the studio</a>.</p>
+        </form>
+      </div>
+      <figure class="demo" aria-label="Examples made by Pawse Studio">
+        <p class="demo-prompt" id="demo-prompt" aria-live="polite">&nbsp;</p>
+        <div class="demo-sticker" id="demo-sticker"></div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band" id="how" aria-labelledby="how-title">
+    <h2 id="how-title">How it works</h2>
+    <ol class="steps">
+      <li><h3>Describe it</h3><p>Write the moment in your own words. Moods, actions, things to hold, things to wear and a caption in quotes all count.</p></li>
+      <li><h3>Fine-tune it</h3><p>Change the mascot, colour, face, movement or caption with a tap. The sticker updates as you go.</p></li>
+      <li><h3>Send it</h3><p>Download it for one chat, or save a set and get a whole pack for Telegram or WhatsApp.</p></li>
+    </ol>
+  </section>
+
+  <section class="band band-tint" aria-labelledby="cast-title">
+    <h2 id="cast-title">Three mascots, any colour</h2>
+    <p class="band-lead">The same character in every sticker, so a pack looks like a set. Each one dances, waves, sulks and dozes.</p>
+    <ul class="cast" id="cast">
+      <li data-base="biscuit"><div class="cast-sticker"></div><h3>Biscuit</h3><p>the fox</p></li>
+      <li data-base="mochi"><div class="cast-sticker"></div><h3>Mochi</h3><p>the cat</p></li>
+      <li data-base="bruno"><div class="cast-sticker"></div><h3>Bruno</h3><p>the bear</p></li>
+    </ul>
+  </section>
+
+  <section class="band" aria-labelledby="where-title">
+    <h2 id="where-title">Works where you chat</h2>
+    <dl class="where">
+      <div><dt>Telegram</dt><dd>Animated stickers (.tgs), and whole packs with the emoji for each one and steps for Telegram's sticker bot.</dd></div>
+      <div><dt>WhatsApp</dt><dd>Animated or still WebP stickers with the white sticker edge, and packs in WhatsApp's own pack format.</dd></div>
+      <div><dt>Anywhere else</dt><dd>PNG and WebP for any app, GIF for Slack and Discord, and Lottie files for websites and apps.</dd></div>
+    </dl>
+  </section>
+
+  <section class="band band-tint" id="pricing" aria-labelledby="pricing-title">
+    <h2 id="pricing-title">Pricing</h2>
+    <div class="plans plans-row">
+      <div class="plan"><h3>Free</h3><p class="price">$0</p><p>Unlimited previews. <span class="free-daily">5</span> PNG or WebP downloads a day, with a small mark.</p></div>
+      <div class="plan"><h3>Credit pack</h3><p class="price price-pack">$2.99</p><p><span class="pack-credits">20</span> downloads in any format, no mark. Credits don't expire.</p></div>
+      <div class="plan plan-pro"><h3>Pro</h3><p class="price price-pro">$4.99 a month</p><p>Every format with no mark, Lottie files, and whole packs for Telegram and WhatsApp.</p></div>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="faq-title">
+    <h2 id="faq-title">Questions</h2>
+    <div class="faq">
+      <details><summary>How does it understand what I type?</summary><p>Mostly with a large word list and rules written for stickers: moods, actions, props, clothes, colours and captions. For the rare sentence it can't place, it can ask a small AI model to choose from the same options. Every sticker is drawn by our animation engine, never by an image generator, so the mascot looks the same every time.</p></details>
+      <details><summary>Do I need an account?</summary><p>Not to try it. You can make and preview as many stickers as you like. A free account lets you download and save them.</p></details>
+      <details><summary>What does Pro add?</summary><p>Every format with no mark, Lottie files, and packs: save up to 30 stickers and download them as one pack for Telegram or WhatsApp.</p></details>
+      <details><summary>How do I add a pack to WhatsApp?</summary><p>WhatsApp adds packs through a sticker app on your phone. The pack zip includes the steps; it also follows WhatsApp's official pack format, so a developer can turn it into an app.</p></details>
+      <details id="faq-brand"><summary>Can my brand have its own mascot?</summary><p>Yes. We can draw your mascot into the studio so your team makes on-brand stickers the same way. <a id="contact-link" href="#">Get in touch</a>.</p></details>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>Pawse Studio</p>
+  <nav aria-label="Legal"><a href="/privacy">Privacy</a></nav>
+</footer>
+</body>
+</html>

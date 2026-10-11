@@ -14,6 +14,7 @@ Keep to that rule and any clip plays on any mascot.
 ```
 mascot/
   characters/biscuit.py   what Biscuit looks like and where its joints are   <- copy this for a new mascot
+  characters/mochi.py     Mochi the cat, characters/bruno.py  Bruno the bear (both subclass Biscuit)
   clips/core.py           the 19 standard animations
   clips/alts.py           the 4 rare alternate takes
   clips/moves.py          reusable acting: jump, walk, step, tap, kick, wave, breathe, squash...
@@ -60,6 +61,12 @@ whether the soles face the viewer). Stances blend, so a clip can also change sta
 the sneeze take is knocked from `stand` to `sit` and hops back up.
 
 ## Adding a mascot
+
+The quickest way is to subclass a mascot with similar proportions and redraw only what differs:
+`characters/mochi.py` (a cat) and `characters/bruno.py` (a bear) subclass Biscuit and override the head, ears, face
+details, body markings, tail and palette. They build all 23 clips unchanged.
+
+For a mascot with different proportions, start from a copy:
 
 1. Copy `mascot/characters/biscuit.py` to `mascot/characters/<name>.py` and rename the class.
 2. Change the data (table below). Everything is in canvas pixels for a 512 x 512 canvas, drawn in the
@@ -146,7 +153,7 @@ Named arm poses: `rest`, `relax`, `wave_lo`, `wave_hi`, `cheer`, `cheer_hi`, `ch
 Named tail poses, standing: `rest`, `out`, `in`, `up`, `low`, `floor`, `flick_out`, `flick_in`, `curl`.
 Sitting: `ground`, `ground_up`, `wrap` (across the lap, with `tail.front` = 1).
 Stances: `stand`, `wide`, `sit`, `lotus`.
-Expressions: `neutral`, `smiley`, `joy`, `worried`, `curious`, `sleep`, `calm`, `surprised`, `focused`.
+Expressions: `neutral`, `smiley`, `joy`, `worried`, `curious`, `sleep`, `calm`, `surprised`, `focused`, `angry`, `wink`.
 
 ## What moves by itself
 

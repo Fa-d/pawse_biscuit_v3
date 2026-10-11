@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+stripe
+httpx        # tests
+playwright   # e2e test only; drives your installed Chrome
