@@ -1,0 +1,4 @@
+# Lottie animation files stay local; they are not published with the code
+lottie/*.json
+lottie_alternates/*.json
+.DS_Store
