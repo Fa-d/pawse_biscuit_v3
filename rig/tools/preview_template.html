@@ -1,0 +1,444 @@
+<title>Biscuit Reel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* layout: a review reel. Sticky tool bar on top, then film-frame pairs (before | after) in a grid; one clip opens into an inspector with a frame ruler. */
+:root {
+  --bg: #ECEFF4; --surface: #FFFFFF; --ink: #1B2634; --muted: #57667A; --line: #D3DAE4;
+  --accent: #0F7F76; --accent-ink: #FFFFFF; --tint: #DFF1EE; --stage: #F4EFE9; --stage-fx: #27323F; --shade: rgba(16, 24, 36, .55);
+  --font-display: "Fredoka", ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #111821; --surface: #1A2431; --ink: #E6ECF3; --muted: #94A3B7; --line: #2B3848;
+    --accent: #4ECDC4; --accent-ink: #0C1B1A; --tint: #1D3837; --stage: #F4EFE9; --stage-fx: #0C1218; --shade: rgba(0, 0, 0, .68); color-scheme: dark }
+}
+:root[data-theme="dark"] { --bg: #111821; --surface: #1A2431; --ink: #E6ECF3; --muted: #94A3B7; --line: #2B3848;
+  --accent: #4ECDC4; --accent-ink: #0C1B1A; --tint: #1D3837; --stage: #F4EFE9; --stage-fx: #0C1218; --shade: rgba(0, 0, 0, .68); color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 400 15px/1.55 var(--font-body); }
+h1, h2, h3, p, ul, ol, dl, dd, figure, pre { margin: 0 }
+ul, ol { padding: 0; list-style: none }
+h1, h2 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; letter-spacing: -.005em }
+h1 { font-size: clamp(30px, 4.6vw, 44px); line-height: 1.08 }
+h2 { font-size: 24px; line-height: 1.2 }
+h3 { font: 600 16px/1.3 var(--font-body) }
+a { color: var(--accent) }
+button { font: inherit; color: inherit }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.data { font: 400 12px/1.4 var(--font-data); color: var(--muted); font-variant-numeric: tabular-nums }
+
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.bar-in { max-width: 1240px; margin: 0 auto; padding: 8px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px }
+.brand { font: 600 18px/1 var(--font-display); margin-right: auto }
+.bar nav { display: flex; gap: 14px; font-size: 14px }
+.bar nav a { color: var(--muted); text-decoration: none }
+.bar nav a:hover { color: var(--ink) }
+.ctl { display: flex; align-items: center; gap: 6px }
+.ctl > span { font: 500 11px/1 var(--font-data); letter-spacing: .07em; text-transform: uppercase; color: var(--muted) }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden }
+.seg button { border: 0; background: transparent; padding: 5px 9px; font: 500 12px/1.2 var(--font-data); cursor: pointer; color: var(--muted) }
+.seg button + button { border-left: 1px solid var(--line) }
+.seg button[aria-pressed="true"] { background: var(--tint); color: var(--accent) }
+.sw { display: inline-flex; gap: 5px }
+.sw button { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); cursor: pointer; padding: 0 }
+.sw button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent) }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 5px 12px; font: 500 13px/1.2 var(--font-body); cursor: pointer }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink) }
+
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: flex; flex-direction: column; gap: 56px }
+.intro { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 32px; align-items: center }
+.intro-text { display: flex; flex-direction: column; gap: 16px; min-width: 0 }
+.lede { font-size: 17px; max-width: 58ch; color: var(--ink) }
+.facts { display: flex; flex-wrap: wrap; gap: 8px }
+.facts li { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 4px 12px; font-size: 13px }
+.facts b { font-weight: 600 }
+.changes { display: grid; gap: 10px; max-width: 62ch }
+.changes li { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 12px; align-items: baseline }
+.changes .k { font: 500 11px/1.4 var(--font-data); letter-spacing: .07em; text-transform: uppercase; color: var(--accent) }
+.hero-stage { max-width: 420px; width: 100%; justify-self: end }
+
+section { display: flex; flex-direction: column; gap: 18px; scroll-margin-top: 70px }
+.sec-head { display: flex; flex-direction: column; gap: 6px; max-width: 70ch }
+.sec-head p { color: var(--muted) }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)) }
+.grid.one { grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)) }
+.clip { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+.pair.solo { grid-template-columns: 1fr }
+.stage { position: relative; aspect-ratio: 1 / 1; max-width: 100%; background: var(--stage); border-radius: 9px; overflow: hidden }
+.fx .stage, .stage.dark { background: var(--stage-fx) }
+.lot { position: absolute; inset: 0 }
+.fx .lot { inset: 16% }
+.chip { position: absolute; left: 7px; top: 7px; z-index: 1; font: 500 10px/1 var(--font-data); letter-spacing: .08em; text-transform: uppercase;
+  padding: 4px 7px; border-radius: 99px; background: var(--surface); color: var(--muted); border: 1px solid var(--line) }
+.chip.new { background: var(--tint); color: var(--accent); border-color: transparent }
+.cap { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding-inline: 2px }
+.cap h3 { font-family: var(--font-data); font-weight: 500; font-size: 14px; overflow-wrap: anywhere }
+.note { color: var(--muted); font-size: 14px; padding-inline: 2px; flex: 1 }
+.clip .btn { align-self: flex-start }
+
+.rig { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px; align-items: start }
+.rig-text { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
+.rig-text p, .rig-text li { max-width: 66ch }
+.steps { display: grid; gap: 8px; counter-reset: s }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px }
+.steps li::before { content: counter(s); font: 500 12px/22px var(--font-data); width: 22px; height: 22px; text-align: center; border-radius: 50%; background: var(--tint); color: var(--accent) }
+.tree-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface) }
+.tree { font: 400 12.5px/1.6 var(--font-data); padding: 14px 16px; color: var(--ink); white-space: pre }
+.tree i { font-style: normal; color: var(--muted) }
+.rig-side { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.rig-side .stage { max-width: 320px }
+code { font: 400 .92em var(--font-data); background: var(--tint); padding: 1px 5px; border-radius: 5px }
+
+.focus { position: fixed; inset: 0; z-index: 20; background: var(--shade); display: grid; place-items: center; padding: 16px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px)); padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) }
+.panel { width: min(100%, 980px); max-height: 100%; overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px }
+.panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px }
+.panel-head h2 { font: 500 18px/1.3 var(--font-data); overflow-wrap: anywhere }
+.panel .pair { gap: 12px }
+.panel .pair.solo { max-width: 520px; width: 100%; margin: 0 auto }
+.ruler { display: flex; flex-direction: column; gap: 6px }
+.ruler input[type="range"] { width: 100%; accent-color: var(--accent) }
+.ticks { display: flex; justify-content: space-between }
+.transport { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px }
+.transport .tc { margin-left: auto; font-size: 13px; color: var(--ink) }
+.facts2 { display: flex; flex-wrap: wrap; gap: 6px 18px }
+.facts2 div { display: flex; gap: 6px; align-items: baseline }
+.facts2 dt { font: 500 11px/1.4 var(--font-data); letter-spacing: .07em; text-transform: uppercase; color: var(--muted) }
+.facts2 dd { font-size: 14px }
+
+@media (max-width: 820px) {
+  .intro, .rig { grid-template-columns: minmax(0, 1fr) }
+  .hero-stage { justify-self: start }
+  .bar nav { display: none }
+  .wrap { gap: 44px }
+}
+</style>
+
+<div class="bar">
+  <div class="bar-in">
+    <span class="brand">Biscuit Reel</span>
+    <nav aria-label="Sections">
+      <a href="#clips">Animations</a><a href="#takes">Rare takes</a><a href="#effects">Effects</a><a href="#rig">Rig</a>
+    </nav>
+    <div class="ctl"><span id="lbl-stage">Stage</span>
+      <div class="sw" role="group" aria-labelledby="lbl-stage" id="stage-sw">
+        <button type="button" data-stage="#F4EFE9" style="background:#F4EFE9" aria-label="Paper" title="Paper" aria-pressed="true"></button>
+        <button type="button" data-stage="#FFFFFF" style="background:#FFFFFF" aria-label="White" title="White" aria-pressed="false"></button>
+        <button type="button" data-stage="#DDF1EC" style="background:#DDF1EC" aria-label="Mint" title="Mint" aria-pressed="false"></button>
+        <button type="button" data-stage="#27323F" style="background:#27323F" aria-label="Night" title="Night" aria-pressed="false"></button>
+      </div>
+    </div>
+    <div class="ctl"><span id="lbl-speed">Speed</span>
+      <div class="seg" role="group" aria-labelledby="lbl-speed" id="speed-seg">
+        <button type="button" data-speed="0.25" aria-pressed="false">0.25×</button>
+        <button type="button" data-speed="0.5" aria-pressed="false">0.5×</button>
+        <button type="button" data-speed="1" aria-pressed="true">1×</button>
+      </div>
+    </div>
+    <button type="button" class="btn" id="play-all">Pause</button>
+  </div>
+</div>
+
+<main class="wrap">
+  <header class="intro">
+    <div class="intro-text">
+      <h1>Biscuit, up on its feet</h1>
+      <p class="lede">Every animation below plays the original next to the new one, in step. Slow it down from the bar, or open any clip to scrub it frame by frame.</p>
+      <ul class="facts">
+        <li><b>19</b> animations rebuilt</li>
+        <li><b>4</b> rare takes added</li>
+        <li><b>4</b> effects reworked</li>
+        <li>Same names, 512 × 512, 60 fps, same frame counts</li>
+      </ul>
+      <ul class="changes">
+        <li><span class="k">Legs</span><span>Biscuit used to sit in every clip. Now it stands on short legs in 15 of them: weight shifts, toe taps, a real walk, and jumps that load, push off, tuck and land. It sits down only to rest.</span></li>
+        <li><span class="k">Hands</span><span>Biscuit had no arms: each hand was a foot flipped up to the chest. Now there are two jointed arms with mitten paws, pink pads and a wrist that flops.</span></li>
+        <li><span class="k">Tail</span><span>Two fixed outlines used to blend into each other. Now a twelve-bone chain whips, trails behind jumps and can wrap, curl or poof.</span></li>
+        <li><span class="k">Acting</span><span>Wind-ups, squash and stretch, overshoot, ears and tuft that follow through, and faces that change by blinking or easing instead of cutting.</span></li>
+      </ul>
+    </div>
+    <div class="stage hero-stage" id="hero"><span class="chip new">New idle</span><div class="lot"></div></div>
+  </header>
+
+  <section id="clips">
+    <div class="sec-head">
+      <h2>The 19 animations</h2>
+      <p>Drop-in replacements. Each note says what to look for.</p>
+    </div>
+    <div class="grid" data-group="clips"></div>
+  </section>
+
+  <section id="takes">
+    <div class="sec-head">
+      <h2>Rare takes</h2>
+      <p>Extra files for a little surprise. Each one starts and ends on the first frame of the regular clip, so the app can play one in between two loops, say one time in eight, and nobody sees a seam.</p>
+    </div>
+    <div class="grid one" data-group="alts"></div>
+  </section>
+
+  <section id="effects" class="fx">
+    <div class="sec-head">
+      <h2>Effects</h2>
+      <p>Same shapes, colours, sizes and lengths. Only the motion changed. The logo is passed through untouched.</p>
+    </div>
+    <div class="grid" data-group="fx"></div>
+  </section>
+
+  <section id="rig">
+    <div class="sec-head">
+      <h2>The rig, for the next mascots</h2>
+      <p>One rule makes the animations reusable: a clip never contains a character's coordinates.</p>
+    </div>
+    <div class="rig">
+      <div class="rig-text">
+        <p>A clip only says things like <code>arm R to wave_hi</code>, <code>sit</code>, <code>step with the left foot</code>, <code>face to joy</code>. Each character decides what those words mean for its own body, so all 23 clips play on any mascot that defines them.</p>
+        <ol class="steps">
+          <li><span>Copy <code>characters/biscuit.py</code> and change the data: colours, joints, drawings, where the paws can reach, how long the legs are, the tail's shape.</span></li>
+          <li><span>Register the new character and run <code>python3 -m mascot.build --char name</code>.</span></li>
+          <li><span>Run <code>tools/check.py</code> and <code>tools/handover.py</code>. They flag player errors, pops, loop seams, anything that leaves the canvas, and clips that do not join up.</span></li>
+        </ol>
+        <div class="tree-wrap"><pre class="tree">shadow
+root            <i>whole-body move, squash and stretch, flips</i>
+  hips          <i>sits down, bends the knees, shifts the weight</i>
+    tail        <i>bone chain: tail 0 &gt; tail 1 &gt; … &gt; tail 11</i>
+    body
+      right arm <i>bone chain: upper arm &gt; forearm &gt; hand</i>
+      left arm  <i>held props live inside "hand"</i>
+      neck      <i>head pivot</i>
+        ears, head, face, eyes, brows
+  right leg, left leg    <i>solved from hip to ankle every frame</i>
+  right foot, left foot  <i>stay planted while the hips move</i></pre></div>
+        <p class="data">Layer and group names are the same in every file.</p>
+      </div>
+      <div class="rig-side">
+        <div class="stage" id="rigtest"><span class="chip">Rig test, not a design</span><div class="lot"></div></div>
+        <p class="note">The walk from <code>carry_cloud</code> on a throwaway body with no tail, other colours, long soft ears and different legs. Nothing in the clip was changed.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="focus" id="focus" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="focus-title">
+    <div class="panel-head">
+      <h2 id="focus-title">clip</h2>
+      <button type="button" class="btn" id="focus-close">Close</button>
+    </div>
+    <div class="pair" id="focus-pair"></div>
+    <div class="ruler">
+      <input type="range" id="focus-range" min="0" max="100" step="1" value="0" aria-label="Frame">
+      <div class="ticks data"><span>0</span><span id="tick-mid"></span><span id="tick-end"></span></div>
+    </div>
+    <div class="transport">
+      <button type="button" class="btn" id="step-back" aria-label="Back one frame">−1</button>
+      <button type="button" class="btn primary" id="focus-play">Pause</button>
+      <button type="button" class="btn" id="step-fwd" aria-label="Forward one frame">+1</button>
+      <span class="data tc" id="focus-tc"></span>
+    </div>
+    <p class="note" id="focus-note"></p>
+    <dl class="facts2" id="focus-facts"></dl>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+<script id="reel-data" type="application/json">/*__DATA__*/null</script>
+<script>
+(function () {
+  "use strict";
+  var DATA = JSON.parse(document.getElementById("reel-data").textContent);
+  var ANIMS = DATA.anims, ITEMS = DATA.items;
+  var root = document.documentElement;
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var state = { playing: !reduce, speed: 1, T: 0, last: null, cards: [] };
+  var HOLD = 40;                                  // frames to rest on the last frame of a play-once clip
+  var hasLottie = typeof lottie !== "undefined";
+
+  function store(k, v) { try { localStorage.setItem("reel." + k, v); } catch (e) {} }
+  function recall(k) { try { return localStorage.getItem("reel." + k); } catch (e) { return null; } }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+  function secs(frames, fr) { return (frames / fr).toFixed(frames / fr >= 10 ? 0 : 1) + " s"; }
+
+  function make(container, key) {
+    if (!hasLottie || !ANIMS[key]) return null;
+    var a = lottie.loadAnimation({ container: container, renderer: "svg", loop: false, autoplay: false,
+      animationData: JSON.parse(JSON.stringify(ANIMS[key])), rendererSettings: { preserveAspectRatio: "xMidYMid meet" } });
+    a.goToAndStop(0, true);
+    return a;
+  }
+  function frameOf(item, T) {
+    var op = item.after.op;
+    if (item.once) return Math.min(T % (op + HOLD), op - 1);
+    return T % op;
+  }
+  function stage(label, cls) {
+    var s = el("div", "stage");
+    if (label) s.appendChild(el("span", "chip" + (cls ? " " + cls : ""), label));
+    s.appendChild(el("div", "lot"));
+    return s;
+  }
+
+  // ---------- cards
+  var io = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      var c = en.target._card;
+      if (!c) return;
+      c.visible = en.isIntersecting;
+      if (c.visible && !c.players) {
+        c.players = c.slots.map(function (s) { return make(s.node, s.key); }).filter(Boolean);
+      }
+      c.dirty = true;
+    });
+  }, { rootMargin: "240px 0px" }) : null;
+
+  function register(node, item, slots) {
+    var c = { item: item, slots: slots, players: null, visible: !io, dirty: true };
+    node._card = c;
+    state.cards.push(c);
+    if (io) io.observe(node);
+    else c.players = slots.map(function (s) { return make(s.node, s.key); }).filter(Boolean);
+    return c;
+  }
+
+  ITEMS.forEach(function (item) {
+    if (item.group === "rig") return;
+    var grid = document.querySelector('.grid[data-group="' + item.group + '"]');
+    if (!grid) return;
+    var card = el("article", "clip");
+    var pair = el("div", "pair" + (item.before ? "" : " solo"));
+    var slots = [];
+    if (item.before) { var sb = stage("Before"); pair.appendChild(sb); slots.push({ node: sb.querySelector(".lot"), key: item.before.key }); }
+    var sa = stage(item.before ? "After" : "New", "new"); pair.appendChild(sa); slots.push({ node: sa.querySelector(".lot"), key: item.after.key });
+    card.appendChild(pair);
+    var cap = el("div", "cap");
+    cap.appendChild(el("h3", null, item.name));
+    cap.appendChild(el("span", "data", item.after.op + " f · " + secs(item.after.op, item.after.fr) + " · " + (item.group === "alts" ? "between loops" : (item.once ? "plays once" : "loops"))));
+    card.appendChild(cap);
+    card.appendChild(el("p", "note", item.note));
+    var b = el("button", "btn", "Inspect");
+    b.type = "button";
+    b.setAttribute("aria-label", "Inspect " + item.name + " frame by frame");
+    b.addEventListener("click", function () { openFocus(item, b); });
+    card.appendChild(b);
+    grid.appendChild(card);
+    register(card, item, slots);
+  });
+
+  // hero and rig test
+  var idle = ITEMS.filter(function (i) { return i.name === "idle" && i.group === "clips"; })[0];
+  var heroNode = document.getElementById("hero");
+  if (idle && heroNode) register(heroNode, idle, [{ node: heroNode.querySelector(".lot"), key: idle.after.key }]);
+  var rigItem = ITEMS.filter(function (i) { return i.group === "rig"; })[0];
+  var rigNode = document.getElementById("rigtest");
+  if (rigItem && rigNode) register(rigNode, rigItem, [{ node: rigNode.querySelector(".lot"), key: rigItem.after.key }]);
+  else if (rigNode) rigNode.parentNode.hidden = true;
+
+  // ---------- inspector
+  var F = { open: false, item: null, players: [], f: 0, playing: true, opener: null };
+  var fo = document.getElementById("focus"), fpair = document.getElementById("focus-pair"), frange = document.getElementById("focus-range");
+  var fplay = document.getElementById("focus-play"), ftc = document.getElementById("focus-tc");
+
+  function pad(n, w) { n = String(n); while (n.length < w) n = "0" + n; return n; }
+  function drawFocus() {
+    var op = F.item.after.op, f = Math.max(0, Math.min(F.f, op - 1));
+    F.players.forEach(function (p) { p.goToAndStop(f, true); });
+    frange.value = Math.floor(f);
+    ftc.textContent = "f " + pad(Math.floor(f), String(op).length) + " / " + op + " · " + (f / F.item.after.fr).toFixed(2) + " s";
+  }
+  function setFocusPlaying(on) { F.playing = on; fplay.textContent = on ? "Pause" : "Play"; }
+  function openFocus(item, opener) {
+    F.item = item; F.opener = opener; F.f = 0; F.players = [];
+    fpair.textContent = "";
+    fpair.className = "pair" + (item.before ? "" : " solo") + (item.group === "fx" ? " fx" : "");
+    var keys = [];
+    if (item.before) keys.push(["Before", "", item.before.key]);
+    keys.push([item.before ? "After" : "New", "new", item.after.key]);
+    document.getElementById("focus-title").textContent = item.file;
+    document.getElementById("focus-note").textContent = item.note;
+    var op = item.after.op;
+    frange.max = op - 1;
+    document.getElementById("tick-mid").textContent = Math.round(op / 2);
+    document.getElementById("tick-end").textContent = op;
+    var facts = document.getElementById("focus-facts");
+    facts.textContent = "";
+    var rows = [["Length", op + " frames, " + secs(op, item.after.fr) + " at " + item.after.fr + " fps"], ["Canvas", item.after.w + " × " + item.after.h],
+      ["File", item.after.kb + " KB" + (item.before ? " (was " + item.before.kb + " KB)" : "")], ["Layers", String(item.after.layers) + (item.before ? " (was " + item.before.layers + ")" : "")]];
+    if (item.base) rows.push(["Fits between", "loops of biscuit_" + item.base]);
+    rows.forEach(function (r) { var d = el("div"); d.appendChild(el("dt", null, r[0])); d.appendChild(el("dd", null, r[1])); facts.appendChild(d); });
+    fo.hidden = false;
+    keys.forEach(function (k) {
+      var s = stage(k[0], k[1]);
+      if (item.group === "fx") s.classList.add("dark");
+      fpair.appendChild(s);
+      var p = make(s.querySelector(".lot"), k[2]);
+      if (p) F.players.push(p);
+    });
+    F.open = true;
+    setFocusPlaying(!reduce);
+    drawFocus();
+    document.getElementById("focus-close").focus();
+  }
+  function closeFocus() {
+    F.players.forEach(function (p) { p.destroy(); });
+    F.players = []; F.open = false; fo.hidden = true;
+    if (F.opener) F.opener.focus();
+  }
+  function step(d) { setFocusPlaying(false); var op = F.item.after.op; F.f = (Math.floor(F.f) + d + op) % op; drawFocus(); }
+  document.getElementById("focus-close").addEventListener("click", closeFocus);
+  fo.addEventListener("click", function (e) { if (e.target === fo) closeFocus(); });
+  fplay.addEventListener("click", function () { setFocusPlaying(!F.playing); });
+  document.getElementById("step-back").addEventListener("click", function () { step(-1); });
+  document.getElementById("step-fwd").addEventListener("click", function () { step(1); });
+  frange.addEventListener("input", function () { setFocusPlaying(false); F.f = Number(frange.value); drawFocus(); });
+  document.addEventListener("keydown", function (e) {
+    if (!F.open) return;
+    if (e.key === "Escape") { closeFocus(); }
+    else if (e.key === "ArrowLeft" && e.target !== frange) { step(-1); e.preventDefault(); }
+    else if (e.key === "ArrowRight" && e.target !== frange) { step(1); e.preventDefault(); }
+    else if (e.key === " " && e.target.tagName !== "BUTTON") { setFocusPlaying(!F.playing); e.preventDefault(); }
+  });
+
+  // ---------- bar controls
+  var playAll = document.getElementById("play-all");
+  function setPlaying(on) { state.playing = on; playAll.textContent = on ? "Pause" : "Play"; }
+  playAll.addEventListener("click", function () { setPlaying(!state.playing); });
+  setPlaying(state.playing);
+
+  function press(group, btn) { Array.prototype.forEach.call(group.querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", b === btn ? "true" : "false"); }); }
+  var speedSeg = document.getElementById("speed-seg");
+  function setSpeed(v, btn) { state.speed = v; if (btn) press(speedSeg, btn); store("speed", String(v)); }
+  speedSeg.addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) setSpeed(Number(b.dataset.speed), b); });
+  var stageSw = document.getElementById("stage-sw");
+  function setStage(v, btn) { root.style.setProperty("--stage", v); if (btn) press(stageSw, btn); store("stage", v); }
+  stageSw.addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) setStage(b.dataset.stage, b); });
+  var s0 = recall("speed"), g0 = recall("stage");
+  if (s0) { var sb0 = speedSeg.querySelector('button[data-speed="' + s0 + '"]'); if (sb0) setSpeed(Number(s0), sb0); }
+  if (g0) { var gb0 = stageSw.querySelector('button[data-stage="' + g0 + '"]'); if (gb0) setStage(g0, gb0); }
+
+  // ---------- one clock for everything, so before and after stay in step
+  function tick(now) {
+    if (state.last == null) state.last = now;
+    var dt = Math.min(100, now - state.last);
+    state.last = now;
+    if (state.playing && !F.open) state.T += dt / 1000 * 60 * state.speed;
+    if (!F.open) {
+      for (var i = 0; i < state.cards.length; i++) {
+        var c = state.cards[i];
+        if (!c.visible || !c.players || (!state.playing && !c.dirty)) continue;
+        var f = frameOf(c.item, state.T);
+        for (var j = 0; j < c.players.length; j++) c.players[j].goToAndStop(f, true);
+        c.dirty = false;
+      }
+    } else if (F.playing) {
+      var op = F.item.after.op;
+      F.f += dt / 1000 * 60 * state.speed;
+      if (F.item.once) { if (F.f > op - 1 + HOLD) F.f = 0; } else F.f = F.f % op;
+      drawFocus();
+    }
+    window.requestAnimationFrame(tick);
+  }
+  window.requestAnimationFrame(tick);
+})();
+</script>
