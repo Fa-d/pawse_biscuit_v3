@@ -1,0 +1,12 @@
+.venv
+**/__pycache__
+**/.DS_Store
+out
+dist
+cloudflare
+render
+tools
+app/data
+app/tests
+studio/cache
+studio/tests/.cache

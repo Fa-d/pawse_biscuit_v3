@@ -1,0 +1,13 @@
+{
+  // Pawse Studio front door: stickers.liveintently.app -> the app on Google Cloud Run.  Deploy:  npx wrangler deploy
+  // (wrangler.containers.jsonc runs the app inside Cloudflare instead, once the account has the Workers Paid plan.)
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pawse-stickers-front",
+  "main": "src/proxy.js",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+  "routes": [{ "pattern": "stickers.liveintently.app", "custom_domain": true }],
+  "vars": {
+    "UPSTREAM": "https://REPLACE-WITH-CLOUD-RUN-URL"
+  }
+}

@@ -56,6 +56,16 @@ async def guard(request: Request, call_next):
     return resp
 
 
+def client_ip(request: Request) -> str:
+    """The visitor's address.  Behind Cloudflare every request arrives from the Worker, so the real address is read
+    from CF-Connecting-IP, and only when STUDIO_BEHIND_CLOUDFLARE says that header can be trusted."""
+    if settings.behind_cloudflare:
+        for h in ("cf-connecting-ip", "x-client-ip"):        # x-client-ip: set by the Worker when it forwards to Cloud Run
+            if request.headers.get(h):
+                return request.headers[h]
+    return request.client.host if request.client else "?"
+
+
 def spec_from(d: dict) -> StickerSpec:
     try:
         spec = StickerSpec.from_dict(d)
@@ -166,7 +176,7 @@ def signup(body: Signup, request: Request, response: Response):
 @app.post("/api/login")
 def login(body: Credentials, request: Request, response: Response):
     email = body.email.strip().lower()
-    ip = request.client.host if request.client else "?"
+    ip = client_ip(request)
     auth.throttle(f"e:{email}", f"i:{ip}")
     with db.connect() as c:
         u = c.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
@@ -194,7 +204,7 @@ RESET_HOURS = 1
 def forgot(body: Forgot, request: Request):
     """Always answers the same, so it can't be used to find out who has an account."""
     email = body.email.strip().lower()
-    ip = request.client.host if request.client else "?"
+    ip = client_ip(request)
     auth.throttle(f"r:{email}", f"i:{ip}")
     auth.failed(f"r:{email}")                                  # counts requests: at most 5 resets an email per window
     with db.connect() as c:
@@ -236,7 +246,7 @@ class Waitlist(BaseModel):
 @app.post("/api/waitlist")
 def join_waitlist(body: Waitlist, request: Request):
     email = auth.validate_signup(body.email, "placeholder-ok")
-    ip = request.client.host if request.client else "?"
+    ip = client_ip(request)
     auth.throttle(f"w:{ip}")
     auth.failed(f"w:{ip}")
     with db.connect() as c:
@@ -256,7 +266,7 @@ class Feedback(BaseModel):
 
 @app.post("/api/feedback")
 def feedback(body: Feedback, request: Request):
-    ip = request.client.host if request.client else "?"
+    ip = client_ip(request)
     auth.throttle(f"b:{ip}")
     auth.failed(f"b:{ip}")
     user = auth.current_user(request)
@@ -281,6 +291,10 @@ def parse_prompt(body: Prompt, request: Request):
             use_llm = db.usage_today(c, user["id"], "llm") < settings.llm_daily
     r = parse(body.prompt, llm=use_llm)
     db.bump("prompt" if r.confident else "prompt:unsure")
+    if not r.confident or "llm" in r.source:
+        with db.connect() as c:                                    # kept in the database: the container's disk is wiped on sleep
+            c.execute("INSERT INTO misses (prompt, unknown, created) VALUES (?, ?, ?)",
+                      (body.prompt, json.dumps(r.unknown), db.now()))
     if "llm" in r.source and user is not None:
         with db.connect() as c:
             db.add_usage(c, user["id"], "llm")

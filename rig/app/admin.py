@@ -10,7 +10,8 @@
     .venv/bin/python -m app.admin reset-link someone@example.com               # support: a password reset link
     .venv/bin/python -m app.admin report --days 14                             # the funnel, misses, feedback
 
-Uses the same settings (STUDIO_DB, SMTP_*, STUDIO_BASE_URL, STUDIO_CACHE) as the web app.
+Uses the same settings (STUDIO_DB, SMTP_*, STUDIO_BASE_URL, STUDIO_CACHE) as the web app.  For the live site on
+Cloudflare, point it at D1:  STUDIO_D1=rest:<account id>/<database id> with CLOUDFLARE_API_TOKEN set.
 """
 from __future__ import annotations
 
@@ -120,9 +121,15 @@ def cmd_report(a):
     print(f"  checkouts begun  {ev['checkout:pro'] + ev['checkout:pack']:>6}    (pro {ev['checkout:pro']}, credit pack {ev['checkout:pack']})")
     print(f"Now: {users['n']} accounts, {users['pro'] or 0} on Pro, {users['with_credits'] or 0} holding credits, {packs_sold} credit packs sold")
 
-    misses = os.path.join(os.environ.get("STUDIO_CACHE", os.path.join(os.path.dirname(__file__), "..", "studio", "cache")), "misses.jsonl")
     words = collections.Counter()
-    if os.path.exists(misses):
+    with db.connect() as c:                                         # the web app records misses in the database
+        for r in c.execute("SELECT unknown FROM misses WHERE created >= ?", (int(time.time()) - a.days * 86400,)):
+            try:
+                words.update(json.loads(r["unknown"]))
+            except ValueError:
+                pass
+    misses = os.path.join(os.environ.get("STUDIO_CACHE", os.path.join(os.path.dirname(__file__), "..", "studio", "cache")), "misses.jsonl")
+    if not os.environ.get("STUDIO_D1") and os.path.exists(misses):   # the command line's own log, when run locally
         cutoff = time.time() - a.days * 86400
         with open(misses) as f:
             for line in f:

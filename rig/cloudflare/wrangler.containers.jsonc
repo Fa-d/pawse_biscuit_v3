@@ -1,0 +1,37 @@
+{
+  // Pawse Studio: a Worker on stickers.liveintently.app in front of the Python app in a Cloudflare Container.
+  // Not in use yet: needs the Workers Paid plan.  Deploy with Docker running:  npx wrangler deploy -c wrangler.containers.jsonc
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pawse-stickers",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+
+  "routes": [{ "pattern": "stickers.liveintently.app", "custom_domain": true }],
+
+  "containers": [
+    {
+      "class_name": "StickerStudio",
+      "image": "../Dockerfile",            // built from rig/ (the Dockerfile's folder)
+      "instance_type": "standard-2",       // 1 vCPU, 6 GiB: composing a sticker is CPU work
+      "max_instances": 2
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "STUDIO", "class_name": "StickerStudio" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["StickerStudio"] }],
+
+  "d1_databases": [
+    { "binding": "DB", "database_name": "pawse-studio", "database_id": "d6c84803-8d51-4c8d-b986-ac46e13b5455" }
+  ],
+
+  // Settings the app reads (see rig/app/README.md).  Secrets (SMTP_*, STRIPE_*) go in with `wrangler secret put`.
+  "vars": {
+    "BASE_URL": "https://stickers.liveintently.app",
+    "INVITE_ONLY": "1",
+    "FREE_DAILY_EXPORTS": "5",
+    "PACK_CREDITS": "20",
+    "CONTACT_EMAIL": ""
+  }
+}

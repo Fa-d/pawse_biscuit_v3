@@ -79,6 +79,12 @@ CREATE TABLE IF NOT EXISTS events (
     n     INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (day, kind)
 );
+CREATE TABLE IF NOT EXISTS misses (
+    id       INTEGER PRIMARY KEY,
+    prompt   TEXT NOT NULL,
+    unknown  TEXT NOT NULL DEFAULT '[]',              -- words the rules didn't know, as JSON
+    created  INTEGER NOT NULL
+);
 CREATE INDEX IF NOT EXISTS stickers_user ON stickers(user_id, created);
 """
 
@@ -88,12 +94,13 @@ MIGRATIONS = [
 ]
 
 _path = None
+_d1 = None          # "proxy:http://d1.internal" or "rest:<account>/<database>" (see d1.py); None = local SQLite file
 
 
-def init(path):
-    global _path
-    _path = path
-    if path != ":memory:":
+def init(path, d1=None):
+    global _path, _d1
+    _path, _d1 = path, d1 or os.environ.get("STUDIO_D1") or None
+    if not _d1 and path != ":memory:":
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     with connect() as c:
         c.executescript(SCHEMA)
@@ -105,6 +112,10 @@ def init(path):
 
 @contextmanager
 def connect():
+    if _d1:
+        from .d1 import Connection
+        yield Connection(_d1)
+        return
     c = sqlite3.connect(_path, timeout=10)
     c.row_factory = sqlite3.Row
     c.execute("PRAGMA foreign_keys = ON")

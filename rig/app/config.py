@@ -30,6 +30,7 @@ class Settings:
     price_pro_label: str = field(default_factory=lambda: os.environ.get("PRICE_PRO_LABEL", "$4.99 a month"))
     price_pack_label: str = field(default_factory=lambda: os.environ.get("PRICE_PACK_LABEL", "$2.99"))
 
+    behind_cloudflare: bool = field(default_factory=lambda: _flag("STUDIO_BEHIND_CLOUDFLARE"))   # trust CF-Connecting-IP
     invite_only: bool = field(default_factory=lambda: _flag("STUDIO_INVITE_ONLY"))   # beta: signup needs an invite code
     # email: plain SMTP.  No SMTP_HOST = messages go to the outbox folder next to the database (for development)
     smtp_host: str = field(default_factory=lambda: os.environ.get("SMTP_HOST", ""))
