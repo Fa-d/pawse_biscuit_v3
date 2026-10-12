@@ -40,6 +40,8 @@ _vocab = vocab()
 # ---------------------------------------------------------------- safety
 @app.middleware("http")
 async def guard(request: Request, call_next):
+    if settings.origin_key and not secrets.compare_digest(request.headers.get("x-origin-key", ""), settings.origin_key):
+        return JSONResponse({"detail": "Not found."}, status_code=404)
     # State-changing calls must be JSON: browsers can't send that cross-site without CORS, and the session cookie is
     # SameSite=Lax.  Stripe's webhook is the one exception (it is signed instead).
     if request.method in ("POST", "PUT", "PATCH", "DELETE") and request.url.path.startswith("/api/") \
@@ -98,15 +100,39 @@ EXAMPLES = ["kitten waving hi with a bow", "grumpy cat saying 'no.'", "sleepy be
             "cool fox in shades dancing", "thank you", "on my way"]
 
 
-@app.get("/api/examples")
-def examples():
-    """Finished stickers for the landing page, made by the same engine (no watermark: they are ours)."""
+# Composing the examples takes about a minute on a cold server with little CPU (Cloud Run between requests), so the
+# image bakes them at build time (`python -m app.main --bake`, see the Dockerfile).  Stale or missing: made live.
+BAKED = os.path.join(HERE, "data", "examples.json")
+_examples_body: bytes | None = None
+
+
+def make_examples():
     out = []
     for prompt in EXAMPLES:
         spec = parse(prompt).spec
         doc, info = render.preview(spec, False)
         out.append({"prompt": prompt, "base": spec.base, "lottie": doc, "still": info["still"]})
     return out
+
+
+def _load_baked():
+    try:
+        with open(BAKED, "rb") as f:
+            body = f.read()
+        if [e["prompt"] for e in json.loads(body)] == EXAMPLES:
+            return body
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return None
+
+
+@app.get("/api/examples")
+def examples():
+    """Finished stickers for the landing page, made by the same engine (no watermark: they are ours)."""
+    global _examples_body
+    if _examples_body is None:
+        _examples_body = _load_baked() or json.dumps(make_examples(), separators=(",", ":")).encode()
+    return Response(_examples_body, media_type="application/json")
 
 
 def _warm():
@@ -116,7 +142,8 @@ def _warm():
         log.exception("could not pre-compose the landing examples")
 
 
-threading.Thread(target=_warm, daemon=True).start()
+if __name__ != "__main__":                          # not while baking
+    threading.Thread(target=_warm, daemon=True).start()
 
 
 @app.get("/favicon.ico", include_in_schema=False)
@@ -450,3 +477,12 @@ if settings.dev:
         with db.connect() as c:
             c.execute("UPDATE users SET plan=?, credits=? WHERE id=?", (body.plan, max(0, body.credits), user["id"]))
         return {"ok": True}
+
+
+if __name__ == "__main__":
+    import sys
+    if sys.argv[1:] == ["--bake"]:                  # used by the Dockerfile
+        os.makedirs(os.path.dirname(BAKED), exist_ok=True)
+        with open(BAKED, "w") as f:
+            json.dump(make_examples(), f, separators=(",", ":"))
+        print(f"baked {len(EXAMPLES)} examples into {BAKED}")

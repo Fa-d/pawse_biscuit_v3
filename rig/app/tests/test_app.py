@@ -282,6 +282,17 @@ class Pages(unittest.TestCase):
         self.assertEqual(c.post("/api/feedback", json={"kind": "wrong", "prompt": "x", "note": "it waved", "spec": SPEC}).status_code, 200)
         self.assertEqual(c.post("/api/feedback", json={"kind": "rant"}).status_code, 422)
 
+    def test_origin_key(self):
+        from app.config import settings
+        object.__setattr__(settings, "origin_key", "from-the-worker")
+        try:
+            c = TestClient(app)
+            self.assertEqual(c.get("/").status_code, 404)
+            self.assertEqual(c.get("/", headers={"X-Origin-Key": "guess"}).status_code, 404)
+            self.assertEqual(c.get("/", headers={"X-Origin-Key": "from-the-worker"}).status_code, 200)
+        finally:
+            object.__setattr__(settings, "origin_key", "")
+
 
 def signed(payload: bytes, secret="whsec_test_dummy"):
     t = str(int(time.time()))

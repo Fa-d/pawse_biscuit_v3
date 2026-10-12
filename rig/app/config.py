@@ -31,6 +31,9 @@ class Settings:
     price_pack_label: str = field(default_factory=lambda: os.environ.get("PRICE_PACK_LABEL", "$2.99"))
 
     behind_cloudflare: bool = field(default_factory=lambda: _flag("STUDIO_BEHIND_CLOUDFLARE"))   # trust CF-Connecting-IP
+    # shared secret the Cloudflare Worker sends as X-Origin-Key; when set, requests without it are refused, so nobody
+    # can skip Cloudflare by calling the Cloud Run address directly (and fake the client address the limits rely on)
+    origin_key: str = field(default_factory=lambda: os.environ.get("STUDIO_ORIGIN_KEY", ""))
     invite_only: bool = field(default_factory=lambda: _flag("STUDIO_INVITE_ONLY"))   # beta: signup needs an invite code
     # email: plain SMTP.  No SMTP_HOST = messages go to the outbox folder next to the database (for development)
     smtp_host: str = field(default_factory=lambda: os.environ.get("SMTP_HOST", ""))

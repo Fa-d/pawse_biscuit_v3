@@ -34,6 +34,7 @@ repository.
 | `STRIPE_PRICE_PRO` | none | Recurring monthly Price id for Pro |
 | `STRIPE_PRICE_PACK` | none | One-time Price id for a credit pack |
 | `PRICE_PRO_LABEL`, `PRICE_PACK_LABEL` | `$4.99 a month`, `$2.99` | What the pricing panel says; keep in step with the Stripe prices |
+| `STUDIO_ORIGIN_KEY` | none | When set, requests without a matching `X-Origin-Key` header get 404, so only the Cloudflare Worker can reach the app |
 | `STUDIO_INVITE_ONLY` | off | Beta: signing up needs an invite code, and the landing page shows a waitlist |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` | none, 587 | Your email provider's SMTP server. Without `SMTP_HOST`, emails are written to `outbox/` next to the database instead of being sent |
 | `SMTP_SECURITY` | `starttls` | `starttls`, `ssl` (port 465) or `none` |
@@ -99,6 +100,8 @@ STUDIO_DEV=1 .venv/bin/uvicorn app.main:app --port 8765 &
 ```
 
 ## Running it for real
+
+The live beta runs on Google Cloud Run behind a Cloudflare Worker; how to ship and change it is in `../DEPLOY.md`.
 
 - One machine is fine to start: `uvicorn app.main:app --workers 2 --host 0.0.0.0 --port 8000` behind HTTPS (Fly.io,
   Render or a small VPS with Caddy). Each worker keeps its own preview cache; composing is CPU work, so give it cores.

@@ -8,6 +8,7 @@ export default {
     headers.set("X-Client-IP", request.headers.get("CF-Connecting-IP") || "");
     headers.set("X-Forwarded-Host", url.host);
     headers.set("X-Forwarded-Proto", "https");
+    headers.set("X-Origin-Key", env.ORIGIN_KEY || "");      // the app refuses requests without it (STUDIO_ORIGIN_KEY)
     headers.delete("Host");
     const init = { method: request.method, headers, redirect: "manual" };
     if (request.method !== "GET" && request.method !== "HEAD") init.body = request.body;

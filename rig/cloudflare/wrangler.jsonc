@@ -8,6 +8,6 @@
   "observability": { "enabled": true },
   "routes": [{ "pattern": "stickers.liveintently.app", "custom_domain": true }],
   "vars": {
-    "UPSTREAM": "https://REPLACE-WITH-CLOUD-RUN-URL"
+    "UPSTREAM": "https://pawse-studio-514648895606.us-central1.run.app"
   }
 }

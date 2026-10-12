@@ -1,4 +1,4 @@
-# Pawse Studio server image (built and run by Cloudflare Containers, see cloudflare/).
+# Pawse Studio server image (runs on Google Cloud Run behind the Cloudflare Worker, see cloudflare/ and DEPLOY.md).
 # Same Python as local development, so the tested library versions install as wheels.
 FROM python:3.14-slim
 
@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r requirements-server.txt
 COPY mascot ./mascot
 COPY studio ./studio
 COPY app ./app
+RUN python -m app.main --bake          # landing-page examples, so a cold server needn't compose them
 
 RUN useradd --create-home --uid 10001 studio
 USER studio
