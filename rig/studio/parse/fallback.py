@@ -1,40 +1,34 @@
 """What happens when the rules do not understand a prompt.
 
-  1. typo fix: unknown words are matched against the lexicon's own words (difflib, no model).  'slepy wih cofee'
-     -> 'sleepy with coffee'.
-  2. small LLM (optional, only when ANTHROPIC credentials exist and llm=True): Claude Haiku maps the prompt onto the
-     same vocabulary through a JSON schema whose fields are enums, so it can only answer with names the rig knows.
-     Answers are cached by normalised prompt, and every prompt that reaches this step is logged to
-     cache/misses.jsonl so its words can be added to lexicon.yaml (and the next user with that wording costs nothing).
+Word forms and typos are already handled inside the parser (morph.py, typo.py).  This module adds:
 
-The rules still have the last word: the LLM answer is a base layer under anything the rules did understand.
+  1. an optional small model (only with llm=True and Anthropic credentials): Claude Haiku maps the prompt onto the
+     registry's names through a JSON schema whose fields are enums, so it can only answer with names the rig knows.
+     Answers are cached by prompt.  The rules still have the last word: the model's answer only fills what the rules
+     left empty.
+  2. a log of every prompt the rules did not understand (cache/misses.jsonl, capped), so its words can be added to
+     the lexicon and the next person with that wording is understood without a model.
+
+Nothing here can raise: a missing SDK, no credentials, an API or network error, a refusal, a cut-off or malformed
+answer all mean "no answer".
 """
 from __future__ import annotations
 
-import difflib
 import json
 import os
+import threading
 import time
 
-from ..spec import VOCAB, StickerSpec
+from ..registry import REG
+from ..spec import MAX_EFFECTS, MAX_PROPS, MAX_WEAR, VOCAB, StickerSpec
 from .parser import Parser, ParseResult, normalize
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE_DIR = os.environ.get("STUDIO_CACHE", os.path.join(HERE, "..", "cache"))
-MODEL = "claude-haiku-5-5"
-
-
-def fix_typos(parser: Parser, result: ParseResult, text):
-    """Replace each unknown word with the closest single word the lexicon knows (or leave it).  Returns new text or None."""
-    vocab = sorted({p for p in parser.index if " " not in p} | parser.stop)
-    out, changed = normalize(text).split(), False
-    for k, tok in enumerate(out):
-        if tok in result.unknown and len(tok) >= 3:
-            best = difflib.get_close_matches(tok, vocab, n=1, cutoff=0.78)
-            if best and best[0] != tok:
-                out[k] = best[0]
-                changed = True
-    return " ".join(out) if changed else None
+MODEL = os.environ.get("STUDIO_LLM_MODEL", "claude-haiku-5-5")
+CACHE_MAX = 5000            # answers kept
+MISSES_MAX = 2_000_000      # bytes of miss log kept (the older half is dropped beyond it)
+_lock = threading.Lock()
 
 
 # ------------------------------------------------------------------ LLM step
@@ -43,6 +37,7 @@ def _schema():
     return {
         "type": "object",
         "properties": {
+            "base": enum(VOCAB["base"]),
             "face": enum(VOCAB["face"]),
             "motion": enum(VOCAB["motion"]),
             "stance": enum(VOCAB["stance"]),
@@ -51,18 +46,21 @@ def _schema():
             "accessories": {"type": "array", "items": enum(VOCAB["accessories"])},
             "unknown_concepts": {"type": "array", "items": {"type": "string"}},
         },
-        "required": ["face", "motion", "stance", "props", "effects", "accessories", "unknown_concepts"],
+        "required": ["base", "face", "motion", "stance", "props", "effects", "accessories", "unknown_concepts"],
         "additionalProperties": False,
     }
 
 
-SYSTEM = (
-    "You turn a short description of a sticker into settings for an animated cartoon mascot. "
-    "Choose the closest face, motion and stance, at most two props, three effects and three accessories (things worn), "
-    "only from the allowed values. "
-    "Prefer fewer props and effects over loosely related ones. "
-    "List any part of the request the allowed values cannot show (for example an object or a second character) in unknown_concepts."
-)
+def _system():
+    m = ", ".join(f"{k} ({v.doing or v.label.lower()})" for k, v in REG.motions.items())
+    return (
+        "You turn a short description of a sticker into settings for an animated cartoon mascot. "
+        "Choose the closest mascot, face, motion and stance, at most two props held in the paws, three effects around it "
+        "and three things worn, only from the allowed values. Keep the mascot 'biscuit' (a fox) unless another animal is asked for. "
+        "Prefer fewer props and effects over loosely related ones. "
+        f"Motions: {m}. "
+        "List any part of the request the allowed values cannot show (for example an object or a second character) in unknown_concepts."
+    )
 
 
 def _cache_path(name):
@@ -72,23 +70,63 @@ def _cache_path(name):
 
 def _load_cache():
     try:
-        with open(_cache_path("llm.json")) as f:
-            return json.load(f)
+        with open(_cache_path("llm.json"), encoding="utf-8") as f:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
     except (OSError, ValueError):
         return {}
 
 
+def _save_cache(cache):
+    if len(cache) > CACHE_MAX:
+        for k in list(cache)[: len(cache) - CACHE_MAX]:
+            del cache[k]
+    path = _cache_path("llm.json")
+    tmp = f"{path}.{os.getpid()}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(cache, f, indent=1, ensure_ascii=False)
+    os.replace(tmp, path)                                   # atomic: a reader never sees half a file
+
+
 def log_miss(text, result: ParseResult, used_llm):
-    with open(_cache_path("misses.jsonl"), "a") as f:
-        f.write(json.dumps(dict(t=round(time.time()), prompt=text, unknown=result.unknown, llm=used_llm)) + "\n")
+    try:
+        with _lock:
+            path = _cache_path("misses.jsonl")
+            if os.path.exists(path) and os.path.getsize(path) > MISSES_MAX:
+                with open(path, encoding="utf-8") as f:
+                    lines = f.readlines()
+                with open(path, "w", encoding="utf-8") as f:
+                    f.writelines(lines[len(lines) // 2:])
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(dict(t=round(time.time()), prompt=text[:300], unknown=result.unknown, llm=used_llm), ensure_ascii=False) + "\n")
+    except OSError:
+        pass
+
+
+def _clean(data):
+    """Keep only allowed names (compared without case, as the API may change it); None if the answer is unusable."""
+    if not isinstance(data, dict):
+        return None
+    out = {}
+    for slot in ("base", "face", "motion", "stance"):
+        allowed = {v.lower(): v for v in VOCAB[slot]}
+        v = data.get(slot)
+        out[slot] = allowed.get(v.lower()) if isinstance(v, str) else None
+    for slot in ("props", "effects", "accessories"):
+        allowed = {v.lower(): v for v in VOCAB[slot]}
+        vs = data.get(slot) if isinstance(data.get(slot), list) else []
+        out[slot] = [allowed[v.lower()] for v in vs if isinstance(v, str) and v.lower() in allowed]
+    out["unknown_concepts"] = [str(x)[:40] for x in (data.get("unknown_concepts") or []) if isinstance(x, (str, int, float))][:8]
+    return out
 
 
 def llm_spec(text):
-    """dict with face/motion/stance/props/effects (+unknown_concepts), or None when no API access."""
+    """dict of registry names (+ unknown_concepts), or None when there is no usable answer."""
     key = normalize(text)
-    cache = _load_cache()
+    with _lock:
+        cache = _load_cache()
     if key in cache:
-        return cache[key]
+        return _clean(cache[key])
     try:
         import anthropic
     except ImportError:
@@ -98,68 +136,75 @@ def llm_spec(text):
         resp = client.messages.create(
             model=MODEL,
             max_tokens=1024,
-            system=SYSTEM,
-            messages=[{"role": "user", "content": text}],
+            system=_system(),
+            messages=[{"role": "user", "content": text[:300]}],
             output_config={"effort": "low", "format": {"type": "json_schema", "schema": _schema()}},
         )
-    except anthropic.AuthenticationError:
+        if resp.stop_reason in ("refusal", "max_tokens"):
+            return None
+        raw = next((b.text for b in resp.content if getattr(b, "type", "") == "text"), None)
+        data = _clean(json.loads(raw)) if raw else None
+    except Exception:  # noqa: BLE001 - auth, network, API, SDK too old for output_config, malformed JSON: no answer
         return None
-    except anthropic.APIConnectionError:
+    if data is None:
         return None
-    except anthropic.APIStatusError:
-        return None
-    if resp.stop_reason in ("refusal", "max_tokens"):
-        return None
-    data = json.loads(next(b.text for b in resp.content if b.type == "text"))
-    cache[key] = data
-    with open(_cache_path("llm.json"), "w") as f:
-        json.dump(cache, f, indent=1)
+    with _lock:
+        cache = _load_cache()
+        cache[key] = data
+        try:
+            _save_cache(cache)
+        except OSError:
+            pass
     return data
 
 
 def merge(llm: dict, rules: ParseResult) -> StickerSpec:
-    """LLM answer as the base, then everything the rules understood on top."""
+    """The model's answer fills what the rules left empty; everything the rules understood stays."""
     spec = rules.spec
     understood = {m.section for m in rules.matches}
-    if "moods" not in understood and "template" not in understood:
+    if llm.get("base") and "bases" not in understood:
+        spec.base = llm["base"]
+    if llm.get("face") and not understood & {"moods", "template"}:
         spec.face = llm["face"]
-    if not understood & {"moods", "actions", "template"}:
+    if llm.get("motion") and not understood & {"moods", "actions", "template"}:
         spec.motion = llm["motion"]
-    if "poses" not in understood and not ("moods" in understood and spec.stance != "stand"):
+    if llm.get("stance") and "poses" not in understood and not ("moods" in understood and spec.stance != "stand"):
         spec.stance = llm["stance"]
-    spec.props = (spec.props + [p for p in llm["props"] if p not in spec.props])[:2]
-    spec.effects = (spec.effects + [e for e in llm["effects"] if e not in spec.effects])[:3]
-    spec.accessories = (spec.accessories + [w for w in llm.get("accessories", []) if w not in spec.accessories])[:3]
+    spec.props = (spec.props + [p for p in llm.get("props", []) if p not in spec.props])[:MAX_PROPS]
+    spec.effects = (spec.effects + [e for e in llm.get("effects", []) if e not in spec.effects])[:MAX_EFFECTS]
+    spec.accessories = (spec.accessories + [w for w in llm.get("accessories", []) if w not in spec.accessories])[:MAX_WEAR]
+    if spec.stance in ("sit", "lotus") and REG.motions[spec.motion].sit == "no":
+        spec.stance = "stand"
     return spec.validate()
 
 
 def parse(text, parser: Parser | None = None, llm=False, auto_caption=True) -> ParseResult:
-    """Rules, then typo fixing, then (optionally) the LLM."""
+    """Rules (with word forms and typo fixes), then, if they did not understand and llm=True, the model."""
     parser = parser or default_parser()
     r = parser.parse(text, auto_caption=auto_caption)
+    if r.fixed:
+        r.source = "rules+typos" if any(k != v for k, v in r.fixed.items()) else r.source
     if r.confident:
         return r
-    fixed = fix_typos(parser, r, parser.extract_caption(text)[1])
-    if fixed:
-        r2 = parser.parse(fixed, auto_caption=auto_caption)
-        cap = parser.extract_caption(text)[0]
-        if cap:
-            r2.spec.caption = r.spec.caption
-        r2.source = "rules+typos"
-        if r2.confident:
-            return r2
-        r = r2 if len(r2.matches) > len(r.matches) else r
     used = False
     if llm:
         data = llm_spec(text)
         if data:
-            r.spec = merge(data, r)
-            r.source = r.source + "+llm"
-            r.confident = True
-            r.unknown = list(data.get("unknown_concepts", []))
-            used = True
+            try:
+                r.spec = merge(data, r)
+                r.source = r.source + "+llm"
+                r.confident = True
+                r.unknown = list(data.get("unknown_concepts", []))
+                used = True
+            except ValueError:
+                pass
     log_miss(text, r, used)
     return r
+
+
+def fix_typos(parser: Parser, result: ParseResult, text):
+    """v3 interface, kept for old scripts: typos are now fixed inside Parser.parse.  Returns None."""
+    return None
 
 
 _DEFAULT = None

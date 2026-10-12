@@ -2,7 +2,8 @@
 
 Every decision between a typed sentence and a downloaded file, in the order it happens, with the file that owns it
 and the knob that changes it. Rules make every decision. A model is consulted only when the rules don't understand
-a prompt, and only when that is switched on.
+a prompt, and only when that is switched on. `python -m studio.cli --rules` prints every numbered rule
+(P01–P33 reading, R01–R23 composing, L01–L11 what the library guarantees).
 
 ## Contents
 
@@ -11,7 +12,7 @@ a prompt, and only when that is switched on.
 3. [Turning matches into a spec](#2-turning-matches-into-a-spec)
 4. [When the rules don't understand](#3-when-the-rules-dont-understand)
 5. [Composer rules](#4-composer-rules)
-6. [Animation, still frame, caption and staging](#5-animation-still-frame-caption-and-staging)
+6. [Animation, still frame, caption and framing](#5-animation-still-frame-caption-and-framing)
 7. [Web app gates](#6-web-app-gates)
 8. [Export, packs and messenger limits](#7-export-packs-and-messenger-limits)
 9. [A worked trace](#8-a-worked-trace)
@@ -21,27 +22,25 @@ a prompt, and only when that is switched on.
 
 ```mermaid
 flowchart TD
-    P[Prompt typed] --> CAP[Pull out caption<br/>quotes or 'saying ...']
-    CAP --> NORM[Normalise, mark clause breaks]
-    NORM --> MATCH[Match phrases longest first<br/>lexicon.yaml + templates.yaml]
-    MATCH --> NEG[Apply negation<br/>3 words back, stops at clause break]
-    NEG --> VOTE[Pick one template, vote per slot<br/>weight then later mention]
-    VOTE --> OK{Understood?}
+    P[Prompt typed] --> CAP[Pull out caption<br/>quotes, 'saying ...', 'a sign reading ...']
+    CAP --> TXT[Clean the text<br/>emoji, emoticons, laughter, stretched words,<br/>chat shorthand, other languages]
+    TXT --> MATCH[Match phrases longest first<br/>lexicon/ + templates/<br/>word forms, safe typo fixes]
+    MATCH --> NEG[Apply negation<br/>within the clause]
+    NEG --> VOTE[Pick one scenario, vote per slot<br/>means 5-6 > scenario 3 > suggests 2,<br/>later word wins a tie]
+    VOTE --> COL[Colours to items or fur,<br/>sides, gaze, tempo, intensity]
+    COL --> OK{Understood?}
     OK -- yes --> SPEC[StickerSpec]
-    OK -- no --> TYPO[Fix typos with difflib, parse again]
-    TYPO --> OK2{Understood?}
-    OK2 -- yes --> SPEC
-    OK2 -- no --> LLMON{LLM switched on<br/>and user signed in?}
-    LLMON -- yes --> LLM[Haiku, answers only rig names<br/>cached] --> MERGE[Rules on top of model answer] --> SPEC
-    LLMON -- no --> DEF[Friendly default + log miss] --> SPEC
+    OK -- no --> LLMON{LLM switched on<br/>and user signed in?}
+    LLMON -- yes --> LLM[Haiku, answers only registry names<br/>cached] --> MERGE[Rules on top of model answer] --> SPEC
+    LLMON -- no --> DEF[Best guess + log miss<br/>'did you mean' hints] --> SPEC
     SPEC --> EDIT[Editor chips change the spec]
     EDIT --> SPEC
-    SPEC --> RES[Composer rules<br/>paws, motion swaps, tail, accessories, colours]
-    RES --> CLIP[Build the clip<br/>motion, wag, blink, props, effects, wear]
-    CLIP --> RIG[Mascot rig bakes Lottie]
-    RIG --> STAGE{Caption?}
-    STAGE -- yes --> FIT[Lay out caption, shrink scene to fit] --> DOC[Lottie document]
-    STAGE -- no --> DOC
+    SPEC --> RES[Composer rules R01-R23<br/>paws, motion swaps, wear zones, effect zones,<br/>size budget, tail, tempo, colours]
+    RES --> CLIP[Act it out on a clip<br/>motion, wag, blink, props, effects, wear]
+    CLIP --> ROLL[Turn the loop so frame 0 is the best frame]
+    ROLL --> RIG[Mascot rig bakes Lottie]
+    RIG --> FRAME[Auto-framing<br/>measure what it covers, fit the canvas<br/>above or below a caption]
+    FRAME --> DOC[Lottie document]
     DOC --> GATE{Web app:<br/>who is asking?}
     GATE --> PREV[Preview<br/>watermarked unless Pro or credits]
     GATE --> DL{Download allowed?}
@@ -56,165 +55,171 @@ flowchart TD
 
 | Stage | File |
 | --- | --- |
-| Reading the prompt, voting | `studio/parse/parser.py`, `lexicon.yaml`, `templates.yaml` |
+| Cleaning the text | `studio/parse/text.py`, `lexicon/core.yaml`, `lexicon/translations.yaml` |
+| Reading the prompt, voting | `studio/parse/parser.py`, `morph.py`, `typo.py`, `lexicon/*.yaml`, `templates/*.yaml` |
 | Fallback | `studio/parse/fallback.py` |
-| The spec and its allowed names | `studio/spec.py` |
-| Composer rules and clip | `studio/compose.py`, `studio/motions.py`, `studio/colour.py` |
-| Props, effects, things worn | `studio/extras.py`, `studio/accessories.py`, `mascot/props.py` |
-| Mascots | `mascot/characters/biscuit.py`, `mochi.py`, `bruno.py` |
+| The spec and its allowed names | `studio/spec.py`, `studio/registry.py` |
+| Composer rules | `studio/rules.py`, `studio/colour.py` |
+| Motions, props, effects, things worn, faces, mascots | `studio/library/*.py` |
+| Clip, still frame, framing | `studio/compose.py`, `studio/framing.py` |
+| Mascots | `mascot/characters/*.py` (14) |
 | Caption | `studio/caption.py` |
 | Files | `studio/export.py` |
 | Packs | `studio/packs.py` |
 | Web app gates | `app/plans.py`, `app/render.py`, `app/main.py` |
+| Editor chips | `app/vocab.py` (read from the registry) |
 | Beta: invites, waitlist, reports, counts | `app/main.py`, `app/admin.py` |
 
 ## 1. Reading the prompt
 
 The prompt is read by rules only (`studio/parse/parser.py`). No model is called at this stage.
 
-1. **Pull out the caption first.** Quoted text (`"Deal!"`, `'monday again'`) or whatever follows `saying`, `says`,
-   `that says`, `with text`, `captioned`, `caption:` or `text:` becomes the caption, word for word. It is removed
-   from the prompt so its words are never read as instructions. Bare `text` doesn't count, so "text me later" stays
-   a request for a phone.
-   - Tweak: the `QUOTED` and `SAYING` patterns at the top of `parser.py`.
-2. **Normalise.** Lowercase, curly quotes to straight, every other character dropped except letters, digits and
-   in-word apostrophes. Commas, full stops, `;`, `!` and `?` become a clause break `|`.
-3. **Match phrases, longest first.** Every phrase in `lexicon.yaml` and `templates.yaml` is tried from the longest
-   (in words) down to single words. A matched phrase claims its words, so a shorter phrase inside it can no longer
-   match: "good night" never also counts as "good".
-   - One phrase can belong to a template and a lexicon entry at the same time; both fire. Within the lexicon a
-     phrase may belong to only one entry (the tests enforce this).
-4. **Negation.** A match is negated when `not`, `no`, `never`, `don't`, `isn't`, `without` or a similar word appears
-   up to 3 words before it. The look-back stops at a clause break or at a word another phrase already claimed, so
-   "not happy, raining" negates only "happy".
-   - A negated mood with a `not:` partner switches to that mood ("not happy" becomes `sad`). Any other negated word
-     is dropped ("not waving" adds no wave).
-5. **Unknown words.** Words no phrase claimed, minus stopwords, negators and clause breaks, are kept as `unknown`.
-   They decide confidence in the next step and are logged when the rules give up.
+1. **Pull out the caption first (P01, P02).** Quoted text (`"Deal!"`, `'monday again'`) or whatever follows `saying`,
+   `says`, `that says`, `with text`, `captioned`, `caption:` or `text:` becomes the caption, word for word; so does what
+   follows "a sign / board / banner / card reading". "reading a book" stays reading. A lead-in such as "with the
+   words" before quoted text is dropped. "no caption" or "without text" turns the suggested caption off.
+2. **Clean the text (P03–P08, `text.py`).** Colour codes become colours. Emoji and emoticons become the words they
+   stand for (😴 sleepy, :D laughing, 🥺👉👈 shy). Laughter in any spelling (hahaha, lolol, jajaja, kkkk, 555, xD) is
+   one word. Stretched words shrink to a word the lexicon knows (heyyyy → hey). Chat shorthand and contractions are
+   spelt out (omw, brb, ty, ily, idk, hbd; can't → can not). A word the lexicon lists exactly is never changed.
+   Lowercase, accents dropped; `,` `.` `;` `!` `?` become a clause break.
+3. **Other languages (P09).** Whole phrases from `translations.yaml` are read as English (feliz cumpleaños, eid mubarak,
+   arigatou gozaimasu, শুভ জন্মদিন …); a one-word phrase is matched as typed first.
+4. **Match phrases, longest first (P10–P13).** Every phrase of the lexicon and the templates is tried from the longest
+   down. A matched phrase claims its words ("ice cream" before "ice"). A word nothing matched is tried as a word form
+   of a listed word (clapping → clap, happier → happy, `morph.py`), then as a typo (`typo.py`: a real English word is
+   never "fixed", the fix must be one or two edits away, and two equally close candidates mean no guess). Little words
+   and fillers ('ngl', 'pov', 'all night') carry no meaning.
+   - A phrase belongs to one lexicon entry only, and may also belong to a template; both fire.
+   - Some words mean something only as the whole prompt (P14, `alone:` in `core.yaml`): "nice" alone is a thumbs up,
+     "nice fox" is a fox. "No!" alone is a head shake (P15).
+5. **Negation (P16–P18).** `not`, `no`, `never`, `without` … negate the next thing said in the same clause; in a list
+   after a negator every item is negated. A negated feeling becomes its partner ("not happy" is sad, "not scared" is
+   determined). A negated prop, effect or worn item is kept out, even when a scenario would bring it ("birthday
+   without the hat").
 
-What the parser can match:
+What the parser can match (`python -m studio.cli --list templates` and friends):
 
-| Source | Holds | Weight on conflicts |
+| Source | Holds | Weight |
 | --- | --- | --- |
-| `templates.yaml` | 33 whole scenarios (monday, birthday, thank you, on my way…), each a full spec plus a suggested caption | 1 (base layer) |
-| `lexicon.yaml` moods | happy, sad, tired, angry, wink, love, shy… with face, tail, motion, sometimes effects | 2 |
-| `lexicon.yaml` actions, props, effects, accessories | wave, jump, dance, phone, mug, confetti, party hat… | 3 |
-| `lexicon.yaml` poses, colours, bases | sitting, hands on hips, purple, cat, bear… | 4 |
-| `lexicon.yaml` intensity | very, super, so (×1.35); a bit, slightly (×0.65) | multiplies |
+| `templates/everyday.yaml`, `occasions.yaml` | 220 scenarios, each a spec plus a suggested caption | 3 |
+| `lexicon/moods.yaml` | 56 feelings: what they MEAN (a face) and SUGGEST (motion, effects, stance) | means 5, suggests 1.5 |
+| `lexicon/actions.yaml` | 98 doing words, each meaning a motion | means 5, suggests 2.2 |
+| `lexicon/things.yaml` | 76 props, 43 effects, 56 worn items | means 5, suggests 2 |
+| `lexicon/poses.yaml`, `mascots.yaml` | 31 poses and stances; 14 mascots with 33 named variants | 6 |
+| `lexicon/colours.yaml` | 45 colours and 6 shade words | — |
+| `lexicon/core.yaml` | stopwords, fillers, negators, intensity, tempo, sides, gaze, words that only count alone | — |
 
 ## 2. Turning matches into a spec
 
 Every decision lands in one `StickerSpec` (`studio/spec.py`). The parser fills it, the editor chips change it, and
 everything after this point reads only the spec.
 
-1. **Pick at most one template.** Each matched template scores the number of words its phrases covered. The highest
-   score wins; on a tie, the one mentioned first. "omg no way" scores `omg` 3 and `no_way` 2, so it becomes the OMG
-   sticker. The template's values go in first, at weight 1.
-2. **Vote on single-value slots.** `face`, `motion`, `stance`, `tail`, `arm_L`, `arm_R` and `base` each collect votes
-   (weight, position, value). The highest weight wins; on a tie, the word that comes **later** in the prompt wins.
-   "sleepy birthday" keeps the birthday props but takes the sleepy face (mood weight 2 beats template weight 1).
-3. **Collect lists.** `props`, `effects` and `accessories` are unions in order of mention, capped at 2 props,
-   3 effects and 3 accessories.
-4. **Colours.** A colour word replaces the palette with that preset (`colours:` in the lexicon). The last one wins.
-5. **Intensity.** Starts at 1.0, ×1.35 per strong word, ×0.65 per weak word, +8% per `!` (at most three count).
+1. **Pick at most one scenario (P29).** Each matched template scores the words its phrases covered; the highest wins,
+   then the one said first. Its spec goes in at weight 3, and its caption is suggested when the prompt has none (P30).
+2. **Vote on single-value slots (P19–P21).** `face`, `motion`, `stance`, `tail`, `arm_L`, `arm_R` and `base` collect
+   votes. What a word means (5, poses and mascots 6) beats a scenario (3), which beats what a word only suggests (2).
+   On a tie the later word wins ("tired but dancing" dances). Vague words count less (please, maybe; yes and no 0.9).
+   A motion suggests its own face when nothing else sets one (P32: eating looks happy, sobbing cries).
+3. **Collect lists.** `props`, `effects` and `accessories` in order of mention, minus anything negated.
+4. **Colours (P22–P25).** A colour paints the item right after it ("a red scarf", "red and white scarf"), or the item
+   before it with 'in' ("a scarf in red"); otherwise the fur ("purple kitty with coffee" is a purple cat). A colour
+   before 'eyes' colours the eyes. Shade words change it (light blue, dark red, pastel pink, neon green). Some mascot
+   words bring a fur colour (polar bear, golden retriever) unless a colour is named.
+5. **Sides, gaze, tempo (P26, P27).** 'left paw' puts the nearest held thing in that paw; 'looking up', 'side eye'
+   set the gaze; 'fast', 'slowly' the tempo.
+6. **Intensity (P28).** Starts at 1.0, ×1.35 per strong word, ×0.65 per soft word, more for `!!!` and CAPITALS.
    Clamped to 0.5–1.6. Motions scale their amplitude by it.
-6. **Caption.** The extracted caption wins. Otherwise, if a template matched and auto captions are on, the
-   template's suggested caption is used.
-7. **Confidence.** Understood when at least one template, mood, action, prop, pose or accessory matched, **and**
-   unknown words are no more than half of the meaningful words (one unknown word is always tolerated). Not
-   understood means the fallback runs (section 3).
+7. **Captions as hints (P31).** When only the caption says anything ("a fox saying 'good morning'"), its words hint at
+   the scenario and the mood, lightly.
+8. **Confidence (P33).** Understood when something in the prompt means a sticker part and few words are left unknown.
+   Unknown words get a 'did you mean' suggestion in the editor.
 
 Defaults when nothing sets a slot:
 
 | Slot | Default |
 | --- | --- |
 | base | `biscuit` (fox) |
-| face | `smiley` |
+| face | the motion's own face, else `smiley` |
 | motion | `idle` |
-| stance | `stand` |
+| stance | the motion's, else `stand` |
 | tail, arms | chosen by the composer (section 4) |
-| intensity | 1.0 |
-| length | 2 seconds at 60 fps (120 frames) |
+| intensity, tempo | 1.0 |
+| length | 2 seconds at 60 fps (120 frames); 1 to 3 seconds allowed |
 
 ## 3. When the rules don't understand
 
-The fallback (`studio/parse/fallback.py`) runs only when step 2 says "not understood". Each step ends the chain as
-soon as the result is understood.
+The fallback (`studio/parse/fallback.py`) runs only when step 2 says "not understood". Word forms and typos were
+already tried inside the parser.
 
-1. **Typo fix (free, no model).** Each unknown word of 3 or more letters is compared with every single word the
-   lexicon knows (`difflib`, similarity cutoff 0.78). The closest match replaces it and the prompt is parsed again.
-   "slepy fox wih cofee" becomes "sleepy fox with coffee".
-2. **Small model (optional).** Only when the LLM switch is on (`--llm` on the command line; `STUDIO_LLM=1` in the web
-   app, signed-in users only, `STUDIO_LLM_DAILY` calls a day each). Claude Haiku (`claude-haiku-5-5`, low effort)
-   must answer a JSON schema whose fields are lists of the rig's own names: face, motion, stance, props, effects,
-   accessories, plus `unknown_concepts` for what it can't show. It can't invent a pose or a prop.
-   - The rules still win. The model's answer is a base layer: it sets face, motion or stance only where the rules
-     matched nothing for that kind of slot, and its props, effects and accessories go after the rules' own.
+1. **Small model (optional).** Only when the LLM switch is on (`--llm` on the command line; `STUDIO_LLM=1` in the web
+   app, signed-in users only, `STUDIO_LLM_DAILY` calls a day each). Claude Haiku (`STUDIO_LLM_MODEL`, default
+   `claude-haiku-5-5`) must answer a JSON schema whose fields are lists of the registry's own names: face, motion,
+   stance, props, effects, accessories, plus `unknown_concepts` for what it can't show. It can't invent a pose or a prop.
+   - The rules still win. The model's answer only fills what the rules left empty, and its props, effects and worn
+     items go after the rules' own.
    - Answers are cached by normalised prompt in `cache/llm.json`; the same wording never costs twice.
    - No credentials, an auth error, a network error, a refusal or a cut-off answer all mean "no answer".
-3. **Log the miss.** Every prompt that reached this step is appended to `cache/misses.jsonl` with its unknown words
-   and whether the model was used. Adding those words to `lexicon.yaml` is how the rules learn, and how model calls
-   trend towards zero.
-4. **Friendly default.** If nothing worked, the spec keeps its defaults (a smiling fox, idle). The editor says it
-   wasn't sure and suggests other words.
+2. **Log the miss.** Every prompt that reached this step is appended to `cache/misses.jsonl` (capped) with its unknown
+   words and whether the model was used. Adding those words to the lexicon is how the rules learn.
+3. **Best guess.** Whatever the rules did understand is kept; the rest stays at its default, and the editor says it
+   wasn't sure and suggests words.
 
 ## 4. Composer rules
 
-The composer (`resolve()` in `studio/compose.py`) settles conflicts in a fixed order. Every change it makes is written
-to `notes`, which the editor shows under the sticker.
+`resolve()` in `studio/rules.py` runs these in order. Every change it makes is written to `notes`, which the editor
+shows under the sticker. The facts each rule reads (which paws a motion wants, where a worn item sits, what a prop is
+for) come from the registry, so a new item obeys the rules without touching them.
 
-1. **Props claim paws first.** Each prop has a preferred paw and a pose: phone right `hold`, clipboard left `hold`,
-   bell right `ring`, badge and heart right `hold_up`, cloud right `carry`, mug right `hold`.
-   - Preferred paw taken → the other paw, with a note ("phone moved to the left paw").
-   - No paw free → the prop is dropped, with a note.
-   - The gift needs both paws; with one busy it's dropped. When it fits, a standing mascot switches to the `wide`
-     stance so its feet show either side of the box.
-2. **The motion gets the paws that are left.** Wave and think want 1 paw; cheer, jump, dance, shiver and hide want 2;
-   the rest want none.
-   - Sitting (`sit` or `lotus`) and the motion needs legs (bounce, jump, cheer, dance, walk, shiver) → `sway`.
-   - The motion needs a paw and none is free → `bounce`. With a gift, the gift becomes the act (step 7).
-   - A wave whose right paw is busy waves with the left.
-3. **Arm poses.** A claimed paw takes its prop's pose. A paw the motion uses is animated by the motion. Any other paw
-   takes the pose the prompt asked for ("hands on hips"), else `knee` in the lotus stance, else `rest`.
-4. **Accessories.** In order of mention. Each clash group allows one item: party hat or crown, glasses or sunglasses,
-   bow or star clip. The later one is dropped, with a note.
-5. **Tail follows the stance.** Sitting → only sitting poses (`ground`, `ground_up`, `wrap`): `up`, `out`, `flick_out`
-   and `curl` become `ground_up`, anything else `ground` (`wrap` across the lap in lotus). Standing with a sitting
-   pose → `ground` becomes `low`, `ground_up` becomes `up`, `wrap` becomes `rest`. Nothing asked → `rest`.
-6. **Colours that show.** A recolour copies itself to every palette slot that shared that colour in the design (the
-   cat's tail tip follows its stripes, the bear's follows its fur). Each coloured item (party hat, bow, scarf,
-   headphones, heart, floating hearts, mug) then takes the first colour from its list that differs from the fur by
-   at least 28 (CIE Lab distance, `studio/colour.py`). A pink cat's bow turns coral.
-7. **Gift sequence.** With a gift and a loop of at least 100 frames: paws rest on the lid, the lid pops at frame 40,
-   paws go to the cheeks, then up in a cheer at frame 78. The face goes curious, surprised, then joyful.
+| Rule | What it does |
+| --- | --- |
+| R01 | At most 2 props, 3 effects and 3 worn items, the first ones listed |
+| R02 | A motion that acts with something brings it when nothing held can be used: typing brings a laptop, singing a microphone, eating the mascot's favourite snack (a bone for the dog, bamboo for the panda) |
+| R03 | A sitting-only motion (dozing, kicking its feet) sits the mascot down |
+| R04 | Held props claim paws first: the paw the spec names, else the prop's own paw, else the other; two-paw props need both |
+| R05 | A motion done with a thing that has its own use becomes that use: waving a flag, cheering with a glass raises a toast, dancing with a microphone sings, with a guitar strums |
+| R06 | A prop that needs a stance gets it (feet apart either side of a gift box) |
+| R07 | A motion that needs legs is swapped for one that works sitting |
+| R08 | A held prop the motion acts with goes with the motion: a snack to the mouth, a mug is sipped, a phone to the ear |
+| R09 | The motion gets the paws that are left; with too few it becomes its fewer-paws version, else a bounce |
+| R10 | Unclaimed paws take the spec's pose, else rest on the knees cross-legged, else hang |
+| R11 | A costume of what the mascot already has is left out (bunny ears on the bunny) |
+| R12 | One worn item per place on the body (hat, eyes, ears, neck, back …) |
+| R13 | Something over the mouth comes off for eating, sipping, singing, a kiss; a sleep mask comes off for reading, typing, photos |
+| R14 | Something over the eyes hides special eyes (hearts, stars); the note says what doesn't show |
+| R15 | An effect the motion already draws is not drawn twice (sobbing has its own waterfall tears) |
+| R16 | One effect over the head and one behind the mascot |
+| R17 | Telegram's 64 KB: when props and effects add up to too much, the costliest effect goes |
+| R18 | The tail follows the stance (sitting tail poses when sitting) |
+| R19 | A calm motion keeps a calm tempo (dozing is never played faster than 1.2×) |
+| R20 | A fur colour repaints every shade of it (arms, legs, tail, stripes) and keeps eyes and paws readable |
+| R21 | A worn or held thing takes the colour the spec gives it, else the first colour it likes that stands out from the fur |
+| R22 | With a gift box and a loop of at least 100 frames the gift is the act: paws on the lid, it pops, a cheer, the lid drops back |
+| R23 | A sign carries the caption when it is short enough to read there |
 
-## 5. Animation, still frame, caption and staging
+## 5. Animation, still frame, caption and framing
 
-`build_clip()` in `studio/compose.py`, then the rig bakes it (`mascot/character.py`).
+`build_clip()` and `compose()` in `studio/compose.py`, then the rig bakes it (`mascot/character.py`).
 
-1. **Loop length.** `seconds × 60` frames (default 120). Every periodic movement uses a period that fits a whole
-   number of times into the loop (`per()` in `studio/motions.py`), so the last frame equals the first and the loop
-   has no seam.
-2. **Size in the canvas.** 0.86 for jump, cheer or a cloud on a string (they need headroom); 1.06 when sitting;
-   otherwise 1.0.
-3. **Motion.** One of 14 functions in `studio/motions.py`, built from the rig's moves (`mascot/clips/moves.py`).
-   Each returns its best still frame (jump apex, wave at the top of its swing…).
-4. **Tail wag.** Strength from the `WAG` table per motion (2 for shiver to 12 for cheer and dance), halved when
-   sitting, × intensity. Fast wag (30 frames) above 8, slow (60) otherwise.
-5. **Blink.** One blink at 80% of the loop, except for sleep, calm, joy and wink faces and the hide and think motions.
-6. **Props, effects, things worn.** Added as layers. Head items hang from the head's pivot and are placed from each
-   mascot's crown, eye and ear positions, so they fit all three mascots and follow every head turn.
-7. **Still frame (PNG, WebP).** The motion's best frame, moved later when a prop is still appearing: badge 34,
-   phone 40, clipboard at half the loop, gift 90.
-8. **Caption layout** (`studio/caption.py`). Text is drawn as vector outlines of Fredoka SemiBold, so every player
-   shows it.
-   - One line if it fits 460 px wide at 52 px or larger (tries 76 down to 52). Otherwise wrapped to at most two
-     lines, shrinking from 76 down to 30 until it fits.
-   - Bottom captions end at y = 500; top captions start at y = 14. Outline style = dark text with a white halo;
-     bubble style = text on a yellow rounded panel.
-9. **Staging.** With a caption, the whole scene is parented to one `stage` layer and shrunk to fit the rows the
-   caption leaves free: scale = the smaller of 0.9 and free height ÷ 440. The feet land 6 px above a bottom caption,
-   or at y = 496 under a top one.
+1. **Loop length.** `seconds × 60` frames (default 120). Every periodic movement uses a period that fits a whole number
+   of times into the loop (`m.per()`), every one-shot finishes before the loop ends, and every key ends on its start
+   value, so the last frame equals the first at any length or tempo (L01–L03).
+2. **Motion.** One of 99 functions in `studio/library/motions_*.py`, each given the paws, stance, mascot and the props
+   it acts with. Each returns its best still frame (jump apex, wave at the top of its swing, the bite …).
+3. **Tail wag and blink.** The motion's wag strength, halved when sitting, × intensity. One blink at 80 % of the loop
+   unless the face or the motion keeps the eyes closed or special.
+4. **Props, effects, things worn.** Added as layers. Everything is placed from the mascot's own data (crown, top,
+   collar, eyes, ears, nose, mouth, paw anchors), so it fits all 14 mascots and follows every head turn (L06, L08).
+   Things a motion acts with stay upright (L07).
+5. **Frame 0 is the best frame.** The loop is turned so that frame 0 shows the motion's key pose with every effect at
+   its fullest. The PNG still, Telegram's first frame and WhatsApp's resting frame are all frame 0.
+6. **Caption layout** (`studio/caption.py`). Text drawn as vector outlines of Fredoka SemiBold, one line if it fits
+   460 px at 52 px or larger, else up to two lines from 76 px down to 30 px. Outline style = dark text with a white
+   halo; bubble style = text on a yellow rounded panel. Top or bottom.
+7. **Auto-framing** (`studio/framing.py`). The finished animation is drawn small with rlottie on a sample of its frames,
+   the area anything ever covers is measured, and the scene is scaled (at most 1.12×, at least 0.42×) and moved to fill
+   the canvas, or the part a caption leaves free, with an 18 px margin for the white sticker edge (L04). Without a
+   rasteriser the v3 rule of thumb is used.
 
 ## 6. Web app gates
 
@@ -271,11 +276,13 @@ to `notes`, which the editor shows under the sticker.
 | Telegram | numbered `.tgs` files, `HOW-TO-ADD-TO-TELEGRAM.txt` with steps for @Stickers and one emoji per file | 512×512, 30 or 60 fps, ≤ 3 s, ≤ 64 KB each | refused, every problem listed |
 | WhatsApp | `contents.json` (WhatsApp sample-app format), `tray.png` (96×96, ≤ 50 KB), numbered `.webp`, `HOW-TO-ADD-TO-WHATSAPP.txt` | 3–30 stickers; all animated or all still; ≤ 500 KB animated or ≤ 100 KB still; frames ≥ 8 ms; ≤ 10 s; 1–3 emoji | refused, every problem listed |
 
-- **Emoji per sticker:** what it does (wave 👋, dance 💃, doze 😴…), then what it holds (mug ☕, gift 🎁…), then
-  what's around it (confetti 🎉, anger 💢…), then its face. No repeats; Telegram gets the first, WhatsApp up to three.
+- **Emoji per sticker:** what it does (wave 👋, dance 💃, doze 😴 …), then its face, then what it holds (mug ☕,
+  gift 🎁 …), what's around it (confetti 🎉, anger 💢 …) and what it wears. Each comes from the item's own entry in
+  the registry. No repeats; Telegram gets the first, WhatsApp up to three.
 - **Accessibility text** for WhatsApp is written from the spec: "An angry cat shaking its head, with the words "no.""
 - **Animated WhatsApp stickers use frame 0** as the still WhatsApp shows when a loop ends, so frame 0 must show the
-  whole sticker; every motion starts from a complete pose.
+  whole sticker; the loop is turned so that frame 0 is the motion's best frame.
+
 
 ## 8. A worked trace
 
@@ -283,46 +290,47 @@ Prompt: `super sleepy purple kitty with coffee and a scarf saying 'monday again'
 
 | Stage | Decision |
 | --- | --- |
-| Caption | `monday again` taken from the quotes and removed from the prompt |
-| Matches | `super` → strong · `sleepy` → mood tired · `purple` → colour · `kitty` → base mochi · `coffee` → prop mug · `scarf` → accessory |
-| Template | none matched |
-| Votes | face `sleep`, stance `sit`, motion `sleep` (all from the tired mood, weight 2); base `mochi` (weight 4) |
+| Caption | `monday again` taken from the quotes and removed from the prompt (P01) |
+| Matches | `super` → stronger · `sleepy` → scenario `sleepy` and mood `sleepy` · `purple` → colour · `kitty` → mascot `mochi` · `coffee` → prop `mug` · `scarf` → worn item |
+| Scenario | `sleepy` (weight 3): face `drowsy`, sitting, motion `nod_off`, effect `zzz`; its caption is not used because the prompt has one |
+| Votes | face `drowsy` (the mood means it, 5); stance, motion and z's agree with the scenario; base `mochi` (6) |
+| Colour | `purple` is followed by the mascot word, so it paints the fur, not the mug (P22) |
 | Intensity | 1.0 × 1.35 = 1.35 |
 | Understood? | yes, nothing unknown; no fallback |
-| Paws | mug claims the right paw (`hold`); left paw `rest` |
-| Motion | `sleep` works sitting; kept |
-| Tail | sitting, nothing asked → `ground` |
-| Colours | purple preset; cat's tail tip follows the new stripe colour; scarf stays coral and mug teal (both stand out from purple) |
-| Size | 1.06 (sitting) |
-| Still frame | 0 |
-| Caption | fits one line at 72 px; scene shrunk to 0.9 and lifted 61 px |
-| Files | TGS 8.0 KB, PNG 53 KB, WhatsApp WebP 452 KB; made in 2.0 s |
+| Paws (R04, R09, R10) | the mug claims the right paw (`hold`); `nod_off` needs no paws; the left paw rests |
+| Tail (R18) | sitting, nothing asked → `ground` |
+| Colours (R20, R21) | purple fur, the cat's stripes and tail tip follow it; scarf coral and mug teal, both stand out from purple |
+| Still frame | the motion's key frame (76 of 120) becomes frame 0 |
+| Framing | the scene covers 348 × 400 px; scaled 0.98 into the space above the caption |
+| Files | TGS 10.2 KB, PNG 58 KB, WhatsApp WebP 382 KB; made in under 10 s, most of it the animated WebP |
 
 ## 9. Where to tweak
 
 | To change | Edit | Effect |
 | --- | --- | --- |
-| What a word means | `studio/parse/lexicon.yaml` | the word's slots; one entry per phrase |
-| A whole scenario | `studio/parse/templates.yaml` | base spec and suggested caption |
-| Who wins a conflict | `WEIGHT` in `parser.py` | template 1, moods 2, actions/props/effects/accessories 3, poses/colours/bases 4 |
-| How many props, effects, worn items | `MAX_PROPS`, `MAX_EFFECTS`, `MAX_WEAR` in `parser.py` | 2, 3, 3 |
-| How strong "very" or "a bit" is | the `1.35` / `0.65` factors and the `!` bonus in `parser.py` | intensity |
-| When the parser gives up | the `confident` line in `parser.py` | how often the fallback runs |
-| Typo tolerance | `cutoff=0.78` in `fallback.py` | lower fixes more, risks wrong guesses |
-| The fallback model | `MODEL`, `SYSTEM` in `fallback.py`; `STUDIO_LLM`, `STUDIO_LLM_DAILY` | which model, its brief, on/off, daily cap |
-| Which paw a prop uses, its pose | `PROPS` in `compose.py` | paw claims and notes |
-| When a prop is visible in the still | `SHOW_AT` in `compose.py` | still frame |
-| Motions, and which need paws or legs | `MOTIONS` and `WAG` in `motions.py` | swaps and tail wag |
-| Things that can't be worn together | `EXCLUSIVE` in `accessories.py` | dropped items |
+| What a word means | `studio/parse/lexicon/*.yaml` (your own words: `parse/lexicon.yaml`) | the word's slots; one entry per phrase |
+| A whole scenario | `studio/parse/templates/*.yaml` (your own: `parse/templates.yaml`) | base spec and suggested caption |
+| Who wins a conflict | `MEANS`, `TEMPLATE`, `SUGGESTS` in `parser.py` | means 5–6, scenario 3, suggests 1.5–2.2 |
+| How many props, effects, worn items | `MAX_PROPS`, `MAX_EFFECTS`, `MAX_WEAR` in `spec.py` | 2, 3, 3 |
+| How strong "very" or "a bit" is | the `1.35` / `0.65` factors in `parser.py` | intensity |
+| Which words a colour skips over | `COLOUR_STOP` in `parser.py` | colour to item or fur |
+| Typo tolerance | edit distances in `typo.py` | how far a fix may reach |
+| The fallback model | `STUDIO_LLM_MODEL`, `STUDIO_LLM`, `STUDIO_LLM_DAILY`; `_system()` in `fallback.py` | which model, its brief, on/off, daily cap |
+| A motion's paws, sitting, swaps, what it brings | its `@motion(...)` in `library/motions_*.py` | composer rules R02–R09 |
+| A prop's paw, pose, colours, cost | its `@prop(...)` in `library/props_*.py` | paw claims, tints, size budget |
+| Where a worn item sits, what it covers | its `@wear(zone=..., covers=...)` in `library/wear_*.py` | clashes (R12), mouth and eyes (R13, R14) |
+| Which effects share a place | `zone=` in `@effect(...)`; `ONE_PER_ZONE` in `registry.py` | R16 |
+| How much a sticker may carry | `BUDGET` in `rules.py` | R17, Telegram size |
+| A mascot's favourite snack | `snack=` in `base(...)` in `library/looks.py` | what "eating" brings |
 | Colour clash threshold, colour order | `MIN_DELTA`, `PREFS` in `colour.py` | which colour an item takes |
 | Caption size and wrapping | `layout()` in `caption.py` | font size, lines |
-| Room left for the mascot under a caption | `FIGURE` in `compose.py` | scene scale |
+| Margin and growth when framing | `MARGIN`, `MAX_GROW`, `MIN_SCALE` in `framing.py` | how full the canvas is |
 | Loop length | `seconds` in the spec (1–3) | frames, file size |
 | Free downloads a day, credits per pack | `FREE_DAILY_EXPORTS`, `PACK_CREDITS` | plan limits |
 | Which formats are free | `FREE_FORMATS` in `app/plans.py` | gates |
 | Watermark words | `MARK` in `app/render.py` | preview and free downloads |
 | Messenger size limits | `TGS_MAX`, `WA_ANIM_MAX`, `WA_STILL_MAX` in `export.py` | warnings and frame-rate steps |
 | White edge width | `r=8` in `die_cut()` in `export.py`; `outline=` in `save()` | sticker border on raster files |
-| Emoji chosen for packs | `MOTION_EMOJI`, `PROP_EMOJI`, `EFFECT_EMOJI`, `FACE_EMOJI` in `packs.py` | pack emoji |
+| Emoji chosen for packs | the `emoji` of each registry item; `emojis_for()` in `packs.py` | pack emoji |
 | Pack size and rules | `WA_MIN`, `WA_MAX`, `TRAY_MAX`, `TG_MAX_SECONDS` in `packs.py`; `PACK_MAX` in `app/main.py` | what a pack may hold |
 | Invite-only signup | `STUDIO_INVITE_ONLY`; codes from `python -m app.admin invite` | who can create an account |

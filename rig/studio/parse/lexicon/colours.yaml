@@ -1,0 +1,54 @@
+# Colour words.  Before an item a colour paints that item ("a red scarf", "pink bow", "a mug in teal"); before
+# "eyes" it colours the eyes; anywhere else it is the fur, and every shade of the fur follows it (studio/colour.py).
+# A shade word just before a colour changes it: "light blue", "dark red", "pastel pink", "neon green" (core.yaml).
+# Anyone can also type a colour code: "#ff6699 cat".
+#
+#   name: "#rrggbb"                                  the name is the word
+#   name: {hex: "#rrggbb", words: [...], swatch: 1}  more words for it; swatch: offered as a colour button in the editor
+
+colours:
+  red: {hex: "#e8574a", words: [reddish, red coloured, cherry red, fire red, fire engine red, tomato red], swatch: 1}
+  crimson: {hex: "#c8323c", words: [blood red, ruby, ruby red]}
+  scarlet: "#e0393e"
+  maroon: {hex: "#8e2f3c", words: [burgundy, wine red, oxblood]}
+  coral: {hex: "#ff7f6e", words: [living coral]}
+  salmon: {hex: "#f7907c", words: [salmon pink]}
+  peach: {hex: "#ffb98a", words: [apricot, peach coloured]}
+  orange: {hex: "#f5933a", words: [orangey, orangish, orange coloured, tangerine, ginger, amber, pumpkin orange], swatch: 1}
+  rust: {hex: "#b8532e", words: [rusty, auburn, copper, copper coloured, terracotta, burnt orange]}
+  golden: {hex: "#f2b33d", words: [gold, gold coloured, honey gold, sunflower yellow], swatch: 1}
+  yellow: {hex: "#f7cb4d", words: [yellowish, canary, canary yellow, lemon yellow, sunshine yellow, butter yellow, banana yellow], swatch: 1}
+  mustard: {hex: "#d6a42b", words: [mustard yellow, ochre]}
+  cream: {hex: "#f3e3c3", words: [creamy, vanilla, off white, eggshell, ivory, pearl, pearly]}
+  beige: {hex: "#dcc6a0", words: [tan, sand, sandy, khaki, camel, fawn, wheat, oat, oatmeal, latte coloured, nude]}
+  caramel: {hex: "#c68a4e", words: [toffee, butterscotch, cinnamon, hazel, hazelnut]}
+  brown: {hex: "#a8744c", words: [brownish, chestnut, coffee brown, chocolate brown, mocha brown, cocoa brown, walnut, bronze], swatch: 1}
+  dark_brown: {hex: "#6e4630", words: [dark chocolate brown, espresso brown, umber]}
+  green: {hex: "#6cc07a", words: [greenish, grassy, grass green, leaf green, kelly green, apple green], swatch: 1}
+  lime: {hex: "#a6d84a", words: [lime green, chartreuse, neon green, slime green, acid green]}
+  mint: {hex: "#98e0c0", words: [minty, mint green, pistachio, seafoam, sea foam, seafoam green], swatch: 1}
+  sage: {hex: "#9db89a", words: [sage green, eucalyptus, matcha green]}
+  olive: {hex: "#8a9a4b", words: [olive green, khaki green, army green, moss, moss green]}
+  emerald: {hex: "#2eaa6e", words: [emerald green, jade, jade green, jungle green]}
+  forest_green: {hex: "#3e7d4f", words: [forest green, dark green, bottle green, pine green, hunter green]}
+  teal: {hex: "#3fb3a8", words: [teal blue, teal green, blue green, petrol, peacock], swatch: 1}
+  turquoise: {hex: "#45c9c1", words: [aqua, aquamarine, cyan, tiffany blue, robin egg blue, lagoon]}
+  sky_blue: {hex: "#7cc4f0", words: [sky blue, baby blue, light blue, powder blue, ice blue, icy blue, pale blue, cornflower]}
+  blue: {hex: "#5aa9e6", words: [blueish, bluish, azure, ocean blue, sea blue, denim, denim blue], swatch: 1}
+  royal_blue: {hex: "#3e66d8", words: [royal blue, cobalt, cobalt blue, sapphire, sapphire blue, electric blue, bright blue]}
+  navy: {hex: "#33467e", words: [navy blue, midnight blue, dark blue, ink blue, indigo blue]}
+  indigo: "#5a57c8"
+  periwinkle: {hex: "#9aa6f0", words: [periwinkle blue, cornflower blue]}
+  purple: {hex: "#8a6fdf", words: [violet, purplish, purpley, grape, grape purple, amethyst], swatch: 1}
+  lavender: {hex: "#b9a4ec", words: [lilac, lavender purple, light purple, wisteria, mauve], swatch: 1}
+  plum: {hex: "#8e4a85", words: [eggplant, aubergine, dark purple, berry, berry purple]}
+  magenta: {hex: "#d046b5", words: [fuchsia, hot magenta, orchid, purple pink]}
+  pink: {hex: "#ff8fb1", words: [pinkish, pinky, rosy, rose pink, bubblegum, bubblegum pink, blush pink, flamingo, flamingo pink], swatch: 1}
+  hot_pink: {hex: "#ff5fa2", words: [hot pink, neon pink, shocking pink, barbie pink, raspberry]}
+  baby_pink: {hex: "#ffc2d6", words: [baby pink, light pink, pale pink, pastel pink, cotton candy pink, strawberry milk]}
+  white: {hex: "#f4eee6", words: [snow white, snowy white, pure white, whitish], swatch: 1}
+  arctic: {hex: "#f2f5fa", words: [polar, arctic white, frost, frosty white, icy white], swatch: 1}
+  silver: {hex: "#c3cad3", words: [silvery, platinum, metallic, chrome]}
+  grey: {hex: "#9aa5b1", words: [gray, greyish, grayish, ash, ashy, smoke, smoky, dove grey, dove gray, stone grey], swatch: 1}
+  charcoal: {hex: "#4a4e57", words: [slate, slate grey, graphite, gunmetal, dark grey, dark gray, steel grey]}
+  black: {hex: "#3e3a45", words: [jet black, pitch black, ebony, onyx, midnight black, inky, blackish], swatch: 1}

@@ -4,17 +4,22 @@ Everything animated in this project is *sampled* once per frame by the rig and t
 here to as few eased keyframes as the tolerance allows.  Only features that every Lottie
 player supports are emitted: shape layers, null layers, parenting, groups with transforms,
 paths / ellipses / rects, fills, strokes and trim paths.
+
+Two switches change how samples become keyframes (both are off unless a caller turns them on):
+
+  rolled(k)      every looping property starts k frames into its loop.  The sticker studio uses it so that
+                 frame 0 of a loop is the frame worth showing as a still.
+  fade_safe      a layer that fades is written with its opacity on a group inside the layer instead of on the
+                 layer itself.  rlottie (Telegram's player, and the rasteriser used for PNG / WebP / GIF export)
+                 blends a layer with fractional opacity through an off-screen surface, and that blend darkens
+                 everything already drawn by one level out of 255 for each such layer.
 """
 from __future__ import annotations
 
 import hashlib
+import math
 
 import numpy as np
-
-try:  # scipy is optional; without it we fall back to cubic-Hermite + linear segments
-    from scipy.optimize import least_squares
-except Exception:  # pragma: no cover
-    least_squares = None
 
 VERSION = "5.7.4"
 
@@ -23,11 +28,17 @@ BOUNDED = ("opacity", "pct")
 
 # default tolerances (max abs error in the unit of the property)
 TOL = dict(pos=0.3, rot=0.2, scale=0.25, opacity=0.8, path=0.35, size=0.3, pct=0.4, width=0.2, color=0.004)
+# The fitter looks for the smallest PEAK error, so its curves use a tolerance to the full.  Fitting to this share
+# of each tolerance keeps the pictures as close to the per-frame samples as they were with the old optimiser.
+FIT_MARGIN = 0.65
 
 
 # --------------------------------------------------------------------------- values
 def num(x, nd=2):
-    x = round(float(x), nd)
+    x = float(x)
+    if not math.isfinite(x):
+        raise ValueError(f"a Lottie value is {x}; every number written to a file must be finite")
+    x = round(x, nd)
     if x == int(x):
         return int(x)
     return x
@@ -98,6 +109,58 @@ def is_anim(x):
     return isinstance(x, Anim)
 
 
+# --------------------------------------------------------------------------- loop rotation
+_ROLL = 0
+
+
+class rolled:
+    """Context manager: every Anim turned into keyframes inside the block starts `k` frames into its loop.
+
+        with rolled(36):
+            doc = character.build(clip)      # frame 0 of doc is frame 36 of the clip; the loop is otherwise the same
+
+    Only meaningful for looping animation (first sample == last sample).  A Layer remembers the roll that was in
+    effect when it was made, so layers made under different rolls can share a document: the studio gives a
+    decoration that does not follow the mascot (z's, sparkles, a chart drawing itself) its own roll, which puts the
+    moment it is most complete on the frame used as the still."""
+
+    def __init__(self, k):
+        self.k = int(k)
+
+    def __enter__(self):
+        global _ROLL
+        self.prev, _ROLL = _ROLL, self.k
+        return self
+
+    def __exit__(self, *exc):
+        global _ROLL
+        _ROLL = self.prev
+        return False
+
+
+def current_roll():
+    return _ROLL
+
+
+def _same(a, b):
+    """Two samples of one property are equal (numbers, tuples of numbers or Paths)."""
+    if isinstance(a, Path):
+        return a.c == b.c and len(a.v) == len(b.v) and np.allclose(a.flat(), b.flat(), atol=1e-6)
+    return bool(np.allclose(np.asarray(a, dtype=float), np.asarray(b, dtype=float), atol=1e-6))
+
+
+def _roll(samples, k):
+    """Rotate per-frame samples of a loop (index = frame, last == first) so they start at frame k."""
+    n = len(samples) - 1
+    if n <= 0 or k % n == 0:
+        return samples
+    k %= n
+    body = list(samples[:n])
+    out = body[k:] + body[:k]
+    out.append(out[0])
+    return out
+
+
 # --------------------------------------------------------------------------- easing fit
 _U = np.linspace(0.0, 1.0, 129)
 _B1 = 3 * (1 - _U) ** 2 * _U
@@ -119,9 +182,165 @@ _STD = [LINEAR, (0.42, 0.0, 0.58, 1.0), (0.333, 0.0, 0.667, 1.0), (0.2, 0.0, 0.2
 STATS = dict(props=0, keys=0, fits=0, cache=0)
 _CACHE = {}
 
+# The easing of one segment has four numbers.  With the two x-handles fixed, the eased value is LINEAR in the two
+# y-handles, so the best y-handles are a 2 x 2 solve.  The fitter therefore tries a grid of x-handle pairs at once
+# (plain array arithmetic), keeps the pair with the smallest peak error and polishes around it.  This replaced a
+# general-purpose optimiser that took over 95 % of the time of every build and found the same curves.
+_GX = tuple(np.linspace(0.02, 0.98, 15))
+_PAIRS = np.array([(a, b) for a in _GX for b in _GX])
+_NT = 1024
+LAWSON_WITHIN = 3.0          # reweight towards the peaks when the least-squares peak error is within this many tolerances
+POLISH_WITHIN = 1.7          # then search between the grid points when it is within this many
+
+
+def _bernstein(u):
+    return 3 * (1 - u) ** 2 * u, 3 * (1 - u) * u ** 2, u ** 3
+
+
+def _tabulate(pairs):
+    """Weights of y1 and y2 and the constant term of the eased value, over a fine grid of tau, per x-handle pair."""
+    uu = np.linspace(0.0, 1.0, 513)
+    b1, b2, b3 = _bernstein(uu)
+    tt = np.linspace(0.0, 1.0, _NT + 1)
+    A = np.empty((len(pairs), _NT + 1))
+    B, C = np.empty_like(A), np.empty_like(A)
+    for g, (x1, x2) in enumerate(pairs):
+        A[g], B[g], C[g] = _bernstein(np.interp(tt, b1 * x1 + b2 * x2 + b3, uu))
+    return A, B, C
+
+
+_TA, _TB, _TC = _tabulate(_PAIRS)
+
+
+def _solve_y(A, B, R, lo, hi, W=None):
+    """Least-squares y-handles for every row (rows = x-handle pairs), kept inside [lo, hi]."""
+    WA, WB = (A, B) if W is None else (W * A, W * B)
+    saa, sab, sbb = (WA * A).sum(1), (WA * B).sum(1), (WB * B).sum(1)
+    ra, rb = (WA * R).sum(1), (WB * R).sum(1)
+    det = saa * sbb - sab * sab
+    det = np.where(np.abs(det) < 1e-14, 1e-14, det)
+    return _inside(ra, rb, saa, sab, sbb, (ra * sbb - rb * sab) / det, (rb * saa - ra * sab) / det, lo, hi)
+
+
+def _inside(ra, rb, saa, sab, sbb, y1, y2, lo, hi):
+    """Keep both handles inside [lo, hi]; a handle that hit its limit changes the best value of the other one."""
+    if float(y1.min()) >= lo and float(y1.max()) <= hi and float(y2.min()) >= lo and float(y2.max()) <= hi:
+        return y1, y2
+    c1, c2 = np.clip(y1, lo, hi), np.clip(y2, lo, hi)
+    n2 = np.where(c1 != y1, (rb - sab * c1) / np.maximum(sbb, 1e-14), y2)
+    n1 = np.where(c2 != y2, (ra - sab * c2) / np.maximum(saa, 1e-14), y1)
+    return np.clip(n1, lo, hi), np.clip(n2, lo, hi)
+
+
+def _minimax(A, B, R, lo, hi, rounds, y1=None, y2=None):
+    """Per row: y-handles with a small PEAK error (least squares, then Lawson's reweighting towards the peaks).
+    Returns (peak error, y1, y2) arrays."""
+    if y1 is None:
+        y1, y2 = _solve_y(A, B, R, lo, hi)
+    E = np.abs(A * y1[:, None] + B * y2[:, None] - R)
+    best = (E.max(1), y1, y2)
+    W = np.ones_like(E)
+    for _ in range(rounds):
+        W = W * (E + 1e-12)
+        W = W / W.sum(1, keepdims=True)
+        y1, y2 = _solve_y(A, B, R, lo, hi, W)
+        E = np.abs(A * y1[:, None] + B * y2[:, None] - R)
+        e = E.max(1)
+        better = e < best[0]
+        best = (np.where(better, e, best[0]), np.where(better, y1, best[1]), np.where(better, y2, best[2]))
+    return best
+
+
+class _Span:
+    """Everything about a span of n frames that does not depend on the samples: the tables of the grid at the
+    span's own tau values and the solved normal equations.  Spans of the same length come up again and again."""
+
+    __slots__ = ("tau", "A", "B", "C", "saa", "sab", "sbb", "i11", "i12", "i22", "ac", "bc", "SA", "SB", "SC")
+
+    def __init__(self, n):
+        self.tau = tau = np.arange(1, n) / float(n)
+        pos = tau * _NT
+        i0 = np.minimum(pos.astype(np.intp), _NT - 1)
+        w = pos - i0
+        self.A = A = _TA[:, i0] * (1 - w) + _TA[:, i0 + 1] * w
+        self.B = B = _TB[:, i0] * (1 - w) + _TB[:, i0 + 1] * w
+        self.C = C = _TC[:, i0] * (1 - w) + _TC[:, i0 + 1] * w
+        self.saa, self.sab, self.sbb = saa, sab, sbb = (A * A).sum(1), (A * B).sum(1), (B * B).sum(1)
+        det = saa * sbb - sab * sab
+        det = np.where(np.abs(det) < 1e-14, 1e-14, det)
+        self.i11, self.i12, self.i22 = sbb / det, -sab / det, saa / det
+        self.ac, self.bc = (A * C).sum(1), (B * C).sum(1)
+        self.SA = np.empty((len(_SX), n - 1))                 # the same tables for the standard candidates
+        self.SB, self.SC = np.empty_like(self.SA), np.empty_like(self.SA)
+        for g, (x1, x2) in enumerate(_SX):
+            self.SA[g], self.SB[g], self.SC[g] = _bernstein(np.interp(tau, _B1 * x1 + _B2 * x2 + _B3, _U))
+
+
+_SPANS = {}
+_SPAN_BUDGET = 6_000_000        # numbers kept in span tables (about 50 MB); the least recently made are dropped beyond it
+_span_load = 0
+
+
+def _span(n):
+    global _span_load
+    sp = _SPANS.get(n)
+    if sp is None:
+        if _span_load > _SPAN_BUDGET:
+            _SPANS.clear()
+            _span_load = 0
+        sp = _SPANS[n] = _Span(n)
+        _span_load += 3 * sp.A.size
+    return sp
+
+
+def _grid_fit(sp, p, tolp, lo, hi):
+    """Best easing on the grid of x-handle pairs for the samples p of a span: ((x1, y1, x2, y2), peak error)."""
+    A, B = sp.A, sp.B
+    R = p - sp.C
+    ra, rb = A @ p - sp.ac, B @ p - sp.bc
+    y1, y2 = _inside(ra, rb, sp.saa, sp.sab, sp.sbb, sp.i11 * ra + sp.i12 * rb, sp.i12 * ra + sp.i22 * rb, lo, hi)
+    err = np.abs(A * y1[:, None] + B * y2[:, None] - R).max(1)
+    g = int(np.argmin(err))
+    if tolp < err[g] <= LAWSON_WITHIN * tolp:             # close: a least-squares fit is not the smallest-peak fit
+        top = np.argpartition(err, 12)[:12]
+        e2, a2, b2 = _minimax(A[top], B[top], R[top], lo, hi, 4, y1[top], y2[top])
+        k = int(np.argmin(e2))
+        if e2[k] < err[g]:
+            return (float(_PAIRS[top[k], 0]), float(a2[k]), float(_PAIRS[top[k], 1]), float(b2[k])), float(e2[k])
+    return (float(_PAIRS[g, 0]), float(y1[g]), float(_PAIRS[g, 1]), float(y2[g])), float(err[g])
+
+
+def _polish(tau, p, c, e, tolp, lo, hi):
+    """Pattern search on the x-handles between the grid points (the y-handles are re-solved at every probe)."""
+    x1, x2 = c[0], c[2]
+    best, best_e = c, e
+    for step in (0.03, 0.012, 0.005):
+        cand = [(min(0.99, max(0.01, x1 + dx)), min(0.99, max(0.01, x2 + dy)))
+                for dx in (-step, 0.0, step) for dy in (-step, 0.0, step) if dx or dy]
+        A = np.empty((len(cand), len(tau)))
+        B, C = np.empty_like(A), np.empty_like(A)
+        for g, (a, b) in enumerate(cand):
+            A[g], B[g], C[g] = _bernstein(np.interp(tau, _B1 * a + _B2 * b + _B3, _U))
+        err, y1, y2 = _minimax(A, B, p - C, lo, hi, 3)
+        g = int(np.argmin(err))
+        if err[g] < best_e:
+            best, best_e = (cand[g][0], float(y1[g]), cand[g][1], float(y2[g])), float(err[g])
+            x1, x2 = cand[g]
+            if best_e <= tolp:
+                break
+    return best, best_e
+
+
+# standard candidates tried before the grid: the cubic through the end slopes (x-handles 1/3 and 2/3), then the
+# easings clips are usually keyed with
+_SX = ((1 / 3, 2 / 3),) + tuple((c[0], c[2]) for c in _STD[1:])
+_SY1 = np.array([0.0] + [c[1] for c in _STD[1:]])
+_SY2 = np.array([0.0] + [c[3] for c in _STD[1:]])
+
 
 def _fit_ease(tau, p, tolp, mono=False):
     """Find a cubic-bezier easing with max |E(tau) - p| <= tolp.  Returns coeffs or None.
+    tau must be the evenly spaced times 1/n .. (n-1)/n of a span of n frames.
 
     mono=True keeps y1, y2 inside [0, 1] so the eased value can never leave the range spanned by its two keys.
     That is required for opacity and trim: some players wrap values above 100 % instead of clamping them.
@@ -129,13 +348,9 @@ def _fit_ease(tau, p, tolp, mono=False):
     if np.max(np.abs(tau - p)) <= tolp:
         return LINEAR
     ylo, yhi = (0.0, 1.0) if mono else (-4.0, 5.0)
-    inside = lambda c: ylo <= c[1] <= yhi and ylo <= c[3] <= yhi
-    err = lambda c: float(np.max(np.abs(ease_eval(c, tau) - p)))
-    # cubic Hermite through the end slopes == bezier with x1 = 1/3, x2 = 2/3
-    s0 = p[0] / tau[0]
-    s1 = (1.0 - p[-1]) / (1.0 - tau[-1])
-    cands = [(1 / 3, s0 / 3, 2 / 3, 1 - s1 / 3)] + _STD[1:]
     m = len(tau)
+    sp = _span(m + 1)
+    err = lambda c: float(np.max(np.abs(ease_eval(c, tau) - p)))
     if m <= 2:
         # one or two samples in between: with x1 = 1/3, x2 = 2/3 the easing is a plain cubic in tau, solve it exactly
         A_ = np.array([[3 * (1 - t) ** 2 * t, 3 * (1 - t) * t ** 2] for t in tau])
@@ -145,28 +360,34 @@ def _fit_ease(tau, p, tolp, mono=False):
         else:
             sm = b_[0] / A_[0, 0]                      # y1 + y2 at tau = 0.5; keep the pair as close to linear as possible
             y1, y2 = sm / 2 - 1 / 6, sm / 2 + 1 / 6
-        cands.insert(0, (1 / 3, float(y1), 2 / 3, float(y2)))
-    cands = [c for c in cands if inside(c)]
-    best, best_err = None, 1e9
-    for c in cands:
-        e = err(c)
-        if e < best_err:
-            best, best_err = c, e
-    if best is not None and best_err <= tolp:
-        return best
-    if best is None:
-        best, best_err = (0.333, 0.333, 0.667, 0.667), err((0.333, 0.333, 0.667, 0.667))
-    if least_squares is None or best_err > 80 * tolp:  # hopeless, don't burn time
+        if ylo <= y1 <= yhi and ylo <= y2 <= yhi:
+            c = (1 / 3, float(y1), 2 / 3, float(y2))
+            if err(c) <= tolp:
+                return c
+    # cubic Hermite through the end slopes == bezier with x1 = 1/3, x2 = 2/3
+    y1s, y2s = _SY1.copy(), _SY2.copy()
+    y1s[0], y2s[0] = (p[0] / tau[0]) / 3.0, 1.0 - ((1.0 - p[-1]) / (1.0 - tau[-1])) / 3.0
+    e = np.abs(sp.SA * y1s[:, None] + sp.SB * y2s[:, None] + sp.SC - p).max(1)
+    if not (ylo <= y1s[0] <= yhi and ylo <= y2s[0] <= yhi):
+        e[0] = 1e9
+    if mono:
+        e[-1] = 1e9                                    # the overshooting 'back' easing leaves the range of its keys
+    g = int(np.argmin(e))
+    if e[g] <= tolp:
+        c = (_SX[g][0], float(y1s[g]), _SX[g][1], float(y2s[g]))
+        if err(c) <= tolp:
+            return c
+    if e[g] > 80 * tolp:                               # hopeless, don't burn time
         return None
     STATS["fits"] += 1
-    fun = lambda c: ease_eval(c, tau) - p
-    lo, hi = np.array([0.02, ylo, 0.02, ylo]), np.array([0.98, yhi, 0.98, yhi])
-    x0 = np.clip(best, lo + 1e-3, hi - 1e-3)
-    try:
-        res = least_squares(fun, x0, bounds=(lo, hi), max_nfev=40, xtol=1e-6, ftol=1e-9)
-    except Exception:
+    c, e = _grid_fit(sp, p, tolp, ylo, yhi)
+    if e > POLISH_WITHIN * tolp:
         return None
-    c = tuple(float(x) for x in res.x)
+    if e > tolp:
+        STATS["polish"] = STATS.get("polish", 0) + 1
+        c, e = _polish(tau, p, c, e, tolp, ylo, yhi)
+        if e > tolp:
+            return None
     return c if err(c) <= tolp else None
 
 
@@ -270,7 +491,16 @@ def prop(value, kind="pos", nd=None, tol=None, wrap=None):
     if not is_anim(value):
         return {"a": 0, "k": fmt(value)}
 
-    samples = value.s
+    samples, cut = value.s, None
+    if _ROLL and len(samples) > 2:
+        n_ = len(samples) - 1
+        k_ = _ROLL % n_
+        if k_:
+            if not _same(samples[0], samples[-1]):
+                # this property jumps at the loop point (a ray that turns by exactly one ray per loop).  Once the loop
+                # is turned that jump lands inside the timeline, where it must stay a jump: a hold key, not a blend.
+                cut = n_ - k_
+            samples = _roll(samples, k_)
     scalar = kind in ("rot", "opacity", "pct", "width")
     if kind == "path":
         nv, closed = len(samples[0].v), samples[0].c
@@ -283,6 +513,9 @@ def prop(value, kind="pos", nd=None, tol=None, wrap=None):
         S = np.array(samples, dtype=float)
         back = lambda row: list(row)
 
+    if not np.isfinite(S).all():
+        bad = int(np.argwhere(~np.isfinite(S).reshape(len(S), -1).all(axis=1))[0][0])
+        raise ValueError(f"an animated {kind} is not a finite number at frame {bad}")
     t = tol if tol is not None else (value.tol if value.tol is not None else TOL[kind])
     if float(np.max(np.abs(S - S[0]))) <= (1e-9 if value.hold else t * 0.5):
         return {"a": 0, "k": fmt(back(S[0]))}
@@ -297,15 +530,23 @@ def prop(value, kind="pos", nd=None, tol=None, wrap=None):
         STATS["keys"] += len(ks)
         return {"a": 1, "k": ks}
 
-    hkey = hashlib.blake2b(S.tobytes() + repr((kind, t, nd, wrap)).encode(), digest_size=12).digest()
+    hkey = hashlib.blake2b(S.tobytes() + repr((kind, t, nd, wrap, cut)).encode(), digest_size=12).digest()
     if hkey in _CACHE:
         STATS["cache"] += 1
         return _CACHE[hkey]
-    keys = fit_keys(S, t, mono=kind in BOUNDED)
+    if cut is None:
+        keys = fit_keys(S, t * FIT_MARGIN, mono=kind in BOUNDED)
+    else:
+        # two runs: up to the frame before the jump (held there), then from the jump on
+        a_ = fit_keys(S[:cut], t * FIT_MARGIN, mono=kind in BOUNDED) if cut > 1 else [(0, None)]
+        b_ = fit_keys(S[cut:], t * FIT_MARGIN, mono=kind in BOUNDED) if len(S) - cut > 1 else [(0, None)]
+        keys = a_[:-1] + [(a_[-1][0], "hold")] + [(f + cut, c) for f, c in b_]
     ks = []
     for f, c in keys:
         k = {"t": f, "s": wrapk(fmt(back(S[f])))}
-        if c is not None:
+        if c == "hold":
+            k["h"] = 1
+        elif c is not None:
             k.update(_ease_json(c, arr=(kind != "path")))
         ks.append(k)
     STATS["keys"] += len(ks)
@@ -372,6 +613,13 @@ def gr(nm, items, **xf):
 
 
 # --------------------------------------------------------------------------- layers
+def _fades(o):
+    """True when an opacity is ever strictly between hidden and solid."""
+    if is_anim(o):
+        return any(0.0 < float(v) < 100.0 for v in o.s)
+    return 0.0 < float(o) < 100.0
+
+
 class Layer:
     def __init__(self, nm, shapes=None, parent=None, p=(0, 0), a=(0, 0), s=(100, 100), r=0, o=100, null=False):
         self.nm = nm
@@ -379,36 +627,42 @@ class Layer:
         self.parent = parent
         self.p, self.a, self.s, self.r, self.o = p, a, s, r, o
         self.null = null
+        self.roll = _ROLL            # see rolled(): the layer's own transform keys use the roll it was made under
 
-    def json(self, ind, index_of, op):
-        d = {
-            "ddd": 0,
-            "ind": ind,
-            "ty": 3 if self.null else 4,
-            "nm": self.nm,
-            "sr": 1,
-            "ks": {
-                "o": prop(self.o, "opacity"),
-                "r": prop(self.r, "rot"),
-                "p": prop(self.p, "pos", wrap="layer"),
-                "a": prop(self.a, "pos", wrap="layer"),
-                "s": prop(self.s, "scale", wrap="layer"),
-            },
-            "ao": 0,
-            "ip": 0,
-            "op": op,
-            "st": 0,
-            "bm": 0,
-        }
+    def json(self, ind, index_of, op, fade_safe=False):
+        with rolled(self.roll):
+            shapes, o = self.shapes, self.o
+            if fade_safe and not self.null and shapes and _fades(o):
+                # the fade goes on a group, not on the layer (see the module docstring)
+                shapes, o = [gr("fade", shapes, o=o)], 100
+            d = {
+                "ddd": 0,
+                "ind": ind,
+                "ty": 3 if self.null else 4,
+                "nm": self.nm,
+                "sr": 1,
+                "ks": {
+                    "o": prop(o, "opacity"),
+                    "r": prop(self.r, "rot"),
+                    "p": prop(self.p, "pos", wrap="layer"),
+                    "a": prop(self.a, "pos", wrap="layer"),
+                    "s": prop(self.s, "scale", wrap="layer"),
+                },
+                "ao": 0,
+                "ip": 0,
+                "op": op,
+                "st": 0,
+                "bm": 0,
+            }
         if not self.null:
-            d["shapes"] = self.shapes
+            d["shapes"] = shapes
         if self.parent is not None:
             d["parent"] = index_of[self.parent]
         return d
 
 
-def document(name, layers, op, w=512, h=512, fr=60):
-    """layers: list of Layer, top-most first."""
+def document(name, layers, op, w=512, h=512, fr=60, fade_safe=False):
+    """layers: list of Layer, top-most first.  fade_safe: see the module docstring."""
     names = [L.nm for L in layers]
     dup = {n for n in names if names.count(n) > 1}
     if dup:
@@ -428,5 +682,5 @@ def document(name, layers, op, w=512, h=512, fr=60):
         "nm": name,
         "ddd": 0,
         "assets": [],
-        "layers": [L.json(index_of[L.nm], index_of, op) for L in layers],
+        "layers": [L.json(index_of[L.nm], index_of, op, fade_safe) for L in layers],
     }

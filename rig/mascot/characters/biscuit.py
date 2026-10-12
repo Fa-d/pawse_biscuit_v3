@@ -78,14 +78,25 @@ class Biscuit(Character):
         "wide":  (3.0,  12.0,    0.0,    6.0,     0.0,  1.0,  1.0,     1.0,     1.0),
         "sit":   (54.0, 24.0,    0.0,   12.0,     1.0,  1.06, 0.95,    1.08,    0.0),   # on its bottom, soles towards the viewer
         "lotus": (54.0, -24.0, -10.0,  -40.0,     1.0,  0.92, 0.95,    1.08,    0.0),   # cross-legged
+        "crouch": (20.0, 8.0,    0.0,    8.0,     0.0,  1.0,  0.97,    1.02,    1.0),   # knees bent, ready to spring (or to hide)
+        "tiptoe": (-7.0, -2.0,  -4.0,   -4.0,     0.25, 0.96, 1.02,    0.99,    1.0),   # up on its toes
     }
     shadow = dict(c=(256.0, 472.0), size=(236.0, 22.0), o=14)
 
     # places the paws can go (right side; the left side mirrors).  Clips only use the pose names below.
     # Points on the face are given in the head drawing's coordinates and placed with head_pt().
     face_anchors = dict(chin=(277.0, 324.0), mouth=(272.0, 305.0), cheek=(338.0, 302.0), hold=(392.0, 322.0), hold_up=(404.0, 290.0),
-                        carry=(386.0, 318.0), ring=(408.0, 272.0), eye_cover=(315.0, 244.0), eye_peek=(356.0, 266.0))
-    body_anchors = dict(belly=(286.0, 372.0), hip=(330.0, 384.0), edge=(356.0, 380.0), lap=(294.0, 404.0), lid=(301.0, 374.0))
+                        carry=(386.0, 318.0), ring=(408.0, 272.0), eye_cover=(315.0, 244.0), eye_peek=(356.0, 266.0),
+                        # v4
+                        salute=(352.0, 236.0), facepalm=(282.0, 238.0), ear=(374.0, 262.0), thumbs=(408.0, 336.0),
+                        # acting with things: a bite at the corner of the mouth, a phone against the cheek
+                        bite=(310.0, 346.0), phone_ear=(350.0, 280.0))
+    body_anchors = dict(belly=(286.0, 372.0), hip=(330.0, 384.0), edge=(356.0, 380.0), lap=(294.0, 404.0), lid=(301.0, 374.0),
+                        # v4
+                        chest=(274.0, 342.0), cross=(226.0, 346.0), hug=(222.0, 362.0), pray=(262.0, 334.0), clap_open=(304.0, 334.0),
+                        point_fwd=(336.0, 318.0), thumbs_down=(398.0, 352.0), tray=(330.0, 372.0),
+                        text=(298.0, 366.0))         # a phone held in front of the chest
+    cheek = {"R": (352.0, 266.0)}           # centre of the blush on the right cheek (head drawing)
 
     def __init__(self):
         self.anchors = A = dict(self.body_anchors)
@@ -118,6 +129,37 @@ class Biscuit(Character):
             "cover_eyes": P(ik(A["eye_cover"], bend=-1, hand=184), front=True),
             "peek": P(ik(A["eye_peek"], bend=-1, hand=160), front=True),
             "stretch": P((112, 6, 0, 1.5), front=True, palm=True),
+            # ---- v4 poses (the paw shapes - fist, thumb, finger - are separate channels; see Character.hand_variant)
+            "salute": P(ik(A["salute"], bend=-1, hand=212), front=True),
+            "facepalm": P(ik(A["facepalm"], bend=-1, hand=196), front=True),
+            "ear": P(ik(A["ear"], bend=-1, hand=168), front=True),
+            "chest": P(ik(A["chest"], bend=1, hand=-74)),
+            "cross": P(ik(A["cross"], bend=1, hand=-92)),
+            "hug": P(ik(A["hug"], bend=1, hand=-80)),
+            "wide": P((106, 4, 0, 1.4), palm=True),
+            "shrug": P((34, 70, 12, 1.15), palm=True),
+            "flex": P((90, 92, 0, 1.25), front=True),
+            "pray": P(ik(A["pray"], bend=1, hand=178)),
+            "clap": P(ik(A["pray"], bend=1, hand=160)),
+            "clap_open": P(ik(A["clap_open"], bend=1, hand=150), palm=True),
+            "point_out": P((90, 2, 0, 1.45)),
+            "point_up": P((146, 10, 4, 1.4), front=True),
+            "point_fwd": P(ik(A["point_fwd"], bend=-1, hand=128), front=True),
+            "thumbs_up": P(ik(A["thumbs"], bend=-1, hand=90)),
+            "thumbs_down": P(ik(A["thumbs_down"], bend=-1, hand=-90)),
+            "tray": P(ik(A["tray"], bend=1, hand=-8)),
+            "present": P(ik(A["tray"], bend=1, hand=-8), front=True),     # carrying something in front (a cake)
+            "lift": P((152, 18, 0, 1.5), front=True, palm=True),
+            "fist_pump": P((128, 44, 0, 1.3), front=True),
+            "reach": P((132, 0, 0, 1.55), front=True, palm=True),
+            "dab": P((128, 0, 0, 1.55), front=True),
+            "dab_in": P((160, -128, -10, 1.6), front=True),
+            "behind": P((22, -32, 0, 0.9)),
+            "fly": P((165, 0, 0, 1.55), front=True),
+            # ---- acting with things (studio library)
+            "bite": P(ik(A["bite"], bend=-1, hand=186), front=True),
+            "phone_ear": P(ik(A["phone_ear"], bend=-1, hand=172), front=True),
+            "text": P(ik(A["text"], bend=1, hand=-12), front=True),
         }
 
     tail = dict(
@@ -140,6 +182,8 @@ class Biscuit(Character):
             "flick_out": (-25, 25, 32, 20, -36),   # tip flops outwards
             "flick_in": (-25, 25, 30, 40, 44),     # tip curls inwards
             "curl": (-20, 30, 42, 52, 60),
+            "alert": (2, 38, 36, 12, -12),          # straight up and bristling
+            "tucked": (-48, 56, 64, 60, 34),          # curled up tight behind the body (scared)
             # --- sitting: the hips are on the ground, so the tail lies along it
             "ground": (10, 6, 28, 46, -4, 0, -6),
             "ground_up": (10, 24, 34, 26, -14, 0, -5),

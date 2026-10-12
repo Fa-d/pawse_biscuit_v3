@@ -1,0 +1,237 @@
+# Occasions and holidays.  Same format as everyday.yaml.  Captions are suggestions; the editor lets people change them.
+
+# ---------------------------------------------------------------- the year round
+new_year:
+  words: [happy new year, new year, new years, new year's eve, nye, countdown, new year party, cheers to the new year,
+    happy new years, new year countdown, new year night]
+  spec: {face: excited, motion: toast, props: [glass], effects: [fireworks, confetti], accessories: [party_hat]}
+  caption: "Happy New Year!"
+new_year_resolution:
+  words: [new year new me, new year resolution, new year resolutions, resolutions, this year i will, fresh start, new beginnings]
+  spec: {face: determined, motion: workout, effects: [sparkles], accessories: [headband]}
+  caption: "New year, new me!"
+lunar_new_year:
+  words: [lunar new year, happy lunar new year, chinese new year, happy chinese new year, spring festival, tet, seollal,
+    year of the, gong xi fa cai, gong hei fat choy, kung hei fat choy]
+  spec: {face: joy, motion: show_off, props: [red_envelope, lantern], effects: [fireworks]}
+  caption: "Happy Lunar New Year!"
+valentine:
+  words: [happy valentine's day, valentine's day, valentines day, be my valentine, will you be my valentine, happy valentines,
+    valentines, valentine]
+  spec: {face: love, motion: blow_kiss, props: [rose], effects: [hearts], accessories: [heart_glasses]}
+  caption: "Be mine"
+galentines:
+  words: [galentine, galentines, galentines day, happy galentines, palentines]
+  spec: {face: joy, motion: high_five, props: [bouquet], effects: [hearts]}
+  caption: "Happy Galentine's!"
+womens_day:
+  words: [happy women's day, womens day, women's day, international women's day, happy womens day]
+  spec: {face: proud, motion: flex, effects: [sparkles], accessories: [flower_crown]}
+  caption: "Happy Women's Day!"
+st_patricks:
+  words: [st patricks day, st patrick's day, saint patricks day, happy st patricks day, paddys day, luck of the irish, lucky charm]
+  spec: {face: joy, motion: dance, effects: [rainbow, sparkles], accessories: [top_hat]}
+  caption: "Happy St. Patrick's Day!"
+holi:
+  words: [happy holi, holi, holi hai, festival of colors, festival of colours, bura na mano holi hai]
+  spec: {face: joy, motion: dance, effects: [rainbow, confetti]}
+  caption: "Happy Holi!"
+nowruz:
+  words: [nowruz, happy nowruz, nowruz mubarak, persian new year, norooz, navruz]
+  spec: {face: joy, motion: sway, effects: [petals, sparkles], accessories: [flower_crown]}
+  caption: "Happy Nowruz!"
+april_fools:
+  words: [april fools, april fools day, april fool, got you good, gotcha prank, it was a prank, just a prank]
+  spec: {face: silly, motion: giggle, accessories: [clown_nose]}
+  caption: "April Fools!"
+easter:
+  words: [happy easter, easter, easter sunday, easter weekend, easter bunny, easter egg hunt, he is risen, egg hunt]
+  spec: {face: joy, motion: hop, props: [easter_egg], effects: [petals], accessories: [bunny_ears]}
+  caption: "Happy Easter!"
+songkran:
+  words: [songkran, happy songkran, thai new year, water festival]
+  spec: {face: joy, motion: shake, effects: [bubbles, sun]}
+  caption: "Happy Songkran!"
+pohela_boishakh:
+  words: [pohela boishakh, pohela baishakh, bengali new year, bangla new year, noboborsho, shubho noboborsho]
+  spec: {face: joy, motion: dance, effects: [confetti], accessories: [flower_crown]}
+  caption: "Shubho Noboborsho!"
+earth_day:
+  words: [earth day, happy earth day, save the planet, go green, love the earth, climate action, plant a tree, recycle]
+  spec: {face: smiley, motion: hug, effects: [leaves, sun]}
+  caption: "Happy Earth Day!"
+mothers_day:
+  words: [happy mother's day, mothers day, mother's day, happy mothers day, love you mom, best mom ever, love you mum, mum, mom,
+    mama]
+  spec: {face: love, motion: show_off, props: [bouquet], effects: [hearts]}
+  caption: "Happy Mother's Day!"
+fathers_day:
+  words: [happy father's day, fathers day, father's day, happy fathers day, love you dad, best dad ever, dad, papa, daddy cool]
+  spec: {face: proud, motion: show_off, props: [trophy], accessories: [necktie, mustache]}
+  caption: "Happy Father's Day!"
+teachers_day:
+  words: [teachers day, teacher's day, happy teachers day, thank you teacher, best teacher, for my teacher, teacher appreciation]
+  spec: {face: joy, motion: show_off, props: [apple], accessories: [glasses]}
+  caption: "Thank you, teacher!"
+pride:
+  words: [happy pride, pride month, pride parade, love is love, love wins, gay pride, lgbtq pride, proud and loud]
+  spec: {face: joy, motion: wave_flag, props: [flag], effects: [rainbow]}
+  caption: "Happy Pride!"
+summer_break:
+  words: [school is out, schools out, summer vacation, last day of school, summer camp, no more school, school out]
+  spec: {face: excited, motion: victory, effects: [sun, confetti], accessories: [sunglasses]}
+  caption: "School's out!"
+independence_day:
+  words: [independence day, happy independence day, national day, happy national day, fourth of july, 4th of july, july 4th,
+    canada day, bastille day, victory day, republic day, happy republic day, national holiday, flag day]
+  spec: {face: proud, motion: wave_flag, props: [flag], effects: [fireworks]}
+  caption: "Happy Independence Day!"
+match_day:
+  words: [match day, game day, world cup, finals tonight, the final, go team, come on team, our team won, olympics,
+    champions league]
+  spec: {face: excited, motion: wave_flag, props: [flag], effects: [confetti], accessories: [tshirt]}
+  caption: "Go team!"
+friendship_day:
+  words: [friendship day, happy friendship day, friends day, international friendship day]
+  spec: {face: joy, motion: high_five, effects: [hearts, sparkles]}
+  caption: "Happy Friendship Day!"
+back_to_school:
+  words: [back to school, first day of school, first day of class, new school year, school starts, school starts tomorrow,
+    first day of college, first day of uni]
+  spec: {face: excited, motion: march, props: [book], accessories: [backpack]}
+  caption: "Back to school!"
+graduation:
+  words: [graduation, happy graduation, graduation day, i graduated, we graduated, finally graduated, congrats grad,
+    congrats graduate, class of 2025, class of 2026, class of 2027, graduated, convocation, commencement, grad day]
+  spec: {face: proud, motion: victory, props: [diploma], effects: [confetti], accessories: [grad_cap]}
+  caption: "Congrats, grad!"
+halloween:
+  words: [happy halloween, halloween, trick or treat, spooky season, spooktober, halloween night, halloween party, all hallows eve]
+  spec: {face: mischief, motion: scheme, props: [pumpkin], effects: [bats], accessories: [witch_hat]}
+  caption: "Happy Halloween!"
+day_of_the_dead:
+  words: [dia de muertos, dia de los muertos, day of the dead, all souls day]
+  spec: {face: calm, motion: sway, effects: [petals, orbs], accessories: [flower_crown]}
+  caption: "Día de Muertos"
+oktoberfest:
+  words: [oktoberfest, prost, beer festival, beer o clock, beer time]
+  spec: {face: joy, motion: toast, props: [glass], effects: [confetti]}
+  caption: "Prost!"
+diwali:
+  words: [happy diwali, diwali, deepavali, happy deepavali, festival of lights, diwali night, shubh deepawali, deepawali]
+  spec: {face: joy, motion: sway, props: [diya], effects: [fireworks, sparkles]}
+  caption: "Happy Diwali!"
+durga_puja:
+  words: [durga puja, happy durga puja, shubho bijoya, bijoya dashami, dussehra, happy dussehra, navratri, happy navratri, garba,
+    dandiya, dashain, happy dashain]
+  spec: {face: joy, motion: dance, props: [diya], effects: [sparkles, confetti]}
+  caption: "Shubho Bijoya!"
+mid_autumn:
+  words: [mid autumn festival, happy mid autumn festival, mooncake festival, moon festival, chuseok, happy chuseok]
+  spec: {face: calm, motion: sway, props: [lantern], effects: [night_sky]}
+  caption: "Happy Mid-Autumn!"
+thanksgiving:
+  words: [happy thanksgiving, thanksgiving, turkey day, thankful, so thankful, grateful for you, give thanks, friendsgiving, turkey,
+    turkey dinner, turkey day feast]
+  spec: {face: joy, motion: eat, effects: [leaves], accessories: [bib]}
+  caption: "Happy Thanksgiving!"
+black_friday:
+  words: [black friday, cyber monday, big sale, mega sale, flash sale, shop till you drop, deals deals deals]
+  spec: {face: excited, motion: run, props: [shopping_bag, money], effects: [speed_lines]}
+  caption: "Shop shop shop!"
+hanukkah:
+  words: [happy hanukkah, hanukkah, chanukah, happy chanukah, festival of light, chag sameach]
+  spec: {face: joy, motion: sway, props: [gift], effects: [orbs, sparkles]}
+  caption: "Happy Hanukkah!"
+christmas:
+  words: [merry christmas, christmas, xmas, merry xmas, happy holidays, season's greetings, seasons greetings, christmas eve, santa,
+    santa claus, ho ho ho, feliz navidad, noel, christmas time, christmas morning, joyeux noel]
+  spec: {face: joy, motion: hop, props: [gift], effects: [snow], accessories: [santa_hat]}
+  caption: "Merry Christmas!"
+christmas_party:
+  words: [christmas party, office christmas party, ugly sweater party, holiday party, xmas party, christmas dinner]
+  spec: {face: joy, motion: toast, props: [glass], effects: [snow, sparkles], accessories: [xmas_sweater]}
+  caption: "Merry everything!"
+secret_santa:
+  words: [secret santa, secret santa gift, white elephant, gift exchange, kris kringle]
+  spec: {face: excited, motion: idle, props: [gift], accessories: [santa_hat]}
+  caption: "Secret Santa!"
+winter_holidays:
+  words: [winter holidays, holiday season, festive season, tis the season, cozy holidays, holidays are coming]
+  spec: {face: smiley, motion: sip, props: [mug], effects: [snow], accessories: [scarf]}
+  caption: "Happy holidays!"
+kwanzaa:
+  words: [happy kwanzaa, kwanzaa, habari gani]
+  spec: {face: joy, motion: sway, effects: [orbs, sparkles]}
+  caption: "Happy Kwanzaa!"
+
+# ---------------------------------------------------------------- faith and festivals
+eid:
+  words: [eid mubarak, eid, happy eid, eid al fitr, eid al adha, eid ul fitr, eid ul adha, eid ul azha, eid mubarak to you,
+    blessed eid, chand raat, eid salami, eidi]
+  spec: {face: joy, motion: wave, props: [red_envelope], effects: [sparkles, night_sky]}
+  caption: "Eid Mubarak!"
+ramadan:
+  words: [ramadan mubarak, ramadan kareem, ramadan, ramzan, iftar, iftar time, sehri, suhoor, sehri time, roza, fasting]
+  spec: {face: calm, motion: pray, props: [lantern], effects: [night_sky]}
+  caption: "Ramadan Kareem"
+jummah:
+  words: [jummah mubarak, jumma mubarak, juma mubarak, blessed friday, jummah]
+  spec: {face: calm, motion: pray, effects: [aura, sparkles]}
+  caption: "Jummah Mubarak"
+puja:
+  words: [happy puja, puja, pooja, blessings to all, ganesh chaturthi, happy ganesh chaturthi, janmashtami, happy janmashtami]
+  spec: {face: calm, motion: pray, props: [diya], effects: [sparkles]}
+  caption: "Blessings!"
+vesak:
+  words: [vesak, happy vesak, buddha purnima, buddha day, wesak]
+  spec: {face: calm, motion: meditate, props: [lantern], effects: [aura]}
+  caption: "Happy Vesak"
+
+# ---------------------------------------------------------------- life events
+wedding:
+  words: [wedding, happy wedding day, wedding day, just married, newlyweds, newly weds, happily ever after, mr and mrs, i do,
+    we said yes, congrats on your wedding, wedding bells]
+  spec: {face: love, motion: sway, props: [bouquet], effects: [hearts, petals], accessories: [bow_tie]}
+  caption: "Just married!"
+engagement:
+  words: [engaged, we are engaged, i am engaged, she said yes, he said yes, engagement, proposal, will you marry me,
+    put a ring on it]
+  spec: {face: starry, motion: hop, props: [rose], effects: [sparkles, hearts]}
+  caption: "Engaged!"
+baby_shower:
+  words: [baby shower, baby on the way, expecting, we are expecting, new baby, welcome baby, baby is here, it is a boy,
+    it is a girl, gender reveal, newborn baby]
+  spec: {face: joy, motion: hop, props: [balloons], effects: [confetti], accessories: [bib]}
+  caption: "Welcome, little one!"
+housewarming:
+  words: [housewarming, house warming, new home, new house, new apartment, new flat, we moved, moving day, just moved in,
+    home sweet home, moving into, moving house, moving out]
+  spec: {face: excited, motion: ta_da, effects: [confetti, sparkles]}
+  caption: "Home sweet home!"
+retirement:
+  words: [retirement, happy retirement, retired, i am retired, retiring, last day at work, retirement party]
+  spec: {face: relieved, motion: sway, effects: [sun], accessories: [sun_hat, sunglasses]}
+  caption: "Happy retirement!"
+farewell:
+  words: [farewell, farewell party, last day, leaving the company, moving on, goodbye party, see you on the other side,
+    so long farewell]
+  spec: {face: smiley, motion: wave, props: [suitcase]}
+  caption: "Farewell!"
+get_well_card:
+  words: [get well card, hospital, after surgery, surgery, recovery, recovering, in the hospital]
+  spec: {face: smiley, motion: hug, props: [bouquet], effects: [sparkles]}
+  caption: "Get well soon!"
+condolences:
+  words: [condolences, my condolences, sorry for your loss, thinking of you, sending love, with sympathy, deepest sympathy,
+    rest in peace]
+  spec: {face: sad, motion: hug, effects: [hearts]}
+  caption: "Thinking of you"
+carnival:
+  words: [carnival, carnaval, mardi gras, festival time, parade day]
+  spec: {face: joy, motion: dance, effects: [confetti], accessories: [star_glasses]}
+  caption: "Fiesta!"
+concert:
+  words: [concert night, at the concert, festival season, music festival, coachella vibes, gig night]
+  spec: {face: excited, motion: headbang, effects: [spotlight, notes], accessories: [flower_crown]}
+  caption: "Concert night!"

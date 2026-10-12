@@ -1,96 +1,988 @@
-# Real-world prompts and what a sticker for them must show.  Only the listed slots are checked; props/effects are
-# "must include".  Run:  python3 -m studio.tests.eval_parser       (target: 90 % or more without the LLM)
-- {prompt: "good morning!", expect: {motion: wave, props: [mug]}}
-- {prompt: "gm", expect: {props: [mug]}}
-- {prompt: "good night", expect: {face: sleep, effects: [zzz]}}
-- {prompt: "nighty night sweet dreams", expect: {face: sleep}}
-- {prompt: "monday mood", expect: {face: sleep, props: [mug]}}
-- {prompt: "ugh mondays", expect: {face: sleep}}
-- {prompt: "need coffee", expect: {props: [mug]}}
-- {prompt: "sipping tea and chilling", expect: {props: [mug], face: smiley}}
-- {prompt: "happy birthday!", expect: {props: [gift]}}
-- {prompt: "hbd bestie", expect: {props: [gift]}}
-- {prompt: "thank you so much", expect: {props: [heart]}}
-- {prompt: "thanks!", expect: {props: [heart]}}
-- {prompt: "sorry :(", expect: {face: worried}}
-- {prompt: "my bad", expect: {face: worried}}
-- {prompt: "love you", expect: {effects: [hearts]}}
-- {prompt: "i miss you", expect: {face: worried}}
-- {prompt: "sending hugs", expect: {effects: [hearts]}}
-- {prompt: "congrats!!", expect: {face: joy, effects: [confetti]}}
-- {prompt: "well done, proud of you", expect: {face: joy}}
-- {prompt: "achievement unlocked", expect: {props: [badge]}}
-- {prompt: "hello there", expect: {motion: wave}}
-- {prompt: "hi!", expect: {motion: wave}}
-- {prompt: "bye bye", expect: {motion: wave}}
-- {prompt: "see you later", expect: {motion: wave}}
-- {prompt: "ok", expect: {motion: nod}}
-- {prompt: "sounds good", expect: {motion: nod}}
-- {prompt: "yes!", expect: {motion: nod}}
-- {prompt: "thumbs up", expect: {motion: nod}}
-- {prompt: "nope", expect: {motion: "no"}}
-- {prompt: "absolutely not", expect: {motion: "no"}}
-- {prompt: "omg", expect: {face: surprised}}
-- {prompt: "wow really?", expect: {face: surprised}}
-- {prompt: "lol", expect: {face: joy}}
-- {prompt: "hahaha so funny", expect: {face: joy}}
-- {prompt: "so busy today", expect: {props: [clipboard]}}
-- {prompt: "working on my report", expect: {props: [clipboard]}}
-- {prompt: "deadline stress", expect: {face: worried}}
-- {prompt: "on my way", expect: {motion: walk}}
-- {prompt: "running late sorry", expect: {motion: walk}}
-- {prompt: "call me", expect: {props: [phone]}}
-- {prompt: "text me later", expect: {props: [phone]}}
-- {prompt: "don't forget!", expect: {props: [bell]}}
-- {prompt: "dinner time", expect: {}}
-- {prompt: "hmm let me think", expect: {motion: think}}
-- {prompt: "confused", expect: {face: curious}}
-- {prompt: "it's friday!", expect: {motion: dance}}
-- {prompt: "party time", expect: {motion: dance}}
-- {prompt: "dancing to music", expect: {motion: dance, effects: [notes]}}
-- {prompt: "lazy sunday on the couch", expect: {face: sleep}}
-- {prompt: "self care day", expect: {face: calm}}
-- {prompt: "meditating", expect: {face: calm, stance: lotus}}
-- {prompt: "keep calm", expect: {face: calm}}
-- {prompt: "scared", expect: {face: worried, motion: shiver}}
-- {prompt: "so cold", expect: {motion: shiver}}
-- {prompt: "shy", expect: {motion: hide}}
-- {prompt: "don't look at me", expect: {motion: hide}}
-- {prompt: "bad day", expect: {effects: [rain]}}
-- {prompt: "feeling down", expect: {face: worried}}
-- {prompt: "crying", expect: {effects: [tear]}}
-- {prompt: "not happy", expect: {face: worried}}
-- {prompt: "not sad at all", expect: {face: joy}}
-- {prompt: "done!", expect: {props: [cloud]}}
-- {prompt: "finally finished", expect: {props: [cloud]}}
-- {prompt: "hungry", expect: {arm_L: belly}}
-- {prompt: "gym time", expect: {motion: jump}}
-- {prompt: "leg day", expect: {face: focused}}
-- {prompt: "a gift for you", expect: {props: [gift]}}
-- {prompt: "jumping for joy", expect: {motion: jump, face: joy}}
-- {prompt: "waving with a phone", expect: {motion: wave, props: [phone]}}
-- {prompt: "purple fox waving", expect: {motion: wave, palette: true}}
-- {prompt: "sitting and drinking coffee", expect: {stance: sit, props: [mug]}}
-- {prompt: "very excited", expect: {face: joy}}
-- {prompt: "a bit sleepy", expect: {face: sleep}}
-- {prompt: "hands on hips, confident", expect: {arm_L: hip}}
-- {prompt: "celebrating my win", expect: {motion: cheer}}
-- {prompt: "new year party", expect: {effects: [confetti]}}
-- {prompt: "rainy day blues", expect: {effects: [rain]}}
-- {prompt: "sparkly magic fox", expect: {effects: [sparkles]}}
-- {prompt: "slepy fox", expect: {face: sleep}}
-- {prompt: "coffe please", expect: {props: [mug]}}
-- {prompt: "grumpy cat", expect: {base: mochi, face: angry, effects: [anger]}}
-- {prompt: "so annoyed rn", expect: {face: angry}}
-- {prompt: "teddy bear hug", expect: {base: bruno, effects: [hearts]}}
-- {prompt: "kitten waving hi", expect: {base: mochi, motion: wave}}
-- {prompt: "cool fox in shades", expect: {accessories: [sunglasses]}}
-- {prompt: "birthday bear", expect: {base: bruno, accessories: [party_hat], props: [gift]}}
-- {prompt: "nerdy cat studying", expect: {base: mochi, accessories: [glasses], props: [clipboard]}}
-- {prompt: "queen vibes", expect: {accessories: [crown]}}
-- {prompt: "winter mood, cold", expect: {accessories: [scarf], motion: shiver}}
-- {prompt: "wink ;)", expect: {face: wink}}
-- {prompt: "gaming all night", expect: {accessories: [headphones]}}
-- {prompt: "spring flowers", expect: {accessories: [flower]}}
-- {prompt: "grumpy cat with sunglasses saying 'no.'", expect: {base: mochi, face: angry, accessories: [sunglasses]}}
-- {prompt: "sad bear in a party hat", expect: {base: bruno, face: worried, accessories: [party_hat]}}
+# Real-world prompts and what a sticker for them must show.  Only the listed slots are checked: a scalar must be the
+# value (or one of a list of values); props/effects/accessories must include the items; `not:` lists what must NOT
+# be there.  Run:  python3 -m studio.tests.eval_parser      (target: 95 % or more without the LLM)
+
+# ---------------------------------------------------------------- everyday chat (the v3 set, faces updated for v4)
+- {tag: everyday, prompt: "good morning!", expect: {motion: wave, props: [mug]}}
+- {tag: everyday, prompt: "gm", expect: {props: [mug]}}
+- {tag: everyday, prompt: "good night", expect: {face: sleep, effects: [zzz]}}
+- {tag: everyday, prompt: "nighty night sweet dreams", expect: {face: sleep}}
+- {tag: everyday, prompt: "monday mood", expect: {face: [drowsy, sleep], props: [mug]}}
+- {tag: everyday, prompt: "ugh mondays", expect: {face: [drowsy, sleep, unamused], props: [mug]}}
+- {tag: everyday, prompt: "need coffee", expect: {props: [mug]}}
+- {tag: everyday, prompt: "sipping tea and chilling", expect: {props: [mug], face: smiley}}
+- {tag: everyday, prompt: "happy birthday!", expect: {props: [gift], accessories: [party_hat]}}
+- {tag: everyday, prompt: "hbd bestie", expect: {props: [gift]}}
+- {tag: everyday, prompt: "thank you so much", expect: {props: [heart]}}
+- {tag: everyday, prompt: "thanks!", expect: {props: [heart]}}
+- {tag: everyday, prompt: "sorry :(", expect: {face: [sad, pleading]}}
+- {tag: everyday, prompt: "my bad", expect: {face: [pleading, nervous, sad]}}
+- {tag: everyday, prompt: "love you", expect: {face: love, effects: [hearts]}}
+- {tag: everyday, prompt: "i miss you", expect: {face: [sad, pleading]}}
+- {tag: everyday, prompt: "sending hugs", expect: {motion: hug, effects: [hearts]}}
+- {tag: everyday, prompt: "congrats!!", expect: {face: joy, effects: [confetti]}}
+- {tag: everyday, prompt: "well done, proud of you", expect: {face: [proud, joy]}}
+- {tag: everyday, prompt: "achievement unlocked", expect: {props: [badge]}}
+- {tag: everyday, prompt: "hello there", expect: {motion: wave}}
+- {tag: everyday, prompt: "hi!", expect: {motion: wave}}
+- {tag: everyday, prompt: "bye bye", expect: {motion: wave}}
+- {tag: everyday, prompt: "see you later", expect: {motion: wave}}
+- {tag: everyday, prompt: "ok", expect: {motion: nod}}
+- {tag: everyday, prompt: "sounds good", expect: {motion: nod}}
+- {tag: everyday, prompt: "yes!", expect: {motion: nod}}
+- {tag: everyday, prompt: "thumbs up", expect: {motion: thumbs_up}}
+- {tag: everyday, prompt: "nope", expect: {motion: "no"}}
+- {tag: everyday, prompt: "absolutely not", expect: {motion: "no"}}
+- {tag: everyday, prompt: "no!", expect: {motion: "no"}}
+- {tag: everyday, prompt: "omg", expect: {face: [shocked, surprised]}}
+- {tag: everyday, prompt: "wow really?", expect: {face: [surprised, shocked]}}
+- {tag: everyday, prompt: "lol", expect: {face: laugh}}
+- {tag: everyday, prompt: "hahaha so funny", expect: {face: laugh}}
+- {tag: everyday, prompt: "so busy today", expect: {motion: typing}}
+- {tag: everyday, prompt: "working on my report", expect: {props: [clipboard]}}
+- {tag: everyday, prompt: "deadline stress", expect: {face: worried, motion: typing}}
+- {tag: everyday, prompt: "on my way", expect: {motion: run}}
+- {tag: everyday, prompt: "running late sorry", expect: {motion: run}}
+- {tag: everyday, prompt: "call me", expect: {motion: phone_call}}
+- {tag: everyday, prompt: "text me later", expect: {motion: texting}}
+- {tag: everyday, prompt: "don't forget!", expect: {props: [bell]}}
+- {tag: everyday, prompt: "dinner time", expect: {motion: eat}}
+- {tag: everyday, prompt: "hmm let me think", expect: {motion: think}}
+- {tag: everyday, prompt: "confused", expect: {face: confused}}
+- {tag: everyday, prompt: "it's friday!", expect: {motion: dance}}
+- {tag: everyday, prompt: "party time", expect: {motion: dance}}
+- {tag: everyday, prompt: "dancing to music", expect: {motion: dance, effects: [notes]}}
+- {tag: everyday, prompt: "lazy sunday on the couch", expect: {face: [calm, drowsy, sleep], stance: [sit, lotus]}}
+- {tag: everyday, prompt: "self care day", expect: {face: calm}}
+- {tag: everyday, prompt: "meditating", expect: {motion: meditate}}
+- {tag: everyday, prompt: "keep calm", expect: {face: calm}}
+- {tag: everyday, prompt: "scared", expect: {face: scared, motion: tremble}}
+- {tag: everyday, prompt: "so cold", expect: {motion: shiver}}
+- {tag: everyday, prompt: "shy", expect: {motion: bashful, face: flustered}}
+- {tag: everyday, prompt: "don't look at me", expect: {motion: hide}}
+- {tag: everyday, prompt: "bad day", expect: {effects: [rain]}}
+- {tag: everyday, prompt: "feeling down", expect: {face: sad}}
+- {tag: everyday, prompt: "crying", expect: {face: cry, effects: [tear]}}
+- {tag: everyday, prompt: "done!", expect: {effects: [check]}}
+- {tag: everyday, prompt: "finally finished", expect: {effects: [check]}}
+- {tag: everyday, prompt: "hungry", expect: {face: hungry, arm_L: belly}}
+- {tag: everyday, prompt: "gym time", expect: {motion: workout, accessories: [headband]}}
+- {tag: everyday, prompt: "leg day", expect: {face: [determined, focused]}}
+- {tag: everyday, prompt: "a gift for you", expect: {props: [gift]}}
+- {tag: everyday, prompt: "jumping for joy", expect: {motion: jump, face: [joy, excited]}}
+- {tag: everyday, prompt: "waving with a phone", expect: {motion: wave, props: [phone]}}
+- {tag: everyday, prompt: "purple fox waving", expect: {motion: wave, palette: true}}
+- {tag: everyday, prompt: "sitting and drinking coffee", expect: {stance: sit, props: [mug]}}
+- {tag: everyday, prompt: "very excited", expect: {face: excited, intensity: strong}}
+- {tag: everyday, prompt: "a bit sleepy", expect: {face: [drowsy, sleep], intensity: weak}}
+- {tag: everyday, prompt: "hands on hips, confident", expect: {arm_L: hip}}
+- {tag: everyday, prompt: "celebrating my win", expect: {motion: [cheer, victory]}}
+- {tag: everyday, prompt: "new year party", expect: {effects: [confetti]}}
+- {tag: everyday, prompt: "rainy day blues", expect: {effects: [rain]}}
+- {tag: everyday, prompt: "sparkly magic fox", expect: {effects: [sparkles]}}
+- {tag: everyday, prompt: "grumpy cat", expect: {base: mochi, face: angry, effects: [anger]}}
+- {tag: everyday, prompt: "so annoyed rn", expect: {face: angry}}
+- {tag: everyday, prompt: "teddy bear hug", expect: {base: bruno, effects: [hearts]}}
+- {tag: everyday, prompt: "kitten waving hi", expect: {base: mochi, motion: wave}}
+- {tag: everyday, prompt: "cool fox in shades", expect: {accessories: [sunglasses], face: cool}}
+- {tag: everyday, prompt: "birthday bear", expect: {base: bruno, accessories: [party_hat], props: [gift]}}
+- {tag: everyday, prompt: "nerdy cat studying", expect: {base: mochi, accessories: [glasses], motion: read}}
+- {tag: everyday, prompt: "queen vibes", expect: {accessories: [crown]}}
+- {tag: everyday, prompt: "winter mood, cold", expect: {accessories: [scarf], motion: shiver}}
+- {tag: everyday, prompt: "wink ;)", expect: {face: wink}}
+- {tag: everyday, prompt: "gaming all night", expect: {motion: gaming}}
+- {tag: everyday, prompt: "spring flowers", expect: {accessories: [flower]}}
+- {tag: everyday, prompt: "grumpy cat with sunglasses saying 'no.'", expect: {base: mochi, face: angry, accessories: [sunglasses], caption: "no."}}
+- {tag: everyday, prompt: "sad bear in a party hat", expect: {base: bruno, face: sad, accessories: [party_hat]}}
+
+# ---------------------------------------------------------------- faces: every v4 face is reachable by plain words
+- {tag: faces, prompt: "neutral face", expect: {face: neutral}}
+- {tag: faces, prompt: "poker face", expect: {face: neutral}}
+- {tag: faces, prompt: "smiling fox", expect: {face: smiley}}
+- {tag: faces, prompt: "happy fox", expect: {face: joy}}
+- {tag: faces, prompt: "worried fox", expect: {face: worried}}
+- {tag: faces, prompt: "curious cat", expect: {face: curious, base: mochi}}
+- {tag: faces, prompt: "fast asleep", expect: {face: sleep, effects: [zzz]}}
+- {tag: faces, prompt: "calm and peaceful", expect: {face: calm}}
+- {tag: faces, prompt: "surprised", expect: {face: surprised}}
+- {tag: faces, prompt: "focused on work", expect: {face: focused}}
+- {tag: faces, prompt: "angry bear", expect: {face: angry, base: bruno}}
+- {tag: faces, prompt: "winking cat", expect: {face: wink, base: mochi}}
+- {tag: faces, prompt: "laughing so hard", expect: {face: laugh}}
+- {tag: faces, prompt: "big grin", expect: {face: grin}}
+- {tag: faces, prompt: "sad kitty", expect: {face: sad, base: mochi}}
+- {tag: faces, prompt: "sobbing", expect: {face: cry}}
+- {tag: faces, prompt: "puppy eyes", expect: {face: pleading}}
+- {tag: faces, prompt: "heart eyes", expect: {face: love}}
+- {tag: faces, prompt: "starstruck", expect: {face: starry}}
+- {tag: faces, prompt: "dizzy", expect: {face: dizzy}}
+- {tag: faces, prompt: "knocked out", expect: {face: dead}}
+- {tag: faces, prompt: "shook", expect: {face: shocked}}
+- {tag: faces, prompt: "smug fox", expect: {face: smug}}
+- {tag: faces, prompt: "unamused cat", expect: {face: unamused, base: mochi}}
+- {tag: faces, prompt: "pouting", expect: {face: pout}}
+- {tag: faces, prompt: "awkward", expect: {face: nervous}}
+- {tag: faces, prompt: "blowing a kiss", expect: {face: kiss}}
+- {tag: faces, prompt: "silly goofy fox", expect: {face: silly}}
+- {tag: faces, prompt: "yawning", expect: {face: yawn}}
+- {tag: faces, prompt: "so tired", expect: {face: drowsy}}
+- {tag: faces, prompt: "determined", expect: {face: determined}}
+- {tag: faces, prompt: "mischievous fox", expect: {face: mischief}}
+- {tag: faces, prompt: "feeling sick", expect: {face: sick}}
+- {tag: faces, prompt: "puzzled", expect: {face: confused}}
+- {tag: faces, prompt: "embarrassed", expect: {face: flustered}}
+- {tag: faces, prompt: "phew", expect: {face: relieved}}
+- {tag: faces, prompt: "proud of myself", expect: {face: proud}}
+- {tag: faces, prompt: "terrified", expect: {face: scared}}
+- {tag: faces, prompt: "yummy", expect: {motion: eat}}
+- {tag: faces, prompt: "too cool", expect: {face: cool}}
+- {tag: faces, prompt: "furious", expect: {face: furious, effects: [steam]}}
+- {tag: faces, prompt: "so excited", expect: {face: excited}}
+- {tag: faces, prompt: "grateful", expect: {face: proud}}
+- {tag: faces, prompt: "full after dinner", expect: {arm_L: belly}}
+- {tag: faces, prompt: "bored", expect: {face: unamused}}
+- {tag: faces, prompt: "salty", expect: {face: pout}}
+- {tag: faces, prompt: "jealous cat", expect: {face: pout, base: mochi}}
+- {tag: faces, prompt: "evil laugh", expect: {face: mischief}}
+- {tag: faces, prompt: "innocent", expect: {face: proud, arm_L: behind}}
+- {tag: faces, prompt: "nervous laugh", expect: {face: nervous}}
+- {tag: faces, prompt: "tears of joy", expect: {face: laugh, effects: [tear]}}
+- {tag: faces, prompt: "mind blown", expect: {face: shocked}}
+- {tag: faces, prompt: "hangover", expect: {face: dizzy}}
+- {tag: faces, prompt: "ew gross", expect: {face: sick}}
+- {tag: faces, prompt: "fainted", expect: {motion: faint}}
+- {tag: faces, prompt: "flustered", expect: {face: flustered}}
+- {tag: faces, prompt: "blushing", expect: {face: flustered}}
+- {tag: faces, prompt: "relieved", expect: {face: relieved}}
+- {tag: faces, prompt: "touched", expect: {face: proud}}
+- {tag: faces, prompt: "in awe", expect: {face: starry}}
+
+# ---------------------------------------------------------------- chat: slang, shorthand, contractions, punctuation
+- {tag: chat, prompt: "idk", expect: {motion: shrug, face: confused}}
+- {tag: chat, prompt: "dunno lol", expect: {motion: shrug}}
+- {tag: chat, prompt: "i don't know", expect: {motion: shrug}}
+- {tag: chat, prompt: "whatever", expect: {face: unamused}}
+- {tag: chat, prompt: "bruh", expect: {face: unamused}}
+- {tag: chat, prompt: "please", expect: {face: pleading}}
+- {tag: chat, prompt: "pretty please", expect: {face: pleading, motion: plead}}
+- {tag: chat, prompt: "maybe", expect: {face: curious}}
+- {tag: chat, prompt: "why?", expect: {face: confused}}
+- {tag: chat, prompt: "slay", expect: {face: cool, accessories: [crown]}}
+- {tag: chat, prompt: "it is so hot today", expect: {effects: [sweat]}}
+- {tag: chat, prompt: "can't sleep", expect: {face: drowsy}, not: {effects: [zzz], face: [sleep]}}
+- {tag: chat, prompt: "i am so not ready for monday", expect: {face: nervous, props: [mug]}}
+- {tag: chat, prompt: "ngl kinda sad", expect: {face: sad, intensity: weak}}
+- {tag: chat, prompt: "tbh i'm tired", expect: {face: drowsy}}
+- {tag: chat, prompt: "omw!!", expect: {motion: run}}
+- {tag: chat, prompt: "brb", expect: {motion: run}}
+- {tag: chat, prompt: "ttyl", expect: {motion: wave}}
+- {tag: chat, prompt: "ty", expect: {props: [heart]}}
+- {tag: chat, prompt: "thx so much", expect: {props: [heart]}}
+- {tag: chat, prompt: "ily", expect: {face: love}}
+- {tag: chat, prompt: "imy", expect: {face: [sad, pleading]}}
+- {tag: chat, prompt: "gn", expect: {face: sleep}}
+- {tag: chat, prompt: "heyyyy", expect: {motion: wave}}
+- {tag: chat, prompt: "sooo sleepy", expect: {face: drowsy}}
+- {tag: chat, prompt: "HAPPY BIRTHDAY!!!", expect: {props: [gift]}}
+- {tag: chat, prompt: "yasss queen", expect: {accessories: [crown], motion: nod}}
+- {tag: chat, prompt: "smh", expect: {motion: facepalm}}
+- {tag: chat, prompt: "lmaooo", expect: {face: laugh}}
+- {tag: chat, prompt: "jajaja", expect: {face: laugh}}
+- {tag: chat, prompt: "hehe", expect: {face: laugh}}
+- {tag: chat, prompt: "ugh", expect: {face: unamused}}
+- {tag: chat, prompt: "yikes", expect: {face: nervous}}
+- {tag: chat, prompt: "oof", expect: {face: nervous}}
+- {tag: chat, prompt: "let's go!", expect: {motion: cheer}}
+- {tag: chat, prompt: "you got this", expect: {face: determined}}
+- {tag: chat, prompt: "no way!", expect: {face: [shocked, surprised]}}
+- {tag: chat, prompt: "what the heck", expect: {face: shocked}}
+- {tag: chat, prompt: "oh no", expect: {face: worried}}
+- {tag: chat, prompt: "oops", expect: {face: nervous}}
+- {tag: chat, prompt: "uh oh", expect: {face: nervous}}
+- {tag: chat, prompt: "fingers crossed", expect: {motion: pray}}
+- {tag: chat, prompt: "good luck on your exam", expect: {face: determined}}
+- {tag: chat, prompt: "get well soon", expect: {props: [heart]}}
+- {tag: chat, prompt: "feel better soon", expect: {props: [heart]}}
+- {tag: chat, prompt: "eid mubarak", expect: {props: [red_envelope], effects: [sparkles], caption: "Eid Mubarak!"}}
+- {tag: chat, prompt: "merry christmas", expect: {props: [gift], caption: "Merry Christmas!"}}
+- {tag: chat, prompt: "christmas", expect: {template: christmas}}
+- {tag: chat, prompt: "happy new year", expect: {effects: [confetti], accessories: [party_hat]}}
+- {tag: chat, prompt: "ramadan kareem", expect: {face: calm, template: ramadan}}
+- {tag: chat, prompt: "happy valentine's day", expect: {face: love, props: [rose]}}
+- {tag: chat, prompt: "you are right", expect: {motion: nod}}
+- {tag: chat, prompt: "true", expect: {motion: nod}}
+- {tag: chat, prompt: "fair enough", expect: {motion: nod}}
+- {tag: chat, prompt: "nah", expect: {motion: "no"}}
+- {tag: chat, prompt: "hell no", expect: {motion: "no"}}
+- {tag: chat, prompt: "i can't even", expect: {face: [drowsy, dead]}}
+- {tag: chat, prompt: "send help", expect: {face: scared}}
+- {tag: chat, prompt: "it's giving", expect: {face: cool}}
+- {tag: chat, prompt: "on it boss", expect: {motion: nod}}
+- {tag: chat, prompt: "no worries", expect: {motion: nod}}
+- {tag: chat, prompt: "k", expect: {motion: nod}}
+- {tag: chat, prompt: "gg", expect: {motion: clap}}
+- {tag: chat, prompt: "boo", expect: {face: scared}}
+
+# ---------------------------------------------------------------- emoji and emoticons
+- {tag: emoji, prompt: "😂", expect: {face: laugh, effects: [tear]}}
+- {tag: emoji, prompt: "😭", expect: {face: cry}}
+- {tag: emoji, prompt: "🥺", expect: {face: pleading}}
+- {tag: emoji, prompt: "😍", expect: {face: love}}
+- {tag: emoji, prompt: "🤩", expect: {face: starry}}
+- {tag: emoji, prompt: "😎", expect: {face: cool}}
+- {tag: emoji, prompt: "😴", expect: {face: sleep}}
+- {tag: emoji, prompt: "😡", expect: {face: angry}}
+- {tag: emoji, prompt: "🤬", expect: {face: furious}}
+- {tag: emoji, prompt: "😏", expect: {face: smug}}
+- {tag: emoji, prompt: "🙄", expect: {face: unamused}}
+- {tag: emoji, prompt: "😬", expect: {face: nervous}}
+- {tag: emoji, prompt: "😘", expect: {face: kiss}}
+- {tag: emoji, prompt: "🤢", expect: {face: sick}}
+- {tag: emoji, prompt: "🥱", expect: {face: yawn}}
+- {tag: emoji, prompt: "😈", expect: {face: mischief}}
+- {tag: emoji, prompt: "😵‍💫", expect: {face: dizzy}}
+- {tag: emoji, prompt: "😳", expect: {face: flustered}}
+- {tag: emoji, prompt: "😌", expect: {face: relieved}}
+- {tag: emoji, prompt: "😋", expect: {motion: eat}}
+- {tag: emoji, prompt: "😨", expect: {face: scared}}
+- {tag: emoji, prompt: "😕", expect: {face: confused}}
+- {tag: emoji, prompt: "😊", expect: {face: proud}}
+- {tag: emoji, prompt: "🤔", expect: {motion: think}}
+- {tag: emoji, prompt: "👋", expect: {motion: wave}}
+- {tag: emoji, prompt: "👍", expect: {motion: thumbs_up}}
+- {tag: emoji, prompt: "👎", expect: {motion: thumbs_down}}
+- {tag: emoji, prompt: "👏", expect: {motion: clap}}
+- {tag: emoji, prompt: "🙏", expect: {motion: pray}}
+- {tag: emoji, prompt: "🤷", expect: {motion: shrug}}
+- {tag: emoji, prompt: "🤦", expect: {motion: facepalm}}
+- {tag: emoji, prompt: "💪", expect: {motion: flex}}
+- {tag: emoji, prompt: "🫡", expect: {motion: salute}}
+- {tag: emoji, prompt: "🙈", expect: {motion: hide}}
+- {tag: emoji, prompt: "🤗", expect: {motion: hug}}
+- {tag: emoji, prompt: "🎂", expect: {props: [cake]}}
+- {tag: emoji, prompt: "☕", expect: {props: [mug]}}
+- {tag: emoji, prompt: "💤", expect: {effects: [zzz]}}
+- {tag: emoji, prompt: "🎉", expect: {effects: [confetti]}}
+- {tag: emoji, prompt: "❄️", expect: {accessories: [scarf]}}
+- {tag: emoji, prompt: "🎧", expect: {accessories: [headphones]}}
+- {tag: emoji, prompt: "👑", expect: {accessories: [crown]}}
+- {tag: emoji, prompt: "🦊😴", expect: {base: biscuit, face: sleep}}
+- {tag: emoji, prompt: "🐱👋", expect: {base: mochi, motion: wave}}
+- {tag: emoji, prompt: "🐻❤️", expect: {base: bruno, face: love}}
+- {tag: emoji, prompt: ":)", expect: {face: smiley}}
+- {tag: emoji, prompt: ":(", expect: {face: sad}}
+- {tag: emoji, prompt: ":D", expect: {face: laugh}}
+- {tag: emoji, prompt: ";)", expect: {face: wink}}
+- {tag: emoji, prompt: ":P", expect: {face: silly}}
+- {tag: emoji, prompt: "<3", expect: {face: love}}
+- {tag: emoji, prompt: ":'(", expect: {face: cry}}
+- {tag: emoji, prompt: "-_-", expect: {face: unamused}}
+- {tag: emoji, prompt: ">_<", expect: {face: flustered}}
+- {tag: emoji, prompt: "¯\\_(ツ)_/¯", expect: {motion: shrug}}
+- {tag: emoji, prompt: "\\o/", expect: {motion: cheer}}
+- {tag: emoji, prompt: "o/", expect: {motion: wave}}
+- {tag: emoji, prompt: "x_x", expect: {face: dead}}
+- {tag: emoji, prompt: "uwu", expect: {arm_L: cheek}}
+- {tag: emoji, prompt: "zzz", expect: {face: sleep}}
+
+# ---------------------------------------------------------------- typos and word forms
+- {tag: typos, prompt: "slepy fox", expect: {face: [sleep, drowsy]}}
+- {tag: typos, prompt: "coffe please", expect: {props: [mug]}}
+- {tag: typos, prompt: "happpy birthday", expect: {props: [gift]}}
+- {tag: typos, prompt: "angy cat", expect: {face: angry, base: mochi}}
+- {tag: typos, prompt: "suprised", expect: {face: surprised}}
+- {tag: typos, prompt: "exited fox", expect: {face: excited}}
+- {tag: typos, prompt: "confsued", expect: {face: confused}}
+- {tag: typos, prompt: "dancign", expect: {motion: dance}}
+- {tag: typos, prompt: "thnak you", expect: {props: [heart]}}
+- {tag: typos, prompt: "sunglases", expect: {accessories: [sunglasses]}}
+- {tag: typos, prompt: "headphnes", expect: {accessories: [headphones]}}
+- {tag: typos, prompt: "chrismas", expect: {template: christmas}}
+- {tag: typos, prompt: "birthdya", expect: {props: [gift]}}
+- {tag: typos, prompt: "clapping fox", expect: {motion: clap}}
+- {tag: typos, prompt: "waved goodbye", expect: {motion: wave}}
+- {tag: typos, prompt: "cries a lot", expect: {face: cry}}
+- {tag: typos, prompt: "happier than ever", expect: {face: joy}}
+- {tag: typos, prompt: "hugs!", expect: {motion: hug}}
+- {tag: typos, prompt: "jumped up", expect: {motion: jump}}
+- {tag: typos, prompt: "sleepily waving", expect: {motion: wave, face: drowsy}}
+
+# ---------------------------------------------------------------- negation
+- {tag: negation, prompt: "not happy", expect: {face: sad}}
+- {tag: negation, prompt: "not sad at all", expect: {face: joy}}
+- {tag: negation, prompt: "not angry", expect: {face: smiley}}
+- {tag: negation, prompt: "birthday without the hat", expect: {props: [gift]}, not: {accessories: [party_hat]}}
+- {tag: negation, prompt: "christmas but no gift", expect: {template: christmas}, not: {props: [gift]}}
+- {tag: negation, prompt: "coffee, no sparkles", expect: {props: [mug]}, not: {effects: [sparkles]}}
+- {tag: negation, prompt: "fox without glasses or a hat", not: {accessories: [glasses, party_hat]}}
+- {tag: negation, prompt: "no more coffee", not: {props: [mug]}}
+- {tag: negation, prompt: "not scared", expect: {face: determined}}
+- {tag: negation, prompt: "not tired at all", expect: {face: [excited, determined, joy]}}
+- {tag: negation, prompt: "never give up", expect: {face: determined}}
+- {tag: negation, prompt: "not bad", expect: {face: smiley}}
+- {tag: negation, prompt: "i don't care", expect: {face: unamused}}
+- {tag: negation, prompt: "can't wait", expect: {face: excited}}
+- {tag: negation, prompt: "don't cry", not: {face: [cry]}}
+
+# ---------------------------------------------------------------- colour words
+- {tag: colour, prompt: "blue fox", expect: {palette: true}, not: {face: [sad]}}
+- {tag: colour, prompt: "orange cat", expect: {base: mochi, palette: true}, not: {face: [angry]}}
+- {tag: colour, prompt: "pink bear with a red scarf", expect: {base: bruno, palette: true, accessories: [scarf], tints: {scarf: "#e8574a"}}}
+- {tag: colour, prompt: "fox with a red mug", expect: {props: [mug], tints: {mug: "#e8574a"}}, not: {palette: true}}
+- {tag: colour, prompt: "light blue cat", expect: {base: mochi, palette: true}}
+- {tag: colour, prompt: "dark red fox", expect: {palette: true}}
+- {tag: colour, prompt: "pastel pink bunny bow", expect: {base: clover, palette: true, accessories: [bow]}}
+- {tag: colour, prompt: "purple kitty with coffee", expect: {base: mochi, palette: true, props: [mug]}, not: {tints: {mug: true}}}
+- {tag: colour, prompt: "red and white scarf", expect: {accessories: [scarf], tints: {scarf: true}}, not: {palette: true}}
+- {tag: colour, prompt: "#ff6699 cat", expect: {base: mochi, palette: true}}
+- {tag: colour, prompt: "green eyes", expect: {fur: false, palette: true}}
+- {tag: colour, prompt: "polar bear", expect: {base: bruno, palette: true}}
+- {tag: colour, prompt: "black cat with a pink bow", expect: {base: mochi, palette: true, tints: {bow: true}}}
+- {tag: colour, prompt: "a golden crown", expect: {accessories: [crown], tints: {crown: true}}, not: {palette: true}}
+- {tag: colour, prompt: "teal headphones", expect: {accessories: [headphones], tints: {headphones: true}}}
+- {tag: colour, prompt: "lavender fox sleeping", expect: {face: sleep, palette: true}}
+- {tag: colour, prompt: "mint green cat", expect: {palette: true}}
+- {tag: colour, prompt: "feeling blue", expect: {face: sad}, not: {palette: true}}
+- {tag: colour, prompt: "white fox", expect: {palette: true}}
+- {tag: colour, prompt: "ginger cat", expect: {base: mochi, palette: true}}
+
+# ---------------------------------------------------------------- body: poses, gaze, which paw, tempo
+- {tag: body, prompt: "fox looking left", expect: {look: [-1.0, 0.0]}}
+- {tag: body, prompt: "fox looking up at the sky", expect: {look: [0.0, -1.0]}}
+- {tag: body, prompt: "side eye", expect: {face: unamused, look: [1.1, 0.0]}}
+- {tag: body, prompt: "suspicious cat", expect: {base: mochi, face: unamused}}
+- {tag: body, prompt: "coffee in the left paw", expect: {props: [mug], sides: {mug: L}}}
+- {tag: body, prompt: "phone in its right hand", expect: {props: [phone], sides: {phone: R}}}
+- {tag: body, prompt: "dancing fast", expect: {motion: dance, tempo: fast}}
+- {tag: body, prompt: "slowly waving", expect: {motion: wave, tempo: slow}}
+- {tag: body, prompt: "sitting cross legged", expect: {stance: lotus}}
+- {tag: body, prompt: "crouching cat", expect: {stance: crouch}}
+- {tag: body, prompt: "sneaking on tiptoes", expect: {stance: tiptoe}}
+- {tag: body, prompt: "arms crossed", expect: {arm_L: cross, arm_R: cross}}
+- {tag: body, prompt: "hand on heart", expect: {arm_R: chest}}
+- {tag: body, prompt: "salute", expect: {motion: salute}}
+- {tag: body, prompt: "pointing at you", expect: {motion: point}}
+- {tag: body, prompt: "i have an idea", expect: {motion: eureka, effects: [idea]}}
+- {tag: body, prompt: "flexing muscles", expect: {motion: flex}}
+- {tag: body, prompt: "dab", expect: {motion: dab}}
+- {tag: body, prompt: "facepalm", expect: {motion: facepalm}}
+- {tag: body, prompt: "shh it's a secret", expect: {motion: shush}}
+- {tag: body, prompt: "open arms", expect: {motion: ta_da}}
+- {tag: body, prompt: "stretching in the morning", expect: {motion: stretch}}
+- {tag: body, prompt: "hands up", expect: {arm_L: cheer, arm_R: cheer}}
+- {tag: body, prompt: "tail between its legs", expect: {tail: tucked}}
+- {tag: body, prompt: "fist pump", expect: {motion: fist_pump}}
+- {tag: body, prompt: "covering its eyes", expect: {motion: hide}}
+- {tag: body, prompt: "fox praying", expect: {motion: pray}}
+- {tag: body, prompt: "superman pose", expect: {motion: soar}}
+- {tag: body, prompt: "catching my breath", expect: {arm_L: knee}}
+
+# ---------------------------------------------------------------- mascots
+- {tag: mascots, prompt: "a cat", expect: {base: mochi}}
+- {tag: mascots, prompt: "kitty cat", expect: {base: mochi}}
+- {tag: mascots, prompt: "bear cub", expect: {base: bruno}}
+- {tag: mascots, prompt: "teddy", expect: {base: bruno}}
+- {tag: mascots, prompt: "fox", expect: {base: biscuit}}
+- {tag: mascots, prompt: "arctic fox waving", expect: {base: biscuit, palette: true, motion: wave}}
+- {tag: mascots, prompt: "meow", expect: {base: mochi}}
+
+# ---------------------------------------------------------------- captions
+- {tag: captions, prompt: "fox saying 'good vibes only'", expect: {caption: "good vibes only"}}
+- {tag: captions, prompt: "cat with text: see you soon", expect: {caption: "see you soon", base: mochi}}
+- {tag: captions, prompt: "\"sleepy\" fox", expect: {caption: "sleepy"}}
+- {tag: captions, prompt: "thank you, no caption", expect: {props: [heart], caption: false}}
+- {tag: captions, prompt: "happy birthday", expect: {caption: "Happy birthday!"}}
+- {tag: captions, prompt: "a fox that says 'monday again'", expect: {caption: "monday again", face: [drowsy, sleep]}}
+
+# ---------------------------------------------------------------- must not misfire: real words read as something else
+- {tag: misfire, prompt: "fox eating pizza", not: {face: [scared, nervous], effects: [sweat]}}
+- {tag: misfire, prompt: "what???", not: {accessories: [party_hat]}}
+- {tag: misfire, prompt: "orange fox", not: {face: [angry, furious]}}
+- {tag: misfire, prompt: "clapping", not: {face: [sleep, drowsy]}}
+- {tag: misfire, prompt: "caring fox", not: {props: [phone]}}
+- {tag: misfire, prompt: "hoping for the best", not: {motion: [jump]}}
+- {tag: misfire, prompt: "a fox in the corner", not: {motion: [no]}}
+- {tag: misfire, prompt: "power nap", expect: {face: sleep}}
+- {tag: misfire, prompt: "ill call you later", expect: {motion: phone_call}, not: {face: [sick]}}
+- {tag: misfire, prompt: "we'll see", not: {face: [sick]}}
+- {tag: misfire, prompt: "please make a happy fox", expect: {face: joy}}
+- {tag: misfire, prompt: "make me a sticker of a fox waving please", expect: {motion: wave}, not: {face: [pleading]}}
+- {tag: misfire, prompt: "a nice fox sleeping", expect: {face: sleep}, not: {arm_R: [thumbs_up]}}
+- {tag: misfire, prompt: "cute cat", expect: {base: mochi}, not: {face: [angry, sad]}}
+- {tag: misfire, prompt: "never gonna give you up", not: {motion: [walk]}}
+- {tag: misfire, prompt: "sweater weather", expect: {accessories: [scarf]}, not: {effects: [sweat]}}
+- {tag: misfire, prompt: "the king of the jungle", expect: {base: leo}}
+- {tag: misfire, prompt: "corner office", not: {motion: [no]}}
+- {tag: misfire, prompt: "a fox holding a flower", expect: {accessories: [flower]}}
+- {tag: misfire, prompt: "nothing but love", expect: {face: love}}
+- {tag: misfire, prompt: "no worries, take your time", expect: {motion: nod}}
+- {tag: misfire, prompt: "rainbow", not: {effects: [rain]}}
+- {tag: misfire, prompt: "brainstorm", expect: {motion: think}, not: {effects: [rain]}}
+- {tag: misfire, prompt: "good boy", not: {face: [angry, sad]}}
+- {tag: misfire, prompt: "hot chocolate", expect: {props: [mug]}, not: {effects: [sweat]}}
+- {tag: misfire, prompt: "cool down", not: {accessories: [sunglasses]}}
+- {tag: misfire, prompt: "dying of laughter", expect: {face: laugh}, not: {face: [dead]}}
+- {tag: misfire, prompt: "fox wearing a bow tie", expect: {accessories: [bow_tie]}}
+- {tag: misfire, prompt: "deadline tomorrow", expect: {motion: typing}, not: {face: [dead]}}
+- {tag: misfire, prompt: "heading to the gym", expect: {template: gym}}
+- {tag: misfire, prompt: "sunday morning coffee", expect: {props: [mug]}}
+- {tag: misfire, prompt: "cheese", not: {face: [grin]}}
+
+# ---------------------------------------------------------------- other languages (lexicon/translations.yaml)
+- {tag: languages, prompt: "feliz cumpleaños", expect: {props: [gift], template: birthday}}
+- {tag: languages, prompt: "buenos días", expect: {props: [mug], motion: wave}}
+- {tag: languages, prompt: "te quiero mucho", expect: {face: love}}
+- {tag: languages, prompt: "gracias", expect: {props: [heart]}}
+- {tag: languages, prompt: "jajaja", expect: {face: laugh}}
+- {tag: languages, prompt: "gato cansado", expect: {base: mochi, face: drowsy}}
+- {tag: languages, prompt: "bom dia", expect: {props: [mug]}}
+- {tag: languages, prompt: "kkkkk", expect: {face: laugh}}
+- {tag: languages, prompt: "joyeux anniversaire", expect: {template: birthday}}
+- {tag: languages, prompt: "bonne nuit", expect: {face: sleep}}
+- {tag: languages, prompt: "merci beaucoup", expect: {props: [heart]}}
+- {tag: languages, prompt: "alles gute zum geburtstag", expect: {template: birthday}}
+- {tag: languages, prompt: "gute nacht", expect: {face: sleep}}
+- {tag: languages, prompt: "terima kasih", expect: {props: [heart]}}
+- {tag: languages, prompt: "selamat hari raya", expect: {template: eid}}
+- {tag: languages, prompt: "salamat", expect: {props: [heart]}}
+- {tag: languages, prompt: "shukran", expect: {props: [heart]}}
+- {tag: languages, prompt: "عيد مبارك", expect: {template: eid}}
+- {tag: languages, prompt: "رمضان كريم", expect: {template: ramadan}}
+- {tag: languages, prompt: "শুভ জন্মদিন", expect: {template: birthday}}
+- {tag: languages, prompt: "ঈদ মোবারক", expect: {template: eid}}
+- {tag: languages, prompt: "আমি খুশি", expect: {face: joy}}
+- {tag: languages, prompt: "shubho noboborsho", expect: {template: pohela_boishakh}}
+- {tag: languages, prompt: "pohela boishakh", expect: {template: pohela_boishakh}}
+- {tag: languages, prompt: "dhonnobad", expect: {props: [heart]}}
+- {tag: languages, prompt: "ami tomake bhalobashi", expect: {face: love}}
+- {tag: languages, prompt: "shukriya", expect: {props: [heart]}}
+- {tag: languages, prompt: "diwali mubarak", expect: {template: diwali}}
+- {tag: languages, prompt: "जन्मदिन मुबारक", expect: {template: birthday}}
+- {tag: languages, prompt: "с днем рождения", expect: {template: birthday}}
+- {tag: languages, prompt: "спасибо", expect: {props: [heart]}}
+- {tag: languages, prompt: "arigatou", expect: {props: [heart]}}
+- {tag: languages, prompt: "おやすみ", expect: {face: sleep}}
+- {tag: languages, prompt: "ganbatte", expect: {face: determined}}
+- {tag: languages, prompt: "saranghae", expect: {face: love}}
+- {tag: languages, prompt: "ㅋㅋㅋ", expect: {face: laugh}}
+- {tag: languages, prompt: "生日快乐", expect: {template: birthday}}
+- {tag: languages, prompt: "加油", expect: {face: determined}}
+- {tag: languages, prompt: "gong xi fa cai", expect: {template: lunar_new_year}}
+- {tag: languages, prompt: "555", expect: {face: laugh}}
+- {tag: languages, prompt: "neko kawaii", expect: {base: mochi}}
+
+# ---------------------------------------------------------------- v5: every motion is reachable by words
+- {tag: motions, prompt: "fox clapping its hands", expect: {motion: clap}}
+- {tag: motions, prompt: "bravo!", expect: {motion: clap}}
+- {tag: motions, prompt: "shrugging cat", expect: {motion: shrug, base: mochi}}
+- {tag: motions, prompt: "panda doing a facepalm", expect: {motion: facepalm, base: bao}}
+- {tag: motions, prompt: "saluting dog", expect: {motion: salute, base: pip}}
+- {tag: motions, prompt: "flexing tiger", expect: {motion: flex, base: tora}}
+- {tag: motions, prompt: "strong like a lion", expect: {base: leo, face: determined}}
+- {tag: motions, prompt: "praying hands", expect: {motion: pray}}
+- {tag: motions, prompt: "namaste", expect: {motion: pray}}
+- {tag: motions, prompt: "pretty please with puppy eyes", expect: {face: pleading, motion: plead}}
+- {tag: motions, prompt: "two thumbs up!", expect: {motion: thumbs_up}}
+- {tag: motions, prompt: "thumbs down boo", expect: {motion: thumbs_down}}
+- {tag: motions, prompt: "i choose you", expect: {motion: point}}
+- {tag: motions, prompt: "eureka!", expect: {motion: eureka}}
+- {tag: motions, prompt: "peace sign", expect: {motion: peace}}
+- {tag: motions, prompt: "peace and love", expect: {motion: peace}}
+- {tag: motions, prompt: "fist pump yeah", expect: {motion: fist_pump}}
+- {tag: motions, prompt: "hit the dab", expect: {motion: dab}}
+- {tag: motions, prompt: "big bear hug", expect: {motion: hug}}
+- {tag: motions, prompt: "ta-da!", expect: {motion: ta_da}}
+- {tag: motions, prompt: "voila", expect: {motion: ta_da}}
+- {tag: motions, prompt: "blowing kisses", expect: {motion: blow_kiss, face: kiss}}
+- {tag: motions, prompt: "mwah", expect: {motion: blow_kiss}}
+- {tag: motions, prompt: "high five!", expect: {motion: high_five}}
+- {tag: motions, prompt: "waving both paws", expect: {motion: wave_both}}
+- {tag: motions, prompt: "taking a bow", expect: {motion: bow}}
+- {tag: motions, prompt: "morning stretch", expect: {motion: stretch}}
+- {tag: motions, prompt: "big yawn", expect: {motion: yawn, face: yawn}}
+- {tag: motions, prompt: "tee hee", expect: {motion: giggle}}
+- {tag: motions, prompt: "shhh", expect: {motion: shush}}
+- {tag: motions, prompt: "scratching my head", expect: {motion: scratch_head}}
+- {tag: motions, prompt: "evil scheming raccoon", expect: {motion: scheme, base: rocco}}
+- {tag: motions, prompt: "looking around suspiciously", expect: {motion: look_around}}
+- {tag: motions, prompt: "tapping foot impatiently", expect: {motion: impatient}}
+- {tag: motions, prompt: "sulking bunny", expect: {motion: sulk, base: clover}}
+- {tag: motions, prompt: "big sigh", expect: {motion: sigh}}
+- {tag: motions, prompt: "aw shucks", expect: {motion: bashful}}
+- {tag: motions, prompt: "laughing my head off", expect: {motion: laugh}}
+- {tag: motions, prompt: "lmfao", expect: {motion: laugh}}
+- {tag: motions, prompt: "sobbing uncontrollably", expect: {motion: sob, face: cry}}
+- {tag: motions, prompt: "stomping angrily", expect: {motion: stomp}}
+- {tag: motions, prompt: "throwing a tantrum", expect: {motion: stomp}}
+- {tag: motions, prompt: "fainting from shock", expect: {motion: faint}}
+- {tag: motions, prompt: "passed out", expect: {motion: faint}}
+- {tag: motions, prompt: "panicking!!!", expect: {motion: panic}}
+- {tag: motions, prompt: "freaking out", expect: {motion: panic}}
+- {tag: motions, prompt: "we won!", expect: {motion: victory}}
+- {tag: motions, prompt: "i won the game", expect: {motion: victory}}
+- {tag: motions, prompt: "bunny hopping", expect: {motion: hop, base: clover}}
+- {tag: motions, prompt: "skipping along", expect: {motion: hop}}
+- {tag: motions, prompt: "running fast", expect: {motion: run, tempo: fast}}
+- {tag: motions, prompt: "jogging penguin", expect: {motion: run, base: pebble}}
+- {tag: motions, prompt: "sneaky ninja cat", expect: {motion: sneak, base: mochi}}
+- {tag: motions, prompt: "marching proudly", expect: {motion: march}}
+- {tag: motions, prompt: "floating in space", expect: {motion: float}}
+- {tag: motions, prompt: "levitating", expect: {motion: float}}
+- {tag: motions, prompt: "flying like a superhero", expect: {motion: soar}}
+- {tag: motions, prompt: "kicking my feet", expect: {motion: kick_feet}}
+- {tag: motions, prompt: "meditating frog", expect: {motion: meditate, base: fern}}
+- {tag: motions, prompt: "nodding off in class", expect: {motion: nod_off}}
+- {tag: motions, prompt: "headbanging to metal", expect: {motion: headbang}}
+- {tag: motions, prompt: "rock on!", expect: {motion: headbang}}
+- {tag: motions, prompt: "wiggling butt", expect: {motion: wiggle}}
+- {tag: motions, prompt: "twerking", expect: {motion: wiggle}}
+- {tag: motions, prompt: "spinning around", expect: {motion: spin}}
+- {tag: motions, prompt: "twirling", expect: {motion: spin}}
+- {tag: motions, prompt: "doing a backflip", expect: {motion: flip}}
+- {tag: motions, prompt: "cartwheel", expect: {motion: flip}}
+- {tag: motions, prompt: "moonwalking", expect: {motion: moonwalk}}
+- {tag: motions, prompt: "robot dance beep boop", expect: {motion: robot}}
+- {tag: motions, prompt: "flossing", expect: {motion: floss}}
+- {tag: motions, prompt: "disco fever", expect: {motion: disco}}
+- {tag: motions, prompt: "doing jumping jacks", expect: {motion: jumping_jacks}}
+- {tag: motions, prompt: "squats at the gym", expect: {motion: workout}}
+- {tag: motions, prompt: "sneezing", expect: {motion: sneeze, face: sick}}
+- {tag: motions, prompt: "achoo!", expect: {motion: sneeze}}
+- {tag: motions, prompt: "wet dog shaking off", expect: {motion: shake, base: pip}}
+- {tag: motions, prompt: "trembling in fear", expect: {motion: tremble}}
+- {tag: motions, prompt: "shivering in the snow", expect: {motion: shiver}}
+- {tag: motions, prompt: "lion with a crown roaring", expect: {base: leo, motion: roar, accessories: [crown]}}
+- {tag: motions, prompt: "angry tiger roar", expect: {base: tora, motion: roar}}
+- {tag: motions, prompt: "rawr", expect: {motion: roar}}
+- {tag: motions, prompt: "growling bear", expect: {base: bruno, motion: roar}}
+- {tag: motions, prompt: "tiger with boxing gloves", expect: {base: tora, motion: punch}}
+- {tag: motions, prompt: "fight me", expect: {motion: punch}}
+- {tag: motions, prompt: "pig doing yoga", expect: {base: truffle, motion: meditate}}
+- {tag: everyday, prompt: "a cool cat with sunglasses", expect: {base: mochi, accessories: [sunglasses]}}
+- {tag: everyday, prompt: "cat drinking milk", expect: {base: mochi, motion: sip, props: [mug]}}
+- {tag: everyday, prompt: "fox reading the news", expect: {motion: read}, not: {template: [good_news]}}
+- {tag: everyday, prompt: "a hamster stuffing its cheeks", expect: {base: nib, motion: eat}}
+- {tag: everyday, prompt: "my cat when i open the fridge", expect: {base: mochi, face: hungry}}
+- {tag: everyday, prompt: "when the wifi is slow", expect: {face: dizzy}}
+- {tag: everyday, prompt: "can't adult today", expect: {face: [drowsy, sleep, unamused]}}
+- {tag: everyday, prompt: "a cat playing piano", expect: {base: mochi, effects: [notes]}}
+- {tag: everyday, prompt: "cat in a box", expect: {base: mochi, props: [gift]}}
+- {tag: everyday, prompt: "dog in a hoodie", expect: {base: pip, accessories: [tshirt]}}
+- {tag: everyday, prompt: "a fox in a raincoat", expect: {effects: [rain]}}
+- {tag: everyday, prompt: "raccoon with a trash can", expect: {base: rocco, effects: [flies]}, not: {motion: [thumbs_down]}}
+- {tag: everyday, prompt: "fox blowing out birthday candles", expect: {template: birthday_cake, props: [cake]}}
+- {tag: everyday, prompt: "tiger playing basketball", expect: {base: tora, props: [basketball]}}
+
+# ---------------------------------------------------------------- v5: acting with things (each motion brings what it needs)
+- {tag: acting, prompt: "eating pizza", expect: {motion: eat, props: [pizza]}}
+- {tag: acting, prompt: "fox eating a burger", expect: {motion: eat, props: [burger]}}
+- {tag: acting, prompt: "munching on popcorn", expect: {motion: eat, props: [popcorn]}}
+- {tag: acting, prompt: "panda eating bamboo", expect: {motion: eat, props: [bamboo], base: bao}}
+- {tag: acting, prompt: "bunny with a carrot", expect: {props: [carrot], base: clover}}
+- {tag: acting, prompt: "mouse with cheese", expect: {props: [cheese], base: nib}}
+- {tag: acting, prompt: "dog chewing a bone", expect: {motion: eat, props: [bone], base: pip}}
+- {tag: acting, prompt: "cat with a fish", expect: {props: [fish], base: mochi}}
+- {tag: acting, prompt: "eating ice cream", expect: {motion: eat, props: [ice_cream]}}
+- {tag: acting, prompt: "donut time", expect: {props: [donut]}}
+- {tag: acting, prompt: "nom nom nom", expect: {motion: eat}}
+- {tag: acting, prompt: "snack time", expect: {face: hungry}}
+- {tag: acting, prompt: "sipping coffee", expect: {motion: sip, props: [mug]}}
+- {tag: acting, prompt: "drinking bubble tea", expect: {motion: sip, props: [boba]}}
+- {tag: acting, prompt: "boba", expect: {props: [boba]}}
+- {tag: acting, prompt: "drink some water", expect: {props: [water_bottle]}}
+- {tag: acting, prompt: "iced coffee", expect: {props: [takeaway]}}
+- {tag: acting, prompt: "pumpkin spice latte", expect: {props: [takeaway]}}
+- {tag: acting, prompt: "typing on a laptop", expect: {motion: typing, props: [laptop]}}
+- {tag: acting, prompt: "coding all night", expect: {motion: typing}}
+- {tag: acting, prompt: "working from home", expect: {motion: typing}}
+- {tag: acting, prompt: "reading a book", expect: {motion: read, props: [book]}}
+- {tag: acting, prompt: "bookworm owl glasses", expect: {accessories: [glasses]}}
+- {tag: acting, prompt: "talking on the phone", expect: {motion: phone_call}}
+- {tag: acting, prompt: "taking a selfie", expect: {motion: selfie}}
+- {tag: acting, prompt: "texting my bestie", expect: {motion: texting}}
+- {tag: acting, prompt: "scrolling tiktok", expect: {motion: texting}}
+- {tag: acting, prompt: "singing karaoke", expect: {motion: sing}}
+- {tag: acting, prompt: "singing into a microphone", expect: {motion: sing, props: [microphone]}}
+- {tag: acting, prompt: "cheers! raise a glass", expect: {motion: toast}}
+- {tag: acting, prompt: "champagne toast", expect: {motion: toast}}
+- {tag: acting, prompt: "painting a picture", expect: {motion: paint}}
+- {tag: acting, prompt: "artist with a paintbrush", expect: {motion: paint, props: [paintbrush]}}
+- {tag: acting, prompt: "playing video games", expect: {motion: gaming}}
+- {tag: acting, prompt: "gamer with a controller", expect: {motion: gaming, props: [controller]}}
+- {tag: acting, prompt: "taking a photo", expect: {motion: photo}}
+- {tag: acting, prompt: "camera click", expect: {props: [camera]}}
+- {tag: acting, prompt: "brushing teeth", expect: {motion: brush_teeth}}
+- {tag: acting, prompt: "lifting weights", expect: {motion: lift}}
+- {tag: acting, prompt: "dumbbell curls", expect: {motion: lift, props: [dumbbell]}}
+- {tag: acting, prompt: "juggling balls", expect: {motion: juggle}}
+- {tag: acting, prompt: "cuddling a plushie", expect: {motion: cuddle, props: [plushie]}}
+- {tag: acting, prompt: "writing in my diary", expect: {motion: write}}
+- {tag: acting, prompt: "taking notes with a pencil", expect: {motion: write, props: [pencil]}}
+- {tag: acting, prompt: "casting a spell", expect: {motion: magic}}
+- {tag: acting, prompt: "wizard with a magic wand", expect: {motion: magic, props: [wand]}}
+- {tag: acting, prompt: "fanning myself it's so hot", expect: {motion: fan_self}}
+- {tag: acting, prompt: "blowing my nose", expect: {motion: blow_nose}}
+- {tag: acting, prompt: "look what i got", expect: {motion: show_off}}
+- {tag: acting, prompt: "showing off my trophy", expect: {motion: show_off, props: [trophy]}}
+- {tag: acting, prompt: "waving a flag", expect: {motion: wave_flag}}
+- {tag: acting, prompt: "knock knock", expect: {motion: knock}}
+
+# ---------------------------------------------------------------- v5: things to hold
+- {tag: things, prompt: "holding balloons", expect: {props: [balloons]}}
+- {tag: things, prompt: "a bouquet of flowers for you", expect: {props: [bouquet]}}
+- {tag: things, prompt: "red rose", expect: {props: [rose]}}
+- {tag: things, prompt: "holding a sign", expect: {props: [sign]}}
+- {tag: things, prompt: "pom poms cheerleader", expect: {props: [pom_poms]}}
+- {tag: things, prompt: "gold trophy", expect: {props: [trophy]}}
+- {tag: things, prompt: "umbrella in the rain", expect: {props: [umbrella], effects: [rain]}}
+- {tag: things, prompt: "party horn toot toot", expect: {props: [party_horn]}}
+- {tag: things, prompt: "sparklers", expect: {props: [sparkler]}}
+- {tag: things, prompt: "jack o lantern", expect: {props: [pumpkin]}}
+- {tag: things, prompt: "paper lantern", expect: {props: [lantern]}}
+- {tag: things, prompt: "diya", expect: {props: [diya]}}
+- {tag: things, prompt: "red envelope", expect: {props: [red_envelope]}}
+- {tag: things, prompt: "easter egg hunt", expect: {props: [easter_egg]}}
+- {tag: things, prompt: "love letter", expect: {props: [love_letter]}}
+- {tag: things, prompt: "you've got mail", expect: {props: [love_letter]}}
+- {tag: things, prompt: "diploma", expect: {props: [diploma]}}
+- {tag: things, prompt: "money money money", expect: {props: [money]}}
+- {tag: things, prompt: "shopping bags", expect: {props: [shopping_bag]}}
+- {tag: things, prompt: "suitcase packed for vacation", expect: {props: [suitcase]}}
+- {tag: things, prompt: "pillow fight", expect: {props: [pillow]}}
+- {tag: things, prompt: "teddy toy", expect: {props: [plushie]}}
+- {tag: things, prompt: "basketball", expect: {props: [basketball]}}
+- {tag: things, prompt: "soccer ball", expect: {props: [ball]}}
+- {tag: things, prompt: "tissue box", expect: {props: [tissue]}}
+- {tag: things, prompt: "thermometer fever", expect: {props: [thermometer]}}
+- {tag: things, prompt: "alarm clock ringing", expect: {props: [alarm_clock]}}
+- {tag: things, prompt: "magnifying glass detective", expect: {props: [magnifier]}}
+- {tag: things, prompt: "birthday cake with candles", expect: {props: [cake]}}
+- {tag: things, prompt: "slice of watermelon", expect: {props: [watermelon]}}
+- {tag: things, prompt: "sushi roll", expect: {props: [sushi]}}
+- {tag: things, prompt: "taco tuesday", expect: {props: [taco]}}
+- {tag: things, prompt: "hot dog", expect: {props: [hotdog]}}
+- {tag: things, prompt: "honey pot", expect: {props: [honey]}}
+- {tag: things, prompt: "lollipop", expect: {props: [lollipop]}}
+- {tag: things, prompt: "candy cane", expect: {props: [candy_cane]}}
+- {tag: things, prompt: "chocolate bar", expect: {props: [chocolate]}}
+- {tag: things, prompt: "banana", expect: {props: [banana]}}
+- {tag: things, prompt: "apple a day", expect: {props: [apple]}}
+- {tag: things, prompt: "cupcake", expect: {props: [cupcake]}}
+- {tag: things, prompt: "cookie", expect: {props: [cookie]}}
+- {tag: things, prompt: "a teal laptop", expect: {props: [laptop], tints: {laptop: true}}}
+- {tag: things, prompt: "a pink umbrella", expect: {props: [umbrella], tints: {umbrella: true}}}
+
+# ---------------------------------------------------------------- v5: effects
+- {tag: effects, prompt: "question mark", expect: {effects: [question]}}
+- {tag: effects, prompt: "exclamation mark", expect: {effects: [exclaim]}}
+- {tag: effects, prompt: "light bulb idea", expect: {effects: [idea]}}
+- {tag: effects, prompt: "tick tock waiting", expect: {effects: [clock]}}
+- {tag: effects, prompt: "check mark done", expect: {effects: [check]}}
+- {tag: effects, prompt: "big red x", expect: {effects: [cross_mark]}}
+- {tag: effects, prompt: "broken heart", expect: {effects: [broken_heart]}}
+- {tag: effects, prompt: "seeing stars dizzy", expect: {face: dizzy}}
+- {tag: effects, prompt: "steam coming out of ears", expect: {effects: [steam]}}
+- {tag: effects, prompt: "stressed out", expect: {face: worried}}
+- {tag: effects, prompt: "river of tears", expect: {effects: [waterfall_tears]}}
+- {tag: effects, prompt: "snot bubble sleeping", expect: {effects: [snore_bubble]}}
+- {tag: effects, prompt: "frosty breath", expect: {effects: [cold_breath]}}
+- {tag: effects, prompt: "jumpscare", expect: {effects: [shock_lines]}}
+- {tag: effects, prompt: "stinky", expect: {effects: [flies]}}
+- {tag: effects, prompt: "sunshine", expect: {effects: [sun]}}
+- {tag: effects, prompt: "let it snow", expect: {effects: [snow]}}
+- {tag: effects, prompt: "cherry blossoms", expect: {effects: [petals]}}
+- {tag: effects, prompt: "falling leaves", expect: {effects: [leaves]}}
+- {tag: effects, prompt: "make it rain money", expect: {effects: [money_rain]}}
+- {tag: effects, prompt: "lightning bolt", expect: {effects: [lightning]}}
+- {tag: effects, prompt: "rainbow", expect: {effects: [rainbow]}}
+- {tag: effects, prompt: "bubble bath", expect: {effects: [bubbles]}}
+- {tag: effects, prompt: "butterflies", expect: {effects: [butterflies]}}
+- {tag: effects, prompt: "spooky bats", expect: {effects: [bats]}}
+- {tag: effects, prompt: "ghost", expect: {effects: [ghost]}}
+- {tag: effects, prompt: "fireworks", expect: {effects: [fireworks]}}
+- {tag: effects, prompt: "in the spotlight", expect: {effects: [spotlight]}}
+- {tag: effects, prompt: "zoom zoom speed lines", expect: {effects: [speed_lines]}}
+- {tag: effects, prompt: "kaboom", expect: {effects: [boom]}}
+- {tag: effects, prompt: "starry night sky", expect: {effects: [night_sky]}}
+- {tag: effects, prompt: "full moon", expect: {effects: [night_sky]}}
+
+# ---------------------------------------------------------------- v5: things to wear
+- {tag: wear, prompt: "santa hat", expect: {accessories: [santa_hat]}}
+- {tag: wear, prompt: "witch hat", expect: {accessories: [witch_hat]}}
+- {tag: wear, prompt: "wizard hat", expect: {accessories: [wizard_hat]}}
+- {tag: wear, prompt: "wizard cat casting spells", expect: {base: mochi, motion: magic, accessories: [wizard_hat]}}
+- {tag: wear, prompt: "little witch bunny", expect: {base: clover, accessories: [witch_hat]}}
+- {tag: wear, prompt: "cowboy hat yeehaw", expect: {accessories: [cowboy_hat]}}
+- {tag: wear, prompt: "top hat and monocle", expect: {accessories: [top_hat, monocle]}}
+- {tag: wear, prompt: "backwards cap", expect: {accessories: [cap]}}
+- {tag: wear, prompt: "cozy beanie", expect: {accessories: [beanie]}}
+- {tag: wear, prompt: "chef hat", expect: {accessories: [chef_hat]}}
+- {tag: wear, prompt: "graduation cap", expect: {accessories: [grad_cap]}}
+- {tag: wear, prompt: "pirate hat", expect: {accessories: [pirate_hat]}}
+- {tag: wear, prompt: "flower crown", expect: {accessories: [flower_crown]}}
+- {tag: wear, prompt: "halo", expect: {accessories: [halo]}}
+- {tag: wear, prompt: "devil horns", expect: {accessories: [devil_horns]}}
+- {tag: wear, prompt: "bunny ears", expect: {accessories: [bunny_ears]}}
+- {tag: wear, prompt: "unicorn horn", expect: {accessories: [unicorn_horn]}}
+- {tag: wear, prompt: "hard hat", expect: {accessories: [hard_hat]}}
+- {tag: wear, prompt: "beret", expect: {accessories: [beret]}}
+- {tag: wear, prompt: "straw hat", expect: {accessories: [sun_hat]}}
+- {tag: wear, prompt: "sweatband", expect: {accessories: [headband]}}
+- {tag: wear, prompt: "propeller hat", expect: {accessories: [propeller_cap]}}
+- {tag: wear, prompt: "nightcap and pajamas", expect: {accessories: [nightcap]}}
+- {tag: wear, prompt: "viking helmet", expect: {accessories: [viking_helmet]}}
+- {tag: wear, prompt: "tiara", expect: {accessories: [tiara]}}
+- {tag: wear, prompt: "earmuffs", expect: {accessories: [earmuffs]}}
+- {tag: wear, prompt: "heart shaped glasses", expect: {accessories: [heart_glasses]}}
+- {tag: wear, prompt: "star glasses", expect: {accessories: [star_glasses]}}
+- {tag: wear, prompt: "swimming goggles", expect: {accessories: [goggles]}}
+- {tag: wear, prompt: "3d glasses", expect: {accessories: [glasses_3d]}}
+- {tag: wear, prompt: "eye patch", expect: {accessories: [eye_patch]}}
+- {tag: wear, prompt: "sleep mask", expect: {accessories: [sleep_mask]}}
+- {tag: wear, prompt: "fake mustache", expect: {accessories: [mustache]}}
+- {tag: wear, prompt: "face mask", expect: {accessories: [face_mask]}}
+- {tag: wear, prompt: "clown nose", expect: {accessories: [clown_nose]}}
+- {tag: wear, prompt: "bow tie", expect: {accessories: [bow_tie]}}
+- {tag: wear, prompt: "necktie", expect: {accessories: [necktie]}}
+- {tag: wear, prompt: "flower lei", expect: {accessories: [lei]}}
+- {tag: wear, prompt: "collar with a bell", expect: {accessories: [bell_collar]}}
+- {tag: wear, prompt: "baby bib", expect: {accessories: [bib]}}
+- {tag: wear, prompt: "superhero cape", expect: {accessories: [hero_cape]}}
+- {tag: wear, prompt: "angel wings", expect: {accessories: [angel_wings]}}
+- {tag: wear, prompt: "fairy wings", expect: {accessories: [fairy_wings]}}
+- {tag: wear, prompt: "backpack", expect: {accessories: [backpack]}}
+- {tag: wear, prompt: "apron", expect: {accessories: [apron]}}
+- {tag: wear, prompt: "ugly christmas sweater", expect: {accessories: [xmas_sweater]}}
+- {tag: wear, prompt: "t-shirt", expect: {accessories: [tshirt]}}
+- {tag: wear, prompt: "tutu", expect: {accessories: [tutu]}}
+- {tag: wear, prompt: "a red santa hat", expect: {accessories: [santa_hat]}}
+- {tag: wear, prompt: "a blue cape", expect: {accessories: [hero_cape], tints: {hero_cape: true}}}
+- {tag: wear, prompt: "purple witch hat", expect: {accessories: [witch_hat], tints: {witch_hat: true}}}
+
+# ---------------------------------------------------------------- v5: the new mascots
+- {tag: mascots, prompt: "puppy", expect: {base: pip}}
+- {tag: mascots, prompt: "doggo waving", expect: {base: pip, motion: wave}}
+- {tag: mascots, prompt: "golden retriever", expect: {base: pip, palette: true}}
+- {tag: mascots, prompt: "husky", expect: {base: pip, palette: true}}
+- {tag: mascots, prompt: "bunny", expect: {base: clover}}
+- {tag: mascots, prompt: "rabbit eating a carrot", expect: {base: clover, motion: eat, props: [carrot]}}
+- {tag: mascots, prompt: "panda", expect: {base: bao}}
+- {tag: mascots, prompt: "sleepy panda", expect: {base: bao, face: drowsy}}
+- {tag: mascots, prompt: "tiger", expect: {base: tora}}
+- {tag: mascots, prompt: "white tiger", expect: {base: tora, palette: true}}
+- {tag: mascots, prompt: "koala", expect: {base: kiko}}
+- {tag: mascots, prompt: "raccoon", expect: {base: rocco}}
+- {tag: mascots, prompt: "trash panda", expect: {base: rocco}}
+- {tag: mascots, prompt: "piggy", expect: {base: truffle}}
+- {tag: mascots, prompt: "oink oink", expect: {base: truffle}}
+- {tag: mascots, prompt: "frog", expect: {base: fern}}
+- {tag: mascots, prompt: "ribbit", expect: {base: fern}}
+- {tag: mascots, prompt: "penguin", expect: {base: pebble}}
+- {tag: mascots, prompt: "mouse", expect: {base: nib}}
+- {tag: mascots, prompt: "hamster", expect: {base: nib}}
+- {tag: mascots, prompt: "lion", expect: {base: leo}}
+- {tag: mascots, prompt: "roaring lion", expect: {base: leo, motion: roar}}
+- {tag: mascots, prompt: "lioness", expect: {base: leo}}
+- {tag: mascots, prompt: "🐶", expect: {base: pip}}
+- {tag: mascots, prompt: "🐰", expect: {base: clover}}
+- {tag: mascots, prompt: "🐼", expect: {base: bao}}
+- {tag: mascots, prompt: "🐯", expect: {base: tora}}
+- {tag: mascots, prompt: "🐸", expect: {base: fern}}
+- {tag: mascots, prompt: "🐧", expect: {base: pebble}}
+- {tag: mascots, prompt: "🦁", expect: {base: leo}}
+- {tag: mascots, prompt: "pink pig with a bow", expect: {base: truffle, accessories: [bow]}}
+
+# ---------------------------------------------------------------- v5: everyday templates
+- {tag: templates, prompt: "good afternoon", expect: {template: good_afternoon}}
+- {tag: templates, prompt: "good evening", expect: {template: good_evening}}
+- {tag: templates, prompt: "5 more minutes", expect: {template: wake_up, props: [alarm_clock]}}
+- {tag: templates, prompt: "nap time", expect: {template: nap_time}}
+- {tag: templates, prompt: "so sleepy", expect: {template: sleepy, motion: nod_off}}
+- {tag: templates, prompt: "i'm exhausted", expect: {face: drowsy}}
+- {tag: templates, prompt: "welcome to the team", expect: {template: welcome, motion: ta_da}}
+- {tag: templates, prompt: "sorry i'm late", expect: {template: late}}
+- {tag: templates, prompt: "yes please!", expect: {template: yes_please}}
+- {tag: templates, prompt: "deal!", expect: {motion: high_five}}
+- {tag: templates, prompt: "lgtm", expect: {motion: thumbs_up}}
+- {tag: templates, prompt: "i'm confused", expect: {motion: scratch_head}}
+- {tag: templates, prompt: "i have a secret", expect: {motion: shush}}
+- {tag: templates, prompt: "spill the tea", expect: {template: spill_tea}}
+- {tag: templates, prompt: "oopsie", expect: {template: oops}}
+- {tag: templates, prompt: "mind blown", expect: {effects: [boom]}}
+- {tag: templates, prompt: "you're welcome", expect: {template: you_are_welcome}}
+- {tag: templates, prompt: "love you so much", expect: {motion: blow_kiss}}
+- {tag: templates, prompt: "xoxo", expect: {motion: blow_kiss}}
+- {tag: templates, prompt: "i have a crush on you", expect: {template: crush}}
+- {tag: templates, prompt: "date night", expect: {template: date_night}}
+- {tag: templates, prompt: "heartbroken", expect: {effects: [broken_heart]}}
+- {tag: templates, prompt: "bff", expect: {template: besties}}
+- {tag: templates, prompt: "level up!", expect: {props: [badge]}}
+- {tag: templates, prompt: "you got this!", expect: {motion: [cheer, fist_pump]}}
+- {tag: templates, prompt: "so cute", expect: {template: cute}}
+- {tag: templates, prompt: "pet me", expect: {template: pet_me}}
+- {tag: templates, prompt: "feeling blue today", expect: {face: sad}}
+- {tag: templates, prompt: "i am so mad", expect: {motion: stomp}}
+- {tag: templates, prompt: "so jealous", expect: {template: jealous}}
+- {tag: templates, prompt: "this is fine", expect: {template: panic}}
+- {tag: templates, prompt: "so bored", expect: {template: bored}}
+- {tag: templates, prompt: "hurry up!", expect: {motion: impatient}}
+- {tag: templates, prompt: "evil plan", expect: {motion: scheme, accessories: [devil_horns]}}
+- {tag: templates, prompt: "who me?", expect: {accessories: [halo]}}
+- {tag: templates, prompt: "like a boss", expect: {template: like_a_boss}}
+- {tag: templates, prompt: "wfh", expect: {motion: typing}}
+- {tag: templates, prompt: "in a meeting", expect: {template: meeting}}
+- {tag: templates, prompt: "study mode", expect: {motion: read}}
+- {tag: templates, prompt: "doing homework", expect: {motion: write}}
+- {tag: templates, prompt: "exam tomorrow", expect: {face: nervous}}
+- {tag: templates, prompt: "i passed my exam!", expect: {template: passed}}
+- {tag: templates, prompt: "got the job!", expect: {template: new_job}}
+- {tag: templates, prompt: "payday!", expect: {template: payday, effects: [money_rain]}}
+- {tag: templates, prompt: "i'm broke", expect: {template: broke}}
+- {tag: templates, prompt: "coffee run", expect: {template: coffee_run}}
+- {tag: templates, prompt: "tea time", expect: {template: tea_time}}
+- {tag: templates, prompt: "hydrate", expect: {motion: sip}}
+- {tag: templates, prompt: "pizza night", expect: {template: pizza_night, props: [pizza]}}
+- {tag: templates, prompt: "let him cook", expect: {accessories: [chef_hat]}}
+- {tag: templates, prompt: "baking cookies", expect: {template: baking}}
+- {tag: templates, prompt: "food coma", expect: {template: food_coma}}
+- {tag: templates, prompt: "dance party", expect: {template: dance_party}}
+- {tag: templates, prompt: "self care sunday", expect: {face: calm}}
+- {tag: templates, prompt: "bubble bath time", expect: {effects: [bubbles]}}
+- {tag: templates, prompt: "leg day at the gym", expect: {motion: workout}}
+- {tag: templates, prompt: "game night", expect: {motion: gaming}}
+- {tag: templates, prompt: "movie night", expect: {props: [popcorn]}}
+- {tag: templates, prompt: "karaoke night", expect: {motion: sing}}
+- {tag: templates, prompt: "selfie time", expect: {motion: selfie}}
+- {tag: templates, prompt: "say cheese", expect: {motion: photo}}
+- {tag: templates, prompt: "retail therapy", expect: {props: [shopping_bag]}}
+- {tag: templates, prompt: "art time", expect: {motion: paint}}
+- {tag: templates, prompt: "abracadabra", expect: {motion: magic}}
+- {tag: templates, prompt: "my hero", expect: {accessories: [hero_cape]}}
+- {tag: templates, prompt: "talk like a pirate", expect: {accessories: [pirate_hat]}}
+- {tag: templates, prompt: "yeehaw cowboy", expect: {accessories: [cowboy_hat]}}
+- {tag: templates, prompt: "your majesty", expect: {accessories: [crown]}}
+- {tag: templates, prompt: "princess", expect: {accessories: [tiara]}}
+- {tag: templates, prompt: "little angel", expect: {accessories: [halo]}}
+- {tag: templates, prompt: "little devil", expect: {accessories: [devil_horns]}}
+- {tag: templates, prompt: "fairy", expect: {accessories: [fairy_wings]}}
+- {tag: templates, prompt: "unicorn", expect: {accessories: [unicorn_horn]}}
+- {tag: templates, prompt: "clowning around", expect: {face: silly}}
+- {tag: templates, prompt: "beep boop", expect: {motion: robot}}
+- {tag: templates, prompt: "astronaut in space", expect: {motion: float}}
+- {tag: templates, prompt: "detective on the case", expect: {props: [magnifier]}}
+- {tag: templates, prompt: "mad scientist", expect: {accessories: [goggles]}}
+- {tag: templates, prompt: "under construction", expect: {accessories: [hard_hat]}}
+- {tag: templates, prompt: "vacation mode", expect: {props: [suitcase]}}
+- {tag: templates, prompt: "hiking adventure", expect: {accessories: [backpack]}}
+- {tag: templates, prompt: "beach day", expect: {accessories: [sunglasses]}}
+- {tag: templates, prompt: "summer vibes", expect: {accessories: [sunglasses]}}
+- {tag: templates, prompt: "heatwave", expect: {motion: fan_self}}
+- {tag: templates, prompt: "freezing cold", expect: {motion: shiver}}
+- {tag: templates, prompt: "rainy day", expect: {props: [umbrella], effects: [rain]}}
+- {tag: templates, prompt: "snow day!", expect: {effects: [snow]}}
+- {tag: templates, prompt: "hello spring", expect: {effects: [petals]}}
+- {tag: templates, prompt: "autumn vibes", expect: {effects: [leaves]}}
+- {tag: templates, prompt: "cozy winter", expect: {template: winter}}
+- {tag: templates, prompt: "thunderstorm", expect: {effects: [lightning]}}
+- {tag: templates, prompt: "sunny day", expect: {effects: [sun]}}
+- {tag: templates, prompt: "sick day", expect: {motion: blow_nose}}
+- {tag: templates, prompt: "allergy season", expect: {motion: sneeze}}
+- {tag: templates, prompt: "at the doctor", expect: {accessories: [face_mask]}}
+- {tag: templates, prompt: "stay safe", expect: {accessories: [face_mask]}}
+
+# ---------------------------------------------------------------- v5: occasions and holidays
+- {tag: occasions, prompt: "new year new me", expect: {template: new_year_resolution}}
+- {tag: occasions, prompt: "happy chinese new year", expect: {template: lunar_new_year, props: [red_envelope]}}
+- {tag: occasions, prompt: "be my valentine", expect: {template: valentine}}
+- {tag: occasions, prompt: "happy women's day", expect: {template: womens_day}}
+- {tag: occasions, prompt: "st patricks day", expect: {template: st_patricks}}
+- {tag: occasions, prompt: "happy holi", expect: {template: holi, effects: [rainbow]}}
+- {tag: occasions, prompt: "nowruz mubarak", expect: {template: nowruz}}
+- {tag: occasions, prompt: "april fools!", expect: {template: april_fools}}
+- {tag: occasions, prompt: "happy easter", expect: {template: easter, accessories: [bunny_ears], props: [easter_egg]}}
+- {tag: occasions, prompt: "songkran", expect: {template: songkran}}
+- {tag: occasions, prompt: "earth day", expect: {template: earth_day}}
+- {tag: occasions, prompt: "happy mother's day", expect: {template: mothers_day, props: [bouquet]}}
+- {tag: occasions, prompt: "happy father's day", expect: {template: fathers_day}}
+- {tag: occasions, prompt: "thank you teacher", expect: {template: teachers_day}}
+- {tag: occasions, prompt: "happy pride", expect: {template: pride, effects: [rainbow]}}
+- {tag: occasions, prompt: "school's out", expect: {template: summer_break}}
+- {tag: occasions, prompt: "happy independence day", expect: {template: independence_day, props: [flag]}}
+- {tag: occasions, prompt: "game day go team", expect: {template: match_day}}
+- {tag: occasions, prompt: "happy friendship day", expect: {template: friendship_day}}
+- {tag: occasions, prompt: "back to school", expect: {template: back_to_school, accessories: [backpack]}}
+- {tag: occasions, prompt: "graduation day", expect: {template: graduation, accessories: [grad_cap]}}
+- {tag: occasions, prompt: "class of 2026", expect: {template: graduation}}
+- {tag: occasions, prompt: "happy halloween", expect: {template: halloween, accessories: [witch_hat], props: [pumpkin]}}
+- {tag: occasions, prompt: "trick or treat", expect: {template: halloween}}
+- {tag: occasions, prompt: "dia de muertos", expect: {template: day_of_the_dead}}
+- {tag: occasions, prompt: "oktoberfest", expect: {template: oktoberfest}}
+- {tag: occasions, prompt: "happy diwali", expect: {template: diwali, props: [diya]}}
+- {tag: occasions, prompt: "shubho bijoya", expect: {template: durga_puja}}
+- {tag: occasions, prompt: "mid autumn festival", expect: {template: mid_autumn, props: [lantern]}}
+- {tag: occasions, prompt: "happy thanksgiving", expect: {template: thanksgiving}}
+- {tag: occasions, prompt: "black friday", expect: {template: black_friday}}
+- {tag: occasions, prompt: "happy hanukkah", expect: {template: hanukkah}}
+- {tag: occasions, prompt: "merry xmas", expect: {template: christmas, accessories: [santa_hat]}}
+- {tag: occasions, prompt: "office christmas party", expect: {template: christmas_party}}
+- {tag: occasions, prompt: "secret santa", expect: {template: secret_santa}}
+- {tag: occasions, prompt: "happy holidays", expect: {face: joy}}
+- {tag: occasions, prompt: "happy kwanzaa", expect: {template: kwanzaa}}
+- {tag: occasions, prompt: "jummah mubarak", expect: {template: jummah}}
+- {tag: occasions, prompt: "ganesh chaturthi", expect: {template: puja}}
+- {tag: occasions, prompt: "happy vesak", expect: {template: vesak}}
+- {tag: occasions, prompt: "just married", expect: {template: wedding}}
+- {tag: occasions, prompt: "she said yes!", expect: {template: engagement}}
+- {tag: occasions, prompt: "baby shower", expect: {template: baby_shower}}
+- {tag: occasions, prompt: "new home", expect: {template: housewarming}}
+- {tag: occasions, prompt: "happy retirement", expect: {template: retirement}}
+- {tag: occasions, prompt: "farewell party", expect: {template: farewell}}
+- {tag: occasions, prompt: "sorry for your loss", expect: {template: condolences}}
+- {tag: occasions, prompt: "fiesta time", expect: {template: weekend}}
+- {tag: occasions, prompt: "music festival", expect: {template: concert}}
+
+# ---------------------------------------------------------------- v5: combinations
+- {tag: combos, prompt: "sleepy panda sipping coffee", expect: {base: bao, motion: sip, props: [mug], face: drowsy}}
+- {tag: combos, prompt: "happy penguin dancing in a santa hat", expect: {base: pebble, motion: dance, accessories: [santa_hat], face: joy}}
+- {tag: combos, prompt: "angry cat stomping", expect: {base: mochi, motion: stomp, face: angry}}
+- {tag: combos, prompt: "a lion wearing a crown", expect: {base: leo, accessories: [crown]}}
+- {tag: combos, prompt: "frog with a flower crown", expect: {base: fern, accessories: [flower_crown]}}
+- {tag: combos, prompt: "bunny eating a carrot happily", expect: {base: clover, motion: eat, props: [carrot], face: joy}}
+- {tag: combos, prompt: "raccoon sneaking with a pizza", expect: {base: rocco, motion: sneak, props: [pizza]}}
+- {tag: combos, prompt: "pig in a tutu twirling", expect: {base: truffle, motion: spin, accessories: [tutu]}}
+- {tag: combos, prompt: "tiger lifting weights", expect: {base: tora, motion: lift}}
+- {tag: combos, prompt: "koala hugging a teddy toy", expect: {base: kiko, props: [plushie]}}
+- {tag: combos, prompt: "mouse reading a book", expect: {base: nib, motion: read, props: [book]}}
+- {tag: combos, prompt: "dog in a cape flying", expect: {base: pip, motion: soar, accessories: [hero_cape]}}
+- {tag: combos, prompt: "cat with sunglasses and a soda", expect: {base: mochi, accessories: [sunglasses], props: [soda]}}
+- {tag: combos, prompt: "panda with headphones vibing", expect: {base: bao, accessories: [headphones]}}
+- {tag: combos, prompt: "fox in a witch hat casting a spell", expect: {motion: magic, accessories: [witch_hat]}}
+- {tag: combos, prompt: "bear with a balloon waving", expect: {base: bruno, props: [balloons], motion: wave}}
+- {tag: combos, prompt: "lion with a microphone singing", expect: {base: leo, motion: sing, props: [microphone]}}
+- {tag: combos, prompt: "penguin in a scarf shivering", expect: {base: pebble, motion: shiver, accessories: [scarf]}}
+- {tag: combos, prompt: "dancing frog with confetti", expect: {base: fern, motion: dance, effects: [confetti]}}
+- {tag: combos, prompt: "crying bunny with a broken heart", expect: {base: clover, face: cry, effects: [broken_heart]}}
+- {tag: combos, prompt: "excited dog jumping with a gift", expect: {base: pip, motion: jump, props: [gift], face: excited}}
+- {tag: combos, prompt: "cat in a chef hat with a cake", expect: {base: mochi, accessories: [chef_hat], props: [cake]}}
+- {tag: combos, prompt: "pig with a mustache and top hat", expect: {base: truffle, accessories: [mustache, top_hat]}}
+- {tag: combos, prompt: "fox holding a red rose", expect: {props: [rose]}}
+- {tag: combos, prompt: "mouse with a tiny umbrella in the rain", expect: {base: nib, props: [umbrella], effects: [rain]}}
+
+# ---------------------------------------------------------------- v5: negation and misfires
+- {tag: misfire, prompt: "pizza but no hat", expect: {props: [pizza]}, not: {accessories: [party_hat]}}
+- {tag: misfire, prompt: "christmas without the snow", expect: {template: christmas}, not: {effects: [snow]}}
+- {tag: misfire, prompt: "not sleepy at all", not: {face: [sleep, drowsy]}}
+- {tag: misfire, prompt: "don't panic", not: {motion: [panic]}}
+- {tag: misfire, prompt: "no fireworks please", not: {effects: [fireworks]}}
+- {tag: misfire, prompt: "fox without a cape", not: {accessories: [hero_cape]}}
+- {tag: misfire, prompt: "bow tie fox", expect: {accessories: [bow_tie]}, not: {accessories: [bow]}}
+- {tag: misfire, prompt: "a pink bow", expect: {accessories: [bow], tints: {bow: true}}}
+- {tag: misfire, prompt: "teddy bear", expect: {base: bruno}, not: {props: [plushie]}}
+- {tag: misfire, prompt: "hot dog eating", expect: {props: [hotdog]}, not: {base: [pip]}}
+- {tag: misfire, prompt: "cheese", expect: {props: [cheese]}, not: {face: [grin]}}
+- {tag: misfire, prompt: "phone in its left paw", expect: {props: [phone], sides: {phone: "L"}}}
+- {tag: misfire, prompt: "i'm dead lol", expect: {face: [dead, laugh]}}
+- {tag: misfire, prompt: "sweater weather", expect: {accessories: [scarf]}, not: {effects: [sweat]}}
+- {tag: misfire, prompt: "nice", expect: {motion: thumbs_up}}
+- {tag: misfire, prompt: "you", expect: {motion: point}}
+- {tag: misfire, prompt: "hug", expect: {motion: hug}}

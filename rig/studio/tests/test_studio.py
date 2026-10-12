@@ -80,6 +80,8 @@ class Output(unittest.TestCase):
             for w in ACCESSORIES:
                 with self.subTest(base=base, accessory=w):
                     doc, info = compose(StickerSpec(base=base, accessories=[w], motion="bounce"))
+                    if any("has its own" in n for n in info["notes"]):
+                        continue                    # a costume of what it already has (bunny ears on the bunny)
                     self.assertTrue(any(L["nm"] == f"wear {w.replace('_', ' ')}" for L in doc["layers"]))
 
     def test_clashing_accessories(self):
@@ -92,10 +94,10 @@ class Output(unittest.TestCase):
         from mascot.props import C
         p = Parser()
         for base in ("biscuit", "mochi", "bruno"):
-            for colour, pal in p.lex["colours"].items():
+            for colour in p.lex["colours"]:
                 with self.subTest(base=base, colour=colour):
                     _, char, info = __import__("studio.compose", fromlist=["build_clip"]).build_clip(
-                        StickerSpec(base=base, palette=pal, accessories=["bow"]))
+                        StickerSpec(base=base, palette={"orange": p._hex(colour)}, accessories=["bow"]))
                     for item, name in info["tint"].items():
                         if delta(C[name], char.pal["orange"]) < MIN_DELTA:
                             # allowed only when none of the item's colours would do

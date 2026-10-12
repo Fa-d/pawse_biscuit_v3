@@ -1,0 +1,151 @@
+# Body: stance, arm poses and the tail.  A pose MEANS what it names (stance, arms, tail; weight 6, the strongest)
+# and may SUGGEST a face.  Arm poses: studio/library/looks.py (python -m studio.cli --list arms).
+
+poses:
+  sit:
+    words: [sit, sitting, sits, seated, sat, sitting down, sit down, sat down, on the floor, sitting on the floor, on the ground,
+      sitting on the ground, take a seat, have a seat, seat, sitting pretty, sitting nicely, sits down, criss cross applesauce,
+      perched, perching, plop, plopped, plopped down, couch, on the couch, on the sofa, sofa]
+    means: {stance: sit}
+  stand:
+    words: [stand, standing, stands, on its feet, on my feet, standing up, stand up, stood, upright, standing tall, stand tall,
+      rise, rising, get up, getting up]
+    means: {stance: stand}
+  lotus:
+    words: [cross legged, crossed legs, legs crossed, lotus, lotus position, lotus pose, yoga pose, criss cross,
+      sitting cross legged, indian style, butterfly pose, easy pose]
+    means: {stance: lotus}
+  wide:
+    words: [legs apart, feet apart, wide stance, power pose, power stance, superhero pose, hero pose, battle stance,
+      fighting stance, ready stance, stance, legs wide, standing wide, planted, sumo, sumo stance, karate, kung fu, martial arts,
+      ninja pose, warrior pose]
+    means: {stance: wide}
+  crouch:
+    words: [crouch, crouching, crouches, crouched, kneel, kneeling, kneels, knelt, ducking, duck down, hunched, hunch, hunching,
+      ready to pounce, about to pounce, low down, get low, getting low, cower, cowering, cowers, bracing, brace, brace yourself,
+      curled up, ball up, hunker down]
+    means: {stance: crouch}
+  tiptoe:
+    words: [tiptoe, tiptoes, tiptoeing, tip toe, tip toes, on tiptoe, on tiptoes, tippy toes, on its toes, on my toes, pointe,
+      tippy tap, standing on toes]
+    means: {stance: tiptoe}
+  hands_up:
+    words: [hands up, arms up, paws up, raise hands, raised hands, raising hands, raise your hands, raised arms, arms raised,
+      paws raised, hands in the air, arms in the air, paws in the air, hands high, reach for the sky, hands up high, both hands up,
+      throw your hands up, wave your hands in the air, praise, hallelujah, hallelujah hands]
+    means: {arm_L: cheer, arm_R: cheer}
+    suggests: {face: joy}
+  hand_up:
+    words: [hand up, raise hand, raises hand, raised hand, raising hand, raise your hand, paw up, one hand up, me me, pick me,
+      ooh ooh, question please, volunteer, volunteering, hand raised]
+    means: {arm_R: cheer}
+    suggests: {face: excited}
+  jazz_hands:
+    words: [jazz hands, spirit fingers, ta-da hands, showbiz, razzle dazzle, broadway, musical theatre, musical theater]
+    means: {arm_L: cheer_out, arm_R: cheer_out}
+    suggests: {face: grin}
+  hands_hips:
+    words: [hands on hips, paws on hips, hands on waist, hands on hip, paws on hip, akimbo, arms akimbo, confident, confidence,
+      boss, bossy, boss mode, boss lady, boss babe, like a boss, girlboss, girl boss, in charge, the boss, chief, superhero stance,
+      power woman, power man, unbothered stance, well well well]
+    means: {arm_L: hip, arm_R: hip}
+  chin:
+    words: [hand on chin, paw on chin, chin, thinking pose, stroking chin, stroke chin, rubbing chin, chin scratch, hmm pose,
+      the thinker, thinker pose, pondering pose]
+    means: {arm_R: chin}
+    suggests: {face: curious}
+  belly:
+    words: [tummy, belly, rubbing belly, rubbing tummy, belly rub, tummy rub, rub tummy, rub belly, paws on belly, hands on belly,
+      paws on tummy, hands on tummy, holding belly, holding tummy, pat belly, belly pat, tummy pat, round belly, pot belly]
+    means: {arm_L: belly, arm_R: belly}
+  cheeks:
+    words: [cheeks, squish, squishy, squishing, squishy cheeks, aww, awwww, so adorable, too cute, so cute, cuteness,
+      cuteness overload, paws on cheeks, hands on cheeks, squee, squeeing, eek cute, so precious, smol bean, cute overload,
+      i can not handle the cuteness, uwu, owo, nyaa, kyaaa]
+    means: {arm_L: cheek, arm_R: cheek}
+    suggests: {face: joy}
+  cheek:
+    words: [hand on cheek, paw on cheek, cheek rest, resting cheek, chin in hand, daydream pose]
+    means: {arm_R: cheek}
+    suggests: {face: love}
+  ear:
+    words: [hand to ear, paw to ear, hand on ear, paw on ear, cupping ear, cup ear, what did you say, can not hear you,
+      i can not hear you, say again, say that again, speak up, louder, come again, pardon, what was that, eh what,
+      listening closely, listening carefully, i am listening, all ears, tell me]
+    means: {arm_R: ear}
+    suggests: {face: curious}
+  chest:
+    words: [hand on heart, paw on heart, hand on chest, paw on chest, hand over heart, i swear, i promise, promise, promised,
+      promises, pinky promise, pinky swear, honest, honestly speaking, sincerely, sincere, cross my heart, oath, pledge,
+      with all my heart, from the bottom of my heart, heartfelt, deeply touched, i mean it, trust me, believe me, scout's honour,
+      scout's honor, loyal, loyalty, faithful, pledge allegiance]
+    means: {arm_R: chest}
+    suggests: {face: proud}
+  cross:
+    words: [arms crossed, crossed arms, cross arms, crossing arms, crossing my arms, folded arms, arms folded, folding arms,
+      arms cross]
+    means: {arm_L: cross, arm_R: cross}
+    suggests: {face: pout}
+  point_out:
+    words: [pointing, point, points, pointed, over there, look over there, that way, this way, go that way, follow me,
+      check this out, check it out, look at this, look at that, see that, see this, this one, that one, right there, directions,
+      direction, guide, guiding]
+    means: {arm_R: point_out}
+    suggests: {face: smiley}
+  point_up:
+    words: [point up, pointing up, points up, up there, finger up, index finger up, pointing to the sky, point to the sky]
+    means: {arm_R: point_up}
+    suggests: {face: excited}
+  behind:
+    words: [hands behind back, paws behind back, hands behind its back, paws behind its back, hands behind my back, behind its back,
+      hiding something, hiding a gift, secret surprise, what is behind your back, whistling, whistling innocently, nonchalant,
+      casual, casually, acting casual, act natural, nothing to see here]
+    means: {arm_L: behind, arm_R: behind}
+    suggests: {face: smug}
+  reach:
+    words: [reaching, reach, reach out, reaching out, reaches, grab, grabbing, grabby, grabby hands, give me, gimme gimme,
+      want that, i want it, i want that, pick me up, hold me, uppies, up up, carry me, mine mine, reaching for, can i have,
+      can i have it]
+    means: {arm_L: reach, arm_R: reach}
+    suggests: {face: pleading}
+  tray:
+    words: [serving, serve, serves, served, waiter, waitress, butler, room service, tray, on a tray, at your service tray,
+      your order, order up, here is your order, dinner is served, bon appetit, enjoy your meal, for you tray]
+    means: {arm_R: tray}
+    suggests: {face: smiley}
+  lift:
+    words: [lifting, lift, lifts, lifted, lifting up, holding up high, hold up high, raise up, raising up, presenting the baby]
+    means: {arm_L: lift, arm_R: lift}
+    suggests: {face: determined}
+  peek:
+    words: [peek, peeking, peeks, peeked, peep, peeping out, peek out, peeking out, sneak peek, sneak a peek, take a peek,
+      peeking through, one eye open, half covered eyes, peek through fingers, peeking through fingers, a little peek]
+    means: {arm_L: peek, arm_R: peek}
+    suggests: {face: curious}
+  lap:
+    words: [paws in lap, hands in lap, hands folded, folded hands, folded paws, paws folded, polite, politely, well behaved,
+      good boy, good girl, patient pose, proper, properly, manners, good manners]
+    means: {arm_L: lap, arm_R: lap}
+    suggests: {face: smiley}
+  knees:
+    words: [hands on knees, paws on knees, hands on my knees, catching breath, catching my breath, out of breath, breathless,
+      panting, huffing and puffing, winded, need a breather]
+    means: {arm_L: knee, arm_R: knee}
+    suggests: {face: drowsy}
+  tail_up:
+    words: [tail up, tail high, tail raised, tail in the air, tail held high, tail straight up, perky tail]
+    means: {tail: up}
+  tail_low:
+    words: [tail down, tail low, tail drooping, droopy tail, tail droops, drooping tail, low tail, sad tail]
+    means: {tail: low}
+  tail_tucked:
+    words: [tail tucked, tail between legs, tail between its legs, tucked tail, tail tucked in, tail between my legs]
+    means: {tail: tucked}
+  tail_curl:
+    words: [curled tail, curly tail, tail curled, tail curl, curling tail, tail wrapped, wrapped tail]
+    means: {tail: curl}
+  alert:
+    words: [alert, on alert, alerted, ears perked, perked up, ears up, on guard, guarding, guard, watchful, vigilant, sentry,
+      lookout, on the lookout, attention, stand at attention, standing at attention, ready and alert]
+    means: {tail: alert}
+    suggests: {face: focused}

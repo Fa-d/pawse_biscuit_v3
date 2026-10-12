@@ -1,0 +1,109 @@
+# The small words: what carries no meaning, what negates, what makes things stronger or weaker, faster or slower,
+# which paw, where the eyes look, and words that shade a colour.
+#
+# Every file in this folder is read and merged (studio/parse/parser.py); ../lexicon.yaml is read first and is the
+# place for your own additions.  A phrase may belong to one entry only (`python -m studio.cli --check` says so).
+# Words are read the way prompts are: lower case, accents dropped, contractions spelt out ("don't" -> "do not",
+# "i'm" -> "i am"), so write phrases either way.
+
+# single words that carry no meaning for the sticker (never counted as "not understood")
+stopwords: [a, an, the, and, or, but, with, while, is, are, am, be, being, been, was, were, will, would, shall, should, can, could,
+  may, might, must, do, does, did, i, me, my, mine, myself, you, your, yours, yourself, we, us, our, ours, it, its, itself,
+  he, him, she, they, them, their, this, that, these, those, there, here, of, in, on, at, to, for, from, by, as, into, onto, about,
+  just, some, any, when, then, than, after, before, like, also, too, very, so, much, many, more, most, really, quite, rather,
+  mascot, sticker, stickers, emoji, emote, character, guy, girl, boy, buddy, dude, pal, friend, friends, little, cute, tiny, small,
+  one, ones, make, made, making, create, created, creating, show, shows, showing, draw, drawing, drawn, generate, design, animate,
+  animated, animation, gif, want, wants, need, give, get, gets, got, getting, let, put, have, has, had, having, own,
+  feeling, feels, feel, felt, looking, looks, look, seem, seems, mood, vibes, vibe, energy, face, expression,
+  holding, hold, holds, held, carrying, carry, carries, wearing, wear, wears, wore,
+  today, tonight, tomorrow, yesterday, now, again, all, day, days, time, times, every, everyday, always, still, yet,
+  out, over, off, up, away, back, around, through, along, together, ever, even, only, other, another, same, such,
+  saying, says, said, say, caption, title, words, because, since, if, how, what, which, who, whom, whose,
+  where, giving, gives, doing, kind, sort, bit, lot, lots, thing, things, stuff, something, someone, somebody, anything,
+  literally, actually, basically, honestly, obviously, apparently, probably, perhaps, um, umm, uh, er, erm, well, ah, eh,
+  style, version, kawaii, chibi, cartoon, cartoony, simple, big, huge, large, mini, baby, adult, old, young, new, nice,
+  animal, animals, pet, pets, creature, adorable, precious, smol, lovely, beautiful, hand, hands, paw, paws, arm, arms, leg, legs, foot, feet, both, two, head, body,
+  everything, everyone, everybody, someone's, guys, everybody's, outside, inside, here's, there's,
+  eyes, eye, eyed, fur, coat, colored, coloured, color, colour, colors, colours, anyone, anybody, sending, team, mode, life, man, woman, bro, sis, fam, mate, homie, champ, amigo, amiga, amigos, coworker, coworkers, colleague, colleagues, talk, talking, piece, pieces,
+  play, plays, playing, played, open, opens, opening, opened, air, chopsticks, chopstick, spoon, fork]
+
+# words that mean something only when they are the whole prompt: "nice" alone is a thumbs up, "nice fox" is a fox
+alone: {nice: actions.thumbs_up, noice: actions.thumbs_up, mood: actions.nod, same: actions.nod, cute: poses.cheeks,
+  what: moods.shocked, really: moods.surprised, seriously: moods.unamused, honestly: moods.unamused, again: moods.unamused,
+  wait: actions.idle, hello: actions.wave, good: moods.content, great: moods.happy, perfect: actions.thumbs_up, finally: moods.relieved,
+  help: moods.scared, why: moods.why, sure: actions.nod, okay: actions.nod, cool: moods.cool, wow: moods.surprised, love: moods.love,
+  lit: actions.dance, vibing: moods.content, hmm: moods.curious, oh: moods.surprised, me: poses.point_up, you: actions.point,
+  hug: actions.hug, sleep: moods.asleep, adorable: poses.cheeks, precious: poses.cheeks, smol: poses.cheeks, food: moods.hungry, home: moods.relieved, tired: moods.tired, work: props.clipboard}
+
+# 'not', 'no', 'without' ... negate the next thing said in the same clause
+negators: [not, no, never, without, nor, hardly, neither, none, nobody, nothing, instead of, no more]
+
+# phrases that are understood and mean nothing for the sticker (so they are not "not understood")
+fillers: [not going to lie, to be honest, in real life, for real, for real though, i mean, you know, you know what, i guess,
+  kind of, sort of, or something, and stuff, or whatever, as well, a lot, at all, just saying, no offense, between us,
+  if you know what i mean, real quick, right now, at the moment, these days, when you, me when, me after, me before,
+  me trying to, me at, me on, pov, that moment when, that feeling when, the face you make, the look on my face, how i look,
+  how i feel, me irl, current mood, mood right now, today's mood, this is me, it is me, same here, me too, in my head,
+  on the inside, sticker of, a sticker of, sticker for, emoji of, picture of, image of, drawing of, all night, all night long,
+  all day, all day long, all the time, every day, every night, fr, fr fr, for real for real, deadass, ong, on god]
+
+intensity:
+  strong: [very, super, so, extremely, really, totally, mega, ultra, incredibly, insanely, crazy, so much, too, hella,
+    absolutely, completely, utterly, deeply, highly, majorly, seriously, wildly, terribly, awfully, ridiculously, beyond,
+    extra, overly, the most, so so, very very, so very, really really, big time, like crazy, af, as hell, to the max,
+    max, maximum, full on, fully, truly, freaking, fricking, frickin, freakin, flipping, bloody, damn, darn, dang,
+    hecka, uber, giga, ultimate, intense, intensely]
+  weak: [slightly, a bit, a little, a little bit, kinda, sorta, barely, mildly, little bit, lightly, faintly, a touch, a tad,
+    tad, partly, half, semi, low key, lowkey, subtle, subtly, quietly, almost, nearly, somewhat]
+
+# how fast the motion goes
+tempo:
+  fast: [fast, faster, fastest, quick, quickly, quicker, rapid, rapidly, speedy, speedily, hyper, energetic, energetically,
+    frantic, frantically, zoomies, zoom, zooming, full speed, at full speed, double time, double speed, turbo, hurried,
+    hurriedly, in a hurry, swift, swiftly, briskly, brisk, frenzy, frenzied, hyperactive, super fast, really fast, fast paced,
+    upbeat, lively, vigorous, vigorously, nonstop, non stop, crazy fast]
+  slow: [slow, slower, slowest, slowly, slow motion, slo mo, slomo, gently, lazily, leisurely, sluggishly, softly, unhurried,
+    relaxed pace, snail pace, at a snail's pace, dreamily, gracefully, graceful, smoothly, tenderly, half speed, laid back, mellow]
+
+# which paw holds a prop: these stick to the nearest prop in the same clause
+sides:
+  L: [left paw, left hand, left arm, left side, in left, with left, in the left, with the left, left handed, left one, lefty,
+      in its left]
+  R: [right paw, right hand, right arm, right side, in right, with right, in the right, with the right, right handed, right one,
+      in its right]
+
+# where the eyes look: at [x, y], x to the right of the picture, y down, each -1.5 .. 1.5 (0, 0 = at you).
+# `face` (optional) is what the look means for the face (a side-eye is unamused).
+look:
+  left: {words: [looking left, look left, looks left, glancing left, glances left, eyes left, to the left, facing left, turned left,
+    looking to the left, peering left, gazing left], at: [-1.0, 0.0]}
+  right: {words: [looking right, look right, looks right, glancing right, glances right, eyes right, to the right, facing right,
+    turned right, looking to the right, peering right, gazing right], at: [1.0, 0.0]}
+  up: {words: [looking up, look up, looks up, glancing up, gazing up, gaze up, eyes up, eyes to the sky, looking at the sky,
+    looking up at the sky, up at the sky, at the sky, at the stars, stargazing, star gazing, looking up at the stars,
+    cloud watching, looking at the moon, looking upward, looking upwards, heavenward], at: [0.0, -1.0]}
+  down: {words: [looking down, look down, looks down, glancing down, eyes down, downcast, looking at the floor, looking at the ground,
+    at the floor, at the ground, looking at its feet, staring at the floor, head down, looking downward], at: [0.0, 1.0]}
+  up_left: {words: [looking up left, up and left, upper left, looking up and to the left], at: [-0.8, -0.8]}
+  up_right: {words: [looking up right, up and right, upper right, looking up and to the right], at: [0.8, -0.8]}
+  down_left: {words: [looking down left, down and left, lower left], at: [-0.8, 0.8]}
+  down_right: {words: [looking down right, down and right, lower right], at: [0.8, 0.8]}
+  at_you: {words: [looking at you, look at you, looks at you, looking at the camera, at the camera, staring at you, eye contact,
+    looking straight ahead, straight ahead, looking at me, watching you, i see you, i am watching you], at: [0.0, 0.0]}
+  away: {words: [looking away, look away, looks away, avoiding eye contact, avoids eye contact, glancing away, eyes averted,
+    averted eyes, turning away], at: [-1.1, 0.35]}
+  side_eye: {words: [side eye, side eyes, side eyeing, side eyed, sideeye, side glance, side glancing, skeptical, sceptical,
+    suspicious, suspiciously, sus, sussy, shady, shifty, shifty eyes, judging you, judging, judgy, judgmental, judgemental,
+    giving side eye, raised eyebrow, eyebrow raise, doubtful, doubting, really now, hmm really], at: [1.1, 0.0], face: unamused}
+  peeking_eyes: {words: [peeping eyes, watching closely, keeping an eye, keeping an eye on, nosy, nosey, eavesdropping, spying,
+    lurking, lurker, lurk, peeping], at: [0.9, -0.1], face: curious}
+  cross_eyed: {words: [cross eyed, crosseyed, cross eye, crossed eyes, eyes crossed], at: [0.0, 0.0], face: silly}
+
+# words that shade the colour right after them ("light blue", "dark red", "pastel pink")
+colour_modifiers:
+  light: [light, lite, lighter]
+  dark: [dark, darker, darkest, dusky]
+  pastel: [pastel, baby, powder, sorbet]
+  bright: [bright, neon, vivid, vibrant, electric, fluorescent, bold]
+  pale: [pale, paler, washed out, faded, muted, dusty, ashen]
+  deep: [deep, rich, jewel, saturated]

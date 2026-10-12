@@ -1,0 +1,370 @@
+# Feelings.  A mood word MEANS a face (it wins over a scenario template) and SUGGESTS the rest: the motion, the tail,
+# an effect, a pose (a template or any word that means otherwise wins over those).
+#   not:     the mood used when the word is negated ("not happy" -> sad)
+#   weight:  how strongly the word counts (1 = normal); polite or vague words ('please', 'maybe') count less, so the
+#            rest of the prompt decides when it says anything
+# Faces: studio/library/looks.py (python -m studio.cli --list faces).
+
+moods:
+  happy:
+    words: [happy, happier, happiest, happiness, glad, cheerful, cheery, joyful, joyous, joy, good mood, great mood, in a good mood,
+      pleased, delighted, yay, yippee, great, awesome, amazing, wonderful, fantastic, fabulous, brilliant, superb, splendid, fun,
+      funtime, good vibes, positive, positivity, jolly, merry, gleeful, glee, elated, overjoyed, ecstatic, blissful, bliss,
+      on cloud nine, over the moon, walking on air, living my best life, best day, best day ever, good day, great day, wagging,
+      tail wagging, wagging tail, wiggly, ray of sunshine, smiley face, happy face, "^_^", lovely day]
+    means: {face: joy}
+    suggests: {tail: up, motion: bounce}
+    not: sad
+  content:
+    words: [content, contented, chill, chilling, chillin, chilled, relaxed, relax, relaxing, cozy, cosy, comfy, comfortable, fine,
+      i am fine, all good, alright, all right, at ease, vibing, vibin, smile, smiling, smiles, smiled, friendly, gentle, pleasant,
+      satisfied, good, not bad, doing good, doing well, peachy, mellow vibes, easy going, easygoing, carefree, happy go lucky]
+    means: {face: smiley}
+    suggests: {tail: rest, motion: sway}
+    not: worried
+  grin:
+    words: [grin, grinning, grins, grinned, big smile, huge smile, wide smile, toothy, toothy grin, cheesy, cheesy grin, say cheese,
+      beaming, beam, all smiles, ear to ear, smile wide, cheese grin]
+    means: {face: grin}
+    suggests: {tail: up, motion: bounce}
+    not: sad
+  laugh:
+    words: [funny, hilarious, dying, joke, jokes, joking, just kidding, kidding, jk, lolz, comedy, comedic, amusing, amused,
+      that is funny]
+    means: {face: laugh}
+    suggests: {tail: up, motion: laugh}
+    not: unamused
+  tears_of_joy:
+    words: [tears of joy, happy tears, laughing tears, crying laughing, laughing crying, rolling laughing, laughing so hard i cried,
+      laugh cry, crylaugh, laughing until crying]
+    means: {face: laugh, effects: [tear]}
+    suggests: {tail: up, motion: laugh}
+  excited:
+    words: [excited, exited, exciting, excitement, hyped, hype, hyped up, pumped, pumped up, thrilled, stoked, psyched, eager,
+      giddy, can not wait, so ready, ready, i am ready, all set, here we go, let us gooo, woo, wooo, woop, woot, whoop, whoopee,
+      yahoo, buzzing, fired up, amped, amped up, raring to go, cannot contain, bouncing off the walls, sugar rush, thrilling]
+    means: {face: excited}
+    suggests: {tail: up, motion: jump, effects: [sparkles]}
+    not: nervous
+  starry:
+    words: [starstruck, star struck, star eyes, starry eyed, starry eyes, in awe, awestruck, awe, amazed, amazement, impressed,
+      so impressed, fangirl, fangirling, fanboy, fanboying, fan, big fan, number one fan, idol, obsessed, mesmerized, mesmerised,
+      dazzled, wowed, blown away, inspiring, inspired, legend, legendary, iconic, goals]
+    means: {face: starry}
+    suggests: {tail: up, motion: bounce, effects: [sparkles]}
+  love:
+    words: [love, loving, loved, in love, so in love, adore, adoring, adores, crush, crushing on, lovestruck, love struck, smitten,
+      heart eyes, romance, romantic, valentine, valentines, sweetheart, darling, babe, bae, my love, love bug, lovebug, lovey dovey,
+      lovey, affection, affectionate, besotted, infatuated, head over heels, falling for you, fell for you, soulmate, soul mate,
+      my person, sending love, all my love, much love, lots of love, love love love]
+    means: {face: love}
+    suggests: {tail: up, motion: sway, effects: [hearts]}
+    not: unamused
+  kiss:
+    words: [kiss, kissing, kissy face, smooching, peck, a peck, big kiss]
+    means: {face: kiss}
+    suggests: {effects: [hearts], motion: blow_kiss}
+  chef_kiss:
+    words: [chef kiss, chefs kiss, chef's kiss, muah chef, perfection, perfecto, magnifique, bellissimo, delicioso, mwah perfect]
+    means: {face: kiss}
+    suggests: {arm_R: mouth, effects: [sparkles]}
+  grateful:
+    words: [grateful, gratitude, thankful, blessed, so blessed, feeling blessed, appreciate, appreciated, appreciation,
+      appreciative, touched, so touched, moved, heartwarming, heart warming, warm smile, warm fuzzy, warm and fuzzy, wholesome,
+      proud smile]
+    means: {face: proud}
+    suggests: {motion: bow, effects: [hearts], tail: up}
+  proud:
+    words: [proud, so proud, pride, proudly, accomplished, self made, flexing on them, proud of you, proud of myself, proud of us]
+    means: {face: proud}
+    suggests: {tail: up, motion: bounce, effects: [sparkles]}
+  relieved:
+    words: [relieved, relief, phew, whew, finally, at last, thank god, thank goodness, thank heavens, thank the lord, close call,
+      close one, that was close, dodged a bullet, it is over, survived, i survived, we survived, made it, i made it,
+      weight off my shoulders, sigh of relief, peace at last, crisis averted, saved, safe now, all better, feeling better]
+    means: {face: relieved}
+    suggests: {motion: sigh, tail: rest}
+  calm:
+    words: [calm, calmer, calmness, zen, peaceful, serene, serenity, tranquil, tranquility, at peace, still mind, centered, centred,
+      grounded, balanced, harmony, chill out, cool down, cool off, cooling down, cool it, unbothered, untroubled, stress free,
+      quiet mind, soothing, soothed]
+    means: {face: calm}
+    suggests: {motion: sway, tail: rest}
+    not: nervous
+  neutral:
+    words: [neutral, blank, blank stare, expressionless, poker face, straight face, deadpan, emotionless, no reaction, no comment,
+      speechless, no words, i have no words, ok then, okay then, indifferent, unbothered face, stoic, zipped, mouth shut, silent,
+      mute, muted face]
+    means: {face: neutral}
+    suggests: {motion: idle}
+  focused:
+    words: [focused, focus, focusing, concentrate, concentrating, concentration, serious, in the zone, locked in, productive,
+      productivity, attentive, alert mind, sharp, studious, diligent, hard at work, working hard, nose to the grindstone, on task]
+    means: {face: focused}
+    suggests: {motion: idle}
+  determined:
+    words: [determined, determination, motivated, motivation, let us do this, i got this, we got this, i can do this,
+      you can do this, never give up, do not give up, never back down, fighting spirit, keep going, keep it up, keep pushing,
+      go hard, beast mode, hustle, hustling, grind, grinding, strong, stronger, strength, power, powerful, tough, brave, bravery,
+      courage, courageous, fearless, unstoppable, challenge accepted, game on, bring it on, bring it, try hard, persevere,
+      perseverance, resilient, resilience, fierce, focus mode, stay strong, be strong]
+    means: {face: determined}
+    suggests: {motion: fist_pump, tail: up}
+    not: tired
+  cool:
+    words: [cool, coolest, cooler, too cool, so cool, way cool, swag, swaggy, swagger, drip, dripping, stylish, slayed, badass,
+      smooth, suave, legend mode, boss move, chillax, effortless, unbothered king, sigma, alpha, aura points, rizz, got rizz, b-),
+      "8)"]
+    means: {face: cool}
+    suggests: {accessories: [sunglasses], motion: peace, tail: up}
+    not: unamused
+  smug:
+    words: [smug, smugly, smirk, smirking, smirks, smirked, sly, slyly, cocky, savage, told you so, i told you, i told you so,
+      sorry not sorry, as expected, called it, i called it, knew it, i knew it, heh heh, too easy, ez, easy peasy, easy win, gg ez,
+      not even trying, flawless, flawless victory, winning smile, know it all, smarty pants, smartypants, smart alec, sassy, sass,
+      sassy pants]
+    means: {face: smug}
+    suggests: {arm_L: hip, arm_R: hip}
+  wink:
+    words: [wink, winking, winks, winked, wink wink, flirty, flirt, flirting, flirts, flirtatious, cheeky, nudge nudge, iykyk,
+      if you know you know, you know what i mean, wink face, playful wink, inside joke]
+    means: {face: wink}
+    suggests: {motion: idle}
+  silly:
+    words: [silly, silliness, goofy, goof, goofball, goofing, goofing off, playful, derp, derpy, tongue out, sticking tongue out,
+      sticks tongue out, blep, bleh, bleh bleh, wacky, nutty, zany, funny face, silly face, crazy face, crazy silly, silly wink,
+      teasing, tease, teases, nya nya, neener, neener neener, raspberry face, pulling faces, pulling a face, making faces, clowning,
+      clowning around, bonkers, cuckoo, loco]
+    means: {face: silly}
+    suggests: {motion: wiggle, tail: up}
+  mischief:
+    words: [mischief, mischievous, evil, devilish, naughty, up to no good, troll, trolling, trolled, prank, pranking, pranked,
+      prankster, villain, villainous, evil genius, liar, lying, fibbing, cunning, crafty, conniving, menace, agent of chaos,
+      gremlin, goblin mode, mischief managed, angry devil]
+    means: {face: mischief}
+    suggests: {motion: scheme}
+  innocent:
+    words: [innocent, innocently, who me, not me, it was not me, angelic, saint, saintly, goody two shoes, pure, wholesome angel,
+      butter would not melt]
+    means: {face: proud}
+    suggests: {accessories: [halo], arm_L: behind, arm_R: behind}
+  pleading:
+    words: [pleading, plead, pleads, puppy eyes, puppy dog eyes, puppy face, sad puppy eyes, pwease, pweese, pweeze,
+      please please please, pretty pretty please, with a cherry on top, can i, may i, please can i, oh please, puh lease,
+      have mercy, mercy]
+    means: {face: pleading}
+    suggests: {motion: plead}
+  please:
+    words: [please]
+    means: {face: pleading}
+    suggests: {motion: plead}
+    weight: 0.3
+  sorry:
+    words: [sorry, so sorry, sorry sorry, very sorry, apologize, apologise, apologizing, apologising, apology, apologies,
+      my apologies, forgive me, please forgive me, pardon me, sowwy, sowy, soz, i am sorry, regret, regrets, regretful, remorse,
+      my fault, it is my fault, guilty, guilt, shame on me, ashamed of myself, i messed up, messed up, i screwed up, screwed up]
+    means: {face: pleading}
+    suggests: {motion: bow, effects: [sweat], tail: low}
+  oops:
+    words: [oops, oopsie, oopsies, whoops, whoopsie, uh oh, oh oh, slip up, butterfingers, clumsy, silly me, did i do that,
+      that was not supposed to happen, accident, accidentally, mistake, mistakes, error, glitch]
+    means: {face: nervous}
+    suggests: {arm_R: mouth, effects: [sweat]}
+  worried:
+    words: [worried, worry, worrying, worries, worrier, concerned, concern, uneasy, anxious, anxiety, overthinking, overthink,
+      stressed, stress, stressing, stressful, stressed out, tense, on edge, oh no, oh dear, troubled, troubling, fret, fretting,
+      apprehensive, insecure, unsure of myself, what if, dread, dreading, dreadful, pressure, under pressure, panic attack]
+    means: {face: worried}
+    suggests: {effects: [sweat], motion: sway, tail: low}
+    not: calm
+  nervous:
+    words: [nervous, nervously, nerves, jittery, jitters, awkward, awkwardly, awkwardness, yikes, eek, gulp, gulps, oof, grimace,
+      grimacing, awkward laugh, heh, hehe awkward, cringeworthy, teeth clenched, clenched teeth, sheepish, sheepishly, not ready,
+      so not ready, i am not ready, unprepared, stage fright, butterflies in my stomach, chattering teeth, nail biting,
+      biting nails]
+    means: {face: nervous}
+    suggests: {effects: [sweat], motion: tremble}
+    not: calm
+  scared:
+    words: [scared, scary, afraid, terrified, terrifying, frightened, frightening, fright, fear, fearful, spooked, spook, creepy,
+      creeped out, help, helpless, screaming scared, ahh, horrified, horrifying, petrified, shaking in my boots, scaredy cat,
+      scaredy, nightmare, nightmares, monster, monsters, spider, spiders, eeek]
+    means: {face: scared}
+    suggests: {motion: tremble, tail: tucked, effects: [sweat]}
+    not: determined
+  shocked:
+    words: [shocked, shook, shookt, shocking, shock, stunned, jaw drop, jaw dropped, jaw dropping, jaw on the floor, flabbergasted,
+      gobsmacked, oh em gee, what the heck, what the hell, can not believe, i can not believe, can not believe it, mindblown,
+      blew my mind, plot twist, say what, excuse me, are you serious, holy cow, holy moly, holy smokes, holy guacamole, good grief,
+      dumbfounded, astonished, astounded, aghast, appalled]
+    means: {face: shocked}
+    suggests: {motion: jump, tail: alert, effects: [shock_lines]}
+  surprised:
+    words: [surprised, surprising, surprisingly, wow, whoa, woah, wowza, wowie, ooh, oooh, gasp, gasping, gasps, unexpected,
+      unexpectedly, did not expect, did not see that coming, oh really, is that so, no kidding, what a surprise, caught off guard,
+      startled, startle, taken aback, eyes wide, wide eyed, oh wow, oh snap, whoa there]
+    means: {face: surprised}
+    suggests: {motion: jump, tail: up}
+  oh:
+    words: [oh]
+    means: {face: surprised}
+    weight: 0.4
+  confused:
+    words: [confused, confusing, confusion, puzzled, puzzling, puzzle, baffled, baffling, perplexed, bewildered, lost, so lost, huh,
+      wut, wat, what is happening, what is going on, what just happened, i do not get it, do not get it, makes no sense, no sense,
+      does not make sense, confuzzled, head scratching, i am lost, uncertain, unclear, wondering why, how come, why tho]
+    means: {face: confused}
+    suggests: {motion: scratch_head, effects: [question]}
+  why:
+    words: [why]
+    means: {face: confused}
+    suggests: {motion: shrug}
+    weight: 0.6
+  maybe:
+    words: [maybe, maybe not, perhaps not, possibly, might be, we will see, i will think about it, hmm maybe, not sure yet,
+      eventually]
+    means: {face: curious}
+    suggests: {motion: think}
+    weight: 0.5
+  curious:
+    words: [curious, curiosity, wonder, wondering, wonders, hmm, hmmm, interesting, intrigued, intriguing, inquisitive, sleuth,
+      what is this, what is that, ooh what is this, tell me more, do tell, go on, really interesting, fascinated, fascinating, hm]
+    means: {face: curious}
+    suggests: {motion: look_around}
+  sad:
+    words: [sad, sadly, sadness, saddened, unhappy, down, feeling down, feeling blue, blue mood, depressed, depressing, depression,
+      upset, heartbreaking, gloomy, gloom, miserable, misery, lonely, alone, all alone, loneliness, disappointed, disappointing,
+      disappointment, bummed, bummed out, bummer, devastated, hurt, hurting, sorrow, sorrowful, grief, grieving, mourning,
+      melancholy, glum, not okay, not ok, feeling low, low mood, rejected, rejection, left out, ignored, nobody loves me,
+      no one loves me, unloved, sad face, sad times, so sad, it hurts, pain, aching, heavy heart, blah day, homesick, missing home,
+      loss, condolences]
+    means: {face: sad}
+    suggests: {tail: low, motion: sway}
+    not: happy
+  cry:
+    words: [cry, crying, cries, cried, crybaby, cry baby, tears, tearful, in tears, weeps, bawls, waah, wah, sniffle, sniffles,
+      sniffling, sniff, sniff sniff, cry me a river]
+    means: {face: cry}
+    suggests: {effects: [tear], motion: sob, tail: low}
+    not: happy
+  pout:
+    words: [pout, pouting, pouts, pouty, huff, huffing, salty, so salty, bitter, jealous, jealousy, envious, envy, not fair, unfair,
+      so unfair, that is not fair, offended, grumble, grumbling, mope, moping, mopey, petty, spoiled, spoilt, brat, bratty,
+      fine then, whatever then, sore loser]
+    means: {face: pout}
+    suggests: {motion: sulk}
+    not: content
+  unamused:
+    words: [unamused, not amused, unimpressed, meh, eye roll, eyeroll, eye rolling, rolling eyes, roll eyes, rolls eyes,
+      rolling my eyes, srsly, bruh, bruhh, ugh, ughh, cool story, cool story bro, as if, yeah right, sure jan, do not care,
+      i do not care, who cares, so what, big deal, not impressed, over it, so over it, done with this, i am done, can you not,
+      really dude, okay boomer, ok boomer, k bye, annoyed face, dead inside, done with you, again really, tired of this, not funny,
+      unfunny, try again, weird flex, nice try, yeah sure, sure sure, if you say so, unbelievable face]
+    means: {face: unamused}
+    suggests: {motion: idle}
+    not: happy
+  bored:
+    words: [bored, boring, boredom, so bored, nothing to do, blah, dull, tedious, monotonous, killing time, twiddling thumbs,
+      zzz boring, snooze fest, snoozefest, yawn fest, same old, same old same old]
+    means: {face: unamused}
+    suggests: {stance: sit, motion: sigh}
+    not: excited
+  angry:
+    words: [angry, angrily, anger, angered, mad, madder, annoyed, annoying, annoyance, irritated, irritating, irritation, grumpy,
+      cranky, grouchy, grouch, grr, grrr, pissed, pissed off, frustrated, frustrating, frustration, hate, hating, i hate, hates,
+      hated, bothered, triggered, irked, peeved, ticked off, fed up, sick of, sick and tired, had enough, enough is enough, outrage,
+      how dare you, mean, rude, so rude, you are mean, angry face, mad face, hangry, upsetting]
+    means: {face: angry}
+    suggests: {effects: [anger], motion: stomp}
+    not: content
+  furious:
+    words: [furious, fury, rage, raging, enraged, livid, seething, boiling mad, outraged, rage quitting, lost it, going berserk,
+      berserk, see red, seeing red, steaming mad, raging mad, so so angry, hulk, hulk mode, blowing up, explode, exploding,
+      about to explode, screaming mad, wrath, wrathful, tantrum mode, flipping out, flip out]
+    means: {face: furious}
+    suggests: {effects: [steam], motion: stomp}
+    not: calm
+  flustered:
+    words: [flustered, embarrassed, embarrassing, embarrassment, mortified, ashamed, shame, shameful, blush, blushing, blushes,
+      blushed, red faced, red cheeks, rosy cheeks, cheeks red, struggling, struggle, overwhelmed by feelings, so embarrassing,
+      kill me now, i want to disappear, wants to disappear, hot face, flushed, bashful smile, kyaa, kya, eep, doki doki]
+    means: {face: flustered}
+    suggests: {motion: bashful}
+  hungry:
+    words: [hungry, hunger, starving, starved, famished, peckish, ravenous, munchies, the munchies, yummers, scrumptious, drool,
+      drooling, mouth watering, mouthwatering, feed me, i am hungry, so hungry, need food, need snacks, snack attack, craving,
+      cravings, appetite, lip smacking, licking lips, smells good, smells delicious, smells amazing, tummy rumbling, belly rumbling,
+      stomach growling, food, foods, fridge, refrigerator, open the fridge, opening the fridge, raiding the fridge, fridge raid,
+      midnight snacks]
+    means: {face: hungry}
+    suggests: {arm_L: belly, arm_R: belly}
+    not: full
+  full:
+    words: [full, so full, stuffed, i am stuffed, ate too much, eaten too much, food coma, overate, overeating, too much food,
+      cannot eat anymore, satisfied tummy, full belly, full tummy, burp, burping, burps, belch]
+    means: {face: relieved}
+    suggests: {arm_L: belly, arm_R: belly, stance: sit}
+    not: hungry
+  tired:
+    words: [tired, tiring, exhausted, exhausting, exhaustion, drained, draining, sluggish, weary, worn out, wiped out, burnt out,
+      burned out, burnout, dead tired, running on empty, no energy, low energy, low battery, battery low, so done, fatigue,
+      fatigued, need sleep, need a nap, sleep deprived, running on fumes, knackered, pooped, zonked, spent, cannot even,
+      can not even, long day, rough night, barely awake, half awake, half asleep, need a break, recharge, recharging, can not adult,
+      can not adult today, adulting, adulting is hard, too tired to adult, no adulting]
+    means: {face: drowsy}
+    suggests: {stance: sit, motion: yawn}
+    not: excited
+  sleepy:
+    words: [sleepy, sleepily, drowsy, drowsily, dozy, dozing, doze, dozes, dozed, groggy, bleary, bleary eyed, heavy eyelids,
+      eyes heavy, sleepyhead, sleepy head, nap time, naptime, bed soon, ready for bed, need bed]
+    means: {face: drowsy}
+    suggests: {stance: sit, motion: nod_off, effects: [zzz]}
+    not: excited
+  asleep:
+    words: [sleep, sleeping, sleeps, slept, asleep, fast asleep, sound asleep, nap, napping, naps, napped, snooze, snoozing,
+      snoozes, zzz, z z z, bedtime, bed time, dreaming, dream, dreams, dreamy, siesta, hibernate, hibernating, hibernation, catnap,
+      cat nap, power nap, beauty sleep, lights out, out cold, sleeping beauty, sleep mode, in bed, go to bed, going to bed,
+      time for bed, off to bed, bed]
+    means: {face: sleep}
+    suggests: {stance: sit, motion: sleep, effects: [zzz]}
+    not: excited
+  insomnia:
+    words: [can not sleep, cannot sleep, could not sleep, insomnia, sleepless, up all night, all nighter, all-nighter, still awake,
+      wide awake, awake at night, lying awake, no sleep, zero sleep, did not sleep, have not slept, night owl, three am, 3am, 4am]
+    means: {face: drowsy}
+    suggests: {stance: sit, motion: sway}
+  lazy:
+    words: [lazy, laziness, couch potato, can not be bothered, cba, lounging, lounge, lazing, lazing around, lazy bones, lazybones,
+      slacking, slacker, slack off, procrastinate, procrastinating, procrastination, do nothing, doing nothing, rotting, bed rot,
+      bed rotting, vegging, veg out, unproductive, lazy mode]
+    means: {face: drowsy}
+    suggests: {stance: sit, motion: sway}
+  sick:
+    words: [sick, sickness, unwell, not well, not feeling well, feeling ill, feeling sick, nauseous, nausea, queasy, gross,
+      grossed out, ew, eww, yuck, yucky, disgusting, disgusted, disgust, flu, the flu, fever, feverish, under the weather, throw up,
+      throwing up, puke, puking, barf, barfing, vomit, vomiting, food poisoning, poisoned, sick mask, cough, coughing, coughs,
+      sore throat, headache, migraine, tummy ache, stomach ache, germs, germy, virus, contagious, infected, seasick, carsick,
+      motion sickness, green face, blergh, blech]
+    means: {face: sick}
+    suggests: {motion: sneeze, tail: low}
+    not: happy
+  hot:
+    words: [hot, so hot, too hot, heat, heatwave, heat wave, boiling hot, melting, i am melting, scorching, sweltering, overheated,
+      overheating, sweaty weather, sun stroke, sunstroke, it is hot, hot day, hot weather, summer heat, burning up, roasting,
+      baking hot]
+    means: {face: flustered}
+    suggests: {effects: [sweat], motion: fan_self}
+  dizzy:
+    words: [dizzy, dizziness, woozy, head spinning, my head is spinning, drunk, tipsy, hungover, hangover, overwhelmed,
+      overwhelming, too much, discombobulated, loopy, lightheaded, light headed, vertigo, seeing stars, room spinning, brain fog,
+      brain fried, fried, frazzled, information overload, sensory overload, my brain hurts, brain hurts, brain melting, error 404,
+      malfunction, malfunctioning, buffering, loading, short circuit, does not compute, wifi, slow wifi, wifi is slow, no wifi,
+      wifi down, bad wifi, lag, lagging, laggy, slow internet, internet is down, no signal, no internet]
+    means: {face: dizzy}
+    suggests: {motion: sway, effects: [dizzy_stars]}
+  dead:
+    words: [dead, i am dead, ded, rip, r i p, rest in peace, knocked out, ko, k o, game over, killed me, it killed me,
+      this killed me, deceased, wrecked, done for, i am done for, x x, flatlined, flatline, kaput, i am toast, perished,
+      i have perished, defeated, defeat, knocked out cold, out for the count, bonked, bonk, wiped]
+    means: {face: dead}
+    suggests: {motion: faint}

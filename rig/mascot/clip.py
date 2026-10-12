@@ -29,6 +29,9 @@ BEZ = {
 }
 
 
+EASES = set(BEZ) | {"hold", "sine", "elastic", "spring", "bounce"}
+
+
 def ease(name, x):
     """Evaluate a named easing at x in [0, 1]."""
     if x <= 0:
@@ -69,6 +72,8 @@ class Track:
         self.keys = []
 
     def key(self, t, v, e="io"):
+        if e not in EASES:
+            raise ValueError(f"unknown easing {e!r}; expected one of {', '.join(sorted(EASES))}")
         if isinstance(v, (list, tuple)):
             v = np.array(v, dtype=float)
         self.keys = [k for k in self.keys if k[0] != t] + [(t, v, e)]
@@ -154,10 +159,22 @@ class Clip:
         self.pins = []              # paws planted on a fixed point of the scene (solved with IK per frame)
         self.settle = False         # True: ends exactly on its keyed pose (it hands over to another clip instead of looping)
         self.calm = 0               # frames over which follow-through is eased away around the loop point (base clips)
+        self.roll = 0               # the baked loop starts this many frames in (see lottie.rolled); 0 for the app's clips
 
     # ---- keys
+    NAMED = ("arm.L", "arm.R", "tail", "stance")       # tracks of named poses (vectors), keyed through arm() / tailpose() / stance()
+
+    @staticmethod
+    def _check(ch):
+        """A misspelt channel would otherwise be keyed, sampled by nobody and silently do nothing."""
+        from .rig import CHANNELS
+        if ch not in CHANNELS and ch not in Clip.NAMED:
+            near = [c for c in CHANNELS if c.split(".")[0] == ch.split(".")[0]][:8]
+            raise ValueError(f"unknown rig channel {ch!r}" + (f"; channels starting the same way: {', '.join(near)}" if near else ""))
+
     def k(self, ch, *keys):
         """c.k('head.rot', (0, 0), (12, 8, 'back'), ...)"""
+        self._check(ch)
         tr = self.tracks.setdefault(ch, Track(None))
         for key in keys:
             t, v = key[0], key[1]
@@ -166,6 +183,7 @@ class Clip:
         return self
 
     def set(self, ch, v):
+        self._check(ch)
         self.tracks[ch] = Track(None).key(0, v)
         return self
 
@@ -247,13 +265,27 @@ class Clip:
         return self.add("tail", fn)
 
     def face(self, t, name, dur=8, e="io", **over):
-        """Blend every face channel to the named expression, arriving at frame t (starting dur frames earlier)."""
-        from .rig import FACES
+        """Blend every face channel to the named expression, arriving at frame t (starting dur frames earlier).
+        Channels added in v4 that the expression does not set go back to rest, and held channels (eye.style) jump
+        at frame t instead of blending."""
+        from .rig import CHANNELS, FACE_V4, FACES, HELD
+        if name not in FACES:
+            raise ValueError(f"unknown expression {name!r}; expected one of {', '.join(sorted(FACES))}")
         vals = dict(FACES[name])
         vals.update({k.replace("_", "."): v for k, v in over.items()})
-        from .rig import CHANNELS
+        if any(ch in vals for ch in FACE_V4) or any(ch in self.tracks for ch in FACE_V4):
+            for ch in FACE_V4:
+                vals.setdefault(ch, CHANNELS[ch])
+        for ch in vals:
+            if ch not in CHANNELS:
+                raise ValueError(f"expression {name!r} sets {ch!r}, which is not a rig channel")
         for ch, v in vals.items():
             tr = self.tracks.get(ch)
+            if ch in HELD:
+                if t > 0 and not (tr and tr.keys):
+                    self.k(ch, (0, CHANNELS[ch], "hold"))       # before its first face the channel is at rest
+                self.k(ch, (t, v, "hold"))
+                continue
             if dur > 0 and t - dur >= 0:
                 if tr and tr.keys:
                     earlier = [k[0] for k in tr.keys if k[0] <= t]
@@ -280,6 +312,7 @@ class Clip:
         return self
 
     def add(self, ch, fn):
+        self._check(ch)
         self.adds.setdefault(ch, []).append(fn)
         return self
 

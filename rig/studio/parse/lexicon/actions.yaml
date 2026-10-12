@@ -1,0 +1,627 @@
+# Doing words.  An action MEANS a motion (it wins over a scenario template) and SUGGESTS a face and the rest.
+# A motion that acts with something brings it by itself ("typing" brings a laptop, "eating" the mascot's favourite
+# snack), so an action only names a prop when the words name one ("eating pizza" -> pizza, from things.yaml).
+# Motions: studio/library/motions_*.py (python -m studio.cli --list motions).
+
+actions:
+  # ---------------------------------------------------------------- the first fifteen
+  wave:
+    words: [wave, waving, waves, waved, hello, hi, hey, heya, hiya, howdy, hullo, greet, greeting, greetings, bye, goodbye,
+      good bye, bye bye, byebye, see you, see ya, see you soon, welcome, aloha, ciao, farewell, waving hello, waving goodbye,
+      wave hello, wave goodbye, say hi, say hello, saying hi, hello hello, yoohoo, yoo hoo, ahoy, cheerio, ta ta, toodles,
+      peace out, later gator, see you around, so long, salutations, howdy partner, hi hi, hey hey, waving hand, hand wave,
+      hello there, hey there, hi there, bonjour, hola, konnichiwa, annyeong, salaam, salam, assalamualaikum, as salamu alaykum,
+      waves hi]
+    means: {motion: wave}
+    suggests: {face: smiley}
+  wave_both:
+    words: [wave both hands, waving both hands, wave both paws, waving both paws, both hands waving, waving like crazy,
+      frantic wave, big wave, huge wave, waving wildly, over here, i am over here, yoo hoo over here, hey over here, notice me,
+      here here]
+    means: {motion: wave_both}
+    suggests: {face: joy}
+  jump:
+    words: [jump, jumping, jumps, jumped, leap, leaping, leaps, leapt, jump for joy, jumping for joy, jumping around, spring up,
+      springing, pounce, pouncing, jump up and down, trampoline, boing, boing boing, big jump, jump up, jumps up, yeet, yeeet,
+      yeeted]
+    means: {motion: jump}
+    suggests: {face: excited}
+  bounce:
+    words: [bounce, bouncing, bounces, bouncy, bob, bobbing, bobs, bopping along, fidget, fidgeting, hyper bounce, happy bounce,
+      bounce bounce, bouncing around, boop, booping]
+    means: {motion: bounce}
+    suggests: {face: joy}
+  cheer:
+    words: [cheer, cheering, cheers on, celebrate, celebrating, celebrates, celebrated, celebration, celebrations, hooray, hurray,
+      hurrah, woohoo, woo hoo, go team, let us go, let us goo, cheerleader, cheerleading, raise the roof, raising the roof,
+      hip hip hooray, three cheers, celebratory, yes we did, made it big, cheering on, rooting for you, go go go, you can do it,
+      you got this, you have got this, go for it, good luck, best of luck, break a leg, fighting, hwaiting, ganbatte,
+      believe in you]
+    means: {motion: cheer}
+    suggests: {face: joy, effects: [sparkles]}
+  dance:
+    words: [dance, dancing, dances, danced, dancer, groove, grooving, grooves, boogie, boogying, bop, bopping, shimmy, shimmying,
+      rave, raving, jam, jamming, jam out, jamming out, happy dance, dance party, dance off, dance moves, busting a move,
+      bust a move, get down, getting down, cha cha, salsa, tango, waltz, ballroom, hip hop, breakdance, breakdancing, conga,
+      macarena, dancing queen, dance floor, vibe check, club, clubbing, party animal, partying, groovy, funky, get funky,
+      let us dance, shall we dance, party hard]
+    means: {motion: dance}
+    suggests: {face: joy, effects: [notes]}
+  walk:
+    words: [walk, walking, walks, walked, stroll, strolling, strolls, wander, wandering, wanders, strut, strutting, struts, pacing,
+      pace, on the go, on the move, off we go, heading out, head out, leaving now, walking away, walk away, here i come,
+      coming over, step by step, catwalk, runway, hiking, hike, trek, trekking, commute, commuting, errands, running errands,
+      going out, out for a walk, taking a walk, walkies, going home, on my way home, strolling along]
+    means: {motion: walk}
+    suggests: {face: smiley}
+  nod:
+    words: [yes, yep, yeah, yup, yass, yas, yasss, yesss, uh huh, mhm, mm hmm, sure thing, of course, absolutely yes, definitely,
+      indeed, agree, agreed, i agree, totally agree, approve, approved, approval, nod, nodding, nods, nodded, true, so true,
+      very true, exactly, correct, that is right, you are right, right right, fair, fair enough, facts, true facts, got it,
+      understood, understand, roger, roger that, copy, copy that, affirmative, i see, makes sense, that makes sense, good point,
+      valid, valid point, agreed 100, so same, relatable, big mood, yes yes, yes please, yes sir, aye, aye aye, okey dokey,
+      okie dokie, righto, gladly, with pleasure, my pleasure, count me in, i am in, sign me up, why not, ok, okay, okie, okk, kk,
+      sounds good, noted, will do, on it, yes maam, si, oui, ja, haan, ji, hai, no cap, no cap fr, facts no cap]
+    means: {motion: nod}
+    suggests: {face: smiley}
+    weight: 0.9
+  "no":
+    words: [nope, nah, naw, nuh uh, no no, no no no, no thanks, no thank you, disagree, i disagree, refuse, refusing, refuses,
+      decline, declined, shake head, shaking head, shakes head, shook head, head shake, absolutely not, definitely not,
+      certainly not, hard pass, pass, i will pass, not today, not now, not happening, no chance, no way jose, hell no, heck no,
+      oh no you do not, over my dead body, not a chance, denied, veto, nein, never ever, uh uh, no means no, i do not think so,
+      not interested, no deal, wrong, incorrect, that is wrong, false, nuh, nopity nope, nope nope, stop it, stop that, cut it out,
+      nahh, naur, nay]
+    means: {motion: "no"}
+    suggests: {face: unamused}
+    weight: 0.9
+  shiver:
+    words: [shiver, shivering, shivers, shivered, cold, so cold, freezing, freezing cold, frozen, chilly, brr, brrr, icy, ice cold,
+      it is cold, winter cold, frostbite, cold weather, cold day, too cold, chattering, teeth chattering, shaking, shake, shakes]
+    means: {motion: shiver}
+    suggests: {face: nervous, accessories: [scarf], effects: [cold_breath]}
+  think:
+    words: [think, thinking, thinks, thought about, thoughts, pondering, ponder, ponders, considering, consider, considers,
+      deciding, decide, decision, decisions, plan, planning, plans, brainstorm, brainstorming, contemplate, contemplating, reflect,
+      reflecting, mull, mulling, figure out, figuring out, figuring it out, let me think, thinking hard, hard thinking,
+      deep thought, deep in thought, lost in thought, thinking cap, big brain, galaxy brain, overthinker, philosopher,
+      philosophical, theory, hypothesis, i wonder, let me see, let me check, checking, hmmmm, analysing, analyzing]
+    means: {motion: think}
+    suggests: {face: curious, effects: [thought]}
+  sway:
+    words: [sway, swaying, sways, rock, rocking, rocks, swing, swinging, swings, lean, leaning, leans, wobble, wobbling, wobbles,
+      side to side, back and forth, to and fro, lull, lulling, groove gently, sway gently, swaying to the music, chill music]
+    means: {motion: sway}
+    suggests: {face: calm}
+  idle:
+    words: [wait, waiting, waits, waited, patiently, patient, standing by, stand by, standing still, stay still, stay, staying,
+      hold on, hang on, one moment, one sec, one second, just a sec, just a second, just a moment, waiting for you,
+      waiting patiently, idle, idling, pose, posing, poses, posed, portrait, headshot, model, modeling, modelling, strike a pose,
+      still life, statue, freeze, frozen pose, mannequin, afk]
+    means: {motion: idle}
+    suggests: {face: smiley}
+  hide:
+    words: [hide, hiding, hides, hid, hidden, hide and seek, hiding away, i am hiding, nobody saw that, cannot look,
+      too embarrassing, cringe, cringing, cringey, cringy, second hand embarrassment, cover eyes, covering eyes, covers eyes,
+      covered eyes, cannot watch, eyes covered, hands over eyes, paws over eyes, see no evil, no peeking, i did not see that,
+      did not see anything, unsee, cannot unsee, too scary to watch, look away now, spoilers, no spoilers, peekaboo, peek a boo,
+      hide eyes, nobody look at me, avert eyes]
+    means: {motion: hide}
+    suggests: {face: flustered}
+
+  # ---------------------------------------------------------------- gestures
+  clap:
+    words: [clap, clapping, claps, clapped, applause, applaud, applauding, applauds, bravo, brava, encore, well played, slow clap,
+      round of applause, give it up, standing ovation, ovation, clap clap, hand clap, clapping hands, cheers and applause,
+      good game, gg, gg wp, well done, congrats, congratulations, congrats to you, kudos, props to you, hats off, hats off to you,
+      golf clap]
+    means: {motion: clap}
+    suggests: {face: joy, effects: [sparkles]}
+  shrug:
+    words: [shrug, shrugs, shrugging, shrugged, do not know, i have no idea, not a clue, i have no clue, oh well, whatever happens,
+      it is what it is, such is life, c'est la vie, que sera sera, i guess so, dunno, dunno man, no idea man, beats me man,
+      your guess is as good as mine, not my problem, not my circus, idk, idk man, who even knows, shrug emoji, it be like that,
+      life happens, whatevs, eh whatever, not sure, unsure]
+    means: {motion: shrug}
+    suggests: {face: confused}
+  facepalm:
+    words: [facepalm, face palm, facepalming, palm to face, palm face, smh, why me, oh brother, oh boy, oh for crying out loud,
+      are you kidding, are you kidding me, what have i done, what did i just read, i give up, give up, gave up, giving up,
+      epic facepalm, double facepalm, head in hands, head in hand, my head hurts, seriously guys, unbelievable, ugh why, not again,
+      here we go again, every single time, so dumb, stupid me, duh, d oh]
+    means: {motion: facepalm}
+    suggests: {face: unamused}
+  salute:
+    words: [salute, saluting, salutes, saluted, aye aye captain, yes captain, sir yes sir, at your service, reporting for duty,
+      ready for duty, on duty, soldier, sergeant, captain, general, cadet, military, army, navy salute, honor, honour, respect,
+      respects, pay respects, o7, roger captain, mission accepted, yes chef, oui chef, will do boss, yes ma'am]
+    means: {motion: salute}
+    suggests: {face: determined}
+  flex:
+    words: [flex, flexing, flexes, flexed, muscles, muscle, muscly, muscular, buff, gains, swole, biceps, bicep, guns, strong flex,
+      look at these muscles, gym bro, gym rat, bodybuilder, body builder, strongman, strong man, pumped iron, so strong, stronk,
+      i am strong, tough guy, mighty, invincible]
+    means: {motion: flex}
+    suggests: {face: determined}
+  pray:
+    words: [pray, praying, prays, prayer, prayers, paws together, hands together, palms together, fingers crossed, crossing fingers,
+      hoping, hope, hopes, hopeful, hopefully, wish, wishing, wishes, make a wish, i hope, wish me luck, knock on wood, touch wood,
+      bless, bless you, blessing, blessings, god bless, amen, grace, worship, praise be, inshallah, insha allah, thank you god,
+      hands clasped, clasped hands, namaskar, gassho, dua, praying for you, sending prayers, thoughts and prayers, manifesting,
+      manifest, please thank you, namaste]
+    means: {motion: pray}
+    suggests: {face: calm}
+  plead:
+    words: [pleaseee, pls pls, plz plz, pwetty pwease, i beg you, begging, beg, begs, puppy eyes please, can i please, may i please,
+      please say yes, just this once, pretty please with sugar on top, i am begging you, on my knees, beggin]
+    means: {motion: plead}
+    suggests: {face: pleading}
+  thumbs_up:
+    words: [thumbs up, thumb up, thumbs ups, two thumbs up, nice one, very nice, nice job, nice work, 100, 100 percent, a plus,
+      top notch, five stars, 5 stars, ten out of ten, 10 out of 10, 10/10, sounds great, looks good, looks great, all good here,
+      good to go, works for me, solid, excellent, outstanding, superb job, atta boy, atta girl, attaboy, attagirl, good job,
+      great job, great work, good work, approved by me, liked, likes, i like it, love it, love this, nice nice, gj, noice, perfect]
+    means: {motion: thumbs_up}
+    suggests: {face: grin}
+  thumbs_down:
+    words: [thumbs down, thumb down, dislike, disliked, booo, boooo, not good, bad job, terrible, awful, horrible, fail, failed,
+      failure, epic fail, zero out of ten, 0/10, one star, 1 star, disapprove, disapproved, disapproval, booing, lame, so lame,
+      worst, the worst, not cool, uncool, rubbish, trash, garbage, flop, cringe content, do not like, hate it, not a fan]
+    means: {motion: thumbs_down}
+    suggests: {face: unamused}
+  point:
+    words: [pointing at you, point at you, points at you, i choose you, i pick you, it is you, you are next, your turn, you there,
+      hey you, yes you, i want you, we want you, you are it, tag you are it, tag, you are the one, gotcha, got you, this is you,
+      that is you, you you you, you did this, blame you, j accuse]
+    means: {motion: point}
+    suggests: {face: grin}
+  eureka:
+    words: [aha, eureka, i have an idea, got an idea, i got it, good idea, great idea, bright idea, brilliant idea, idea, ideas,
+      lightbulb moment, light bulb moment, genius, smart idea, well actually, um actually, fun fact, did you know, quick question,
+      hear me out, listen up, oh i know, i know, i know the answer, solved it, figured it out, found it, i have got it, that is it,
+      inspiration, inspired idea, aha moment, epiphany]
+    means: {motion: eureka}
+    suggests: {face: excited, effects: [idea]}
+  peace:
+    words: [peace, peace sign, peace and love, peace out sign, v sign, victory sign, deuces, deuces out, chill vibes only,
+      kawaii pose, peace peace, two fingers, cheese peace, peace yo, peace to all, peace be with you]
+    means: {motion: peace}
+    suggests: {face: wink}
+  fist_pump:
+    words: [fist pump, fist pumping, pumping fist, fist, fists, booyah, boo yah, boom baby, get in, yeah buddy, heck yeah,
+      hell yeah, oh yeah, oh yes, crushed it, crushing it, killed it, killing it, smashed it, smashing it, aced it, aced, nailed,
+      victory pose, champion pose, power up, powered up, lets get it, let us get it, yesss finally, score, scored, goal]
+    means: {motion: fist_pump}
+    suggests: {face: excited}
+  dab:
+    words: [dab, dabbing, dabs, dabbed, hit the dab, dab on them, dab on em, dab on the haters, too cool for school]
+    means: {motion: dab}
+    suggests: {face: cool}
+  hug:
+    words: [hug, hugs, hugging, hugged, big hug, big hugs, bear hug, hugs for you, sending hugs, virtual hug, virtual hugs,
+      self hug, hug myself, hugging myself, hugging itself, embrace, embracing, warm hug, group hug, huggy, huggies, hugs and love,
+      hug it out, need a hug, needs a hug, i need a hug, free hug, free hugs, come here, come here you, come to me, hug me,
+      sending love and hugs, squeeze, squeezing, tight hug, cuddle me]
+    means: {motion: hug}
+    suggests: {face: joy, effects: [hearts]}
+  ta_da:
+    words: [ta da, tada, voila, behold, presenting, here it is, surprise arms, welcome home, open arms, arms wide, arms wide open,
+      arms open, wide open arms, spread arms, arms spread, big welcome, here i am, look at me, i am here, i have arrived, arrived,
+      entrance, grand entrance, introducing, meet me, nailed the landing, and scene, open wide, arms out, airplane arms]
+    means: {motion: ta_da}
+    suggests: {face: joy, effects: [sparkles]}
+  blow_kiss:
+    words: [blow a kiss, blowing a kiss, blows a kiss, blew a kiss, blowing kisses, blow kisses, flying kiss, air kiss, air kisses,
+      mwah, muah, mwa, muaah, mwah mwah, kisses, kissy, kiss kiss, smooch, smooches, xoxo, xo, kiss for you, sending kisses,
+      kisses for you, hugs and kisses, love you, love ya, love u, luv u, luv you, ily, i love you, love you lots, love you so much]
+    means: {motion: blow_kiss}
+    suggests: {face: kiss, effects: [hearts]}
+  high_five:
+    words: [high five, high fives, high fiving, high-five, hi five, gimme five, give me five, up top, five, teamwork, team work,
+      we did it, nice teamwork, partner in crime, partners in crime]
+    means: {motion: high_five}
+    suggests: {face: excited}
+  bow:
+    words: [bowing, bowed, take a bow, takes a bow, curtsy, curtsey, curtsying, thank you kindly, thanks kindly, much obliged,
+      at your service bow, deep bow, humbly, humble, grateful bow, arigato, arigatou, gomen, gomenasai, sumimasen, apologies bow,
+      i humbly apologize, respectfully, my liege, your highness, taking a bow, took a bow, bowing down, bow down low]
+    means: {motion: bow}
+    suggests: {face: calm}
+  stretch:
+    words: [stretch, stretching, stretches, stretched, morning stretch, big stretch, stretch out, stretching out, limber up,
+      warm up, warming up, warmup, wake up stretch, reach up, reaching up, arms stretched, stretchy, yoga stretch]
+    means: {motion: stretch}
+    suggests: {face: yawn}
+  yawn:
+    words: [yawn, yawning, yawns, yawned, big yawn, morning yawn, yawny, so sleepy yawn, yawning so hard]
+    means: {motion: yawn}
+    suggests: {face: yawn}
+  giggle:
+    words: [giggle, giggling, giggles, giggly, giggled, tee hee, teehee, hehe, hehehe, hihi, hihihi, snicker, snickering, titter,
+      tittering, chuckle, chuckling, chuckles, chuckled, fufu, fufufu, ufufu, kekeke, kekek, kek, hoho, ohoho, hee, hee hee]
+    means: {motion: giggle}
+    suggests: {face: laugh}
+  shush:
+    words: [shh, shhh, shhhh, shush, shushing, hush, hush hush, keep quiet, be quiet, quiet please, quiet, silence, secret, secrets,
+      it is a secret, keep a secret, keeping secrets, do not tell, do not tell anyone, between you and me, whisper, whispering,
+      whispers, psst, pssst, my lips are sealed, lips sealed, zip it, mum is the word, top secret, sh, library voice, quiet time,
+      hand over mouth, paw over mouth, covering mouth, covers mouth, cover mouth, hand on mouth, paw on mouth, gossip, gossiping]
+    means: {motion: shush}
+    suggests: {face: wink}
+  scratch_head:
+    words: [scratch head, scratching head, scratches head, scratching my head, head scratch, head scratcher, stumped, i am stumped,
+      how does this work, what does this mean, huh what, so confusing, um what]
+    means: {motion: scratch_head}
+    suggests: {face: confused, effects: [question]}
+  scheme:
+    words: [scheme, scheming, schemes, evil plan, evil plans, master plan, evil laugh, evil laughter, mwahaha, muahaha, mwahahaha,
+      bwahaha, plotting, plot, plots, devious, sneaky plan, something evil, rubbing hands, rubbing my hands, all according to plan,
+      as planned, just as planned, world domination]
+    means: {motion: scheme}
+    suggests: {face: mischief}
+  look_around:
+    words: [look around, looking around, looks around, looking for, searching, search, searches, where is it, where are you,
+      where did it go, where am i, lost something, hunting for, scanning, scan, keep watch, keeping watch, looking left and right,
+      coast is clear, is anyone there, anybody home, hello anyone, who is there]
+    means: {motion: look_around}
+    suggests: {face: curious}
+  impatient:
+    words: [impatient, impatiently, tapping foot, tap foot, foot tapping, taps foot, waiting impatiently, hurry up, come on,
+      come on already, any day now, still waiting, waiting forever, i am waiting, how long, how much longer, are we there yet,
+      took you long enough, finally done, tick tock, clock is ticking, you are late, so late, late again, ahem, well well]
+    means: {motion: impatient}
+    suggests: {face: unamused, effects: [clock]}
+  sulk:
+    words: [sulk, sulking, sulks, sulky, hmph, hmpf, humph, harrumph, grumpy pants, grump, crankypants, in a huff, huffy, mood off,
+      no fair, fine whatever, butthurt, leave me alone, go away, do not talk to me, i am not talking to you]
+    means: {motion: sulk}
+    suggests: {face: pout}
+  sigh:
+    words: [sigh, sighing, sighs, sighed, deep sigh, big sigh, heavy sigh, finally over, exhale, exhaling, deep breath,
+      deep breaths, breathe out, haah, haaa, welp, alas, so it goes]
+    means: {motion: sigh}
+    suggests: {face: relieved}
+  bashful:
+    words: [bashful, bashfully, shy, shyly, shyness, so shy, too shy, aw shucks, shucks, flattered, you are too kind, stop it you,
+      oh stop it, oh you, timid, coy, uwu shy, introvert, introverted, socially awkward, social anxiety, hermit, hermit mode]
+    means: {motion: bashful}
+    suggests: {face: flustered}
+
+  # ---------------------------------------------------------------- big feelings, the whole body
+  laugh:
+    words: [laugh, laughs, laughed, laughter, lmfao, roflmao, cracking up, cracked up, dying laughing, dying of laughter,
+      belly laugh, guffaw, cackle, cackling, laughing so hard, cannot stop laughing, can not stop laughing, kekw, pfft,
+      rolling on the floor, rotfl, laughing]
+    means: {motion: laugh}
+    suggests: {face: laugh}
+  sob:
+    words: [sob, sobbing, sobs, sobbed, bawl, bawling, wail, wailing, weep, weeping, ugly cry, ugly crying, cry my eyes out,
+      crying my eyes out, crying so hard, crying a river, waterworks, boohoo, boo hoo, waaah, wahh, waaa, huhuhu, hiks, t t, tt,
+      tt tt, heartbroken sobbing, i am crying, crying rn, sobbing rn, tears everywhere]
+    means: {motion: sob}
+    suggests: {face: cry, effects: [waterfall_tears]}
+  stomp:
+    words: [stomp, stomping, stomps, stomped, tantrum, temper tantrum, throwing a tantrum, rage quit, rampage, on a rampage, so mad,
+      mad mad, furious stomp, angry stomp, stamping feet, stamp feet, hulk smash, smash, grrrr, argh, arrgh, aargh, i am so angry,
+      outrageous, unacceptable]
+    means: {motion: stomp}
+    suggests: {face: furious, effects: [anger]}
+  roar:
+    words: [roar, roaring, roars, roared, rawr, rawrr, rawrrr, raawr, rarr, growl, growling, growls, growled, big roar, mighty roar,
+      fierce roar, loud roar, hear me roar, rawr xd]
+    means: {motion: roar}
+    suggests: {face: angry}
+  punch:
+    words: [punch, punching, punches, punched, boxing, boxer, boxing gloves, boxing glove, jab, jabs, jabbing, uppercut,
+      one two punch, fight, fights, fight me, come at me, come at me bro, square up, squaring up, fists up, put up your dukes,
+      sparring, spar, throw hands, throwing hands, catch these hands, fisticuffs, knockout, knock out, kickboxing, kick boxing,
+      muay thai, mma, wanna fight, want to fight, let us fight, shadow boxing, boxing match, in the ring, ready to fight]
+    means: {motion: punch}
+    suggests: {face: determined, stance: wide}
+  faint:
+    words: [faint, fainted, fainting, faints, passed out, pass out, passing out, swoon, swooning, swoons, collapse, collapsed,
+      collapsing, keel over, keeled over, flop over, i can not handle this, this is too much, i am going to faint, overcome,
+      falls over, fall over, falling over, timber, thud, i have fallen]
+    means: {motion: faint}
+    suggests: {face: dizzy, effects: [dizzy_stars]}
+  panic:
+    words: [panic, panicking, panics, panicked, panic mode, freak out, freaking out, freaks out, freaked out, aaa, aaah, aaaah,
+      aaaaah, ahhh, ahhhh, ahhhhh, help help, mayday, sos, emergency, red alert, chaos, chaotic, meltdown, losing it,
+      losing my mind, running around screaming, screaming, scream, screams, screamed, everything is on fire, this is fine,
+      oh no oh no, oh god oh god, deadline panic, exam panic, nooo, noooo, nooooo, omg omg, oh my god oh my god, what do i do]
+    means: {motion: panic}
+    suggests: {face: scared, effects: [panic_sweat]}
+  victory:
+    words: [victory, victorious, win, winning, won, we won, i won, winner winner, champions, we are the champions, champion,
+      triumph, triumphant, first place win, number one, number 1, "#1", we are number one, top of the world, undefeated, i did it,
+      we did it yay, achievement unlocked, success, successful, we made it, mission accomplished, nailed the exam, passed, i passed,
+      passed the exam, got the job, hired, won the game, win the game, we won the game, i won the game, won the match]
+    means: {motion: victory}
+    suggests: {face: excited, effects: [confetti]}
+  hop:
+    words: [hop, hopping, hops, hopped, hoppity, hippity hop, skip, skipping, skips, skipped, hop hop, hop around, hopping around,
+      skipping along, happy hop, springy, boingy]
+    means: {motion: hop}
+    suggests: {face: joy}
+  run:
+    words: [run, running, runs, ran, jog, jogging, jogs, jogged, sprint, sprinting, sprints, rush, rushing, hurry, hurrying, dash,
+      dashing, dashed, gotta run, got to run, got to go, gotta go, have to go, i am late, late for work, late for class, on my way,
+      omw, coming, i am coming, be right there, almost there, zoomies run, speeding, racing, race, marathon, run away, running away,
+      flee, fleeing, escape, escaping, get away, chase, chasing, being chased, catch me, cannot catch me]
+    means: {motion: run}
+    suggests: {face: determined, effects: [speed_lines]}
+  sneak:
+    words: [sneak, sneaking, sneaks, sneaked, snuck, sneakily, sneaky, stealthy, stealthily, stealth, stealth mode, ninja,
+      ninja mode, creeping, creep, creeps, creepin, sneaking around, sneaking out, sneak attack, spy, spies, secret agent, agent,
+      undercover, incognito, on tiptoes sneaking, sneaky snacky, midnight snack raid, heist, thief, steal, stealing, stole]
+    means: {motion: sneak}
+    suggests: {face: mischief}
+  march:
+    words: [march, marching, marches, marched, parade, parading, left right left, soldier march, marching band, on parade,
+      quick march, march forward, forward march, onwards, onward, here we go marching, proudly marching, military march]
+    means: {motion: march}
+    suggests: {face: determined}
+  float:
+    words: [float, floating, floats, floated, drift, drifting, drifts, levitate, levitating, levitates, hover, hovering, hovers,
+      weightless, zero gravity, floating away, drifting away, in space, space, astronaut, cloud nine floating, dreamy floating,
+      ghostly]
+    means: {motion: float}
+    suggests: {face: calm, effects: [sparkles]}
+  soar:
+    words: [soar, soaring, soars, soared, fly, flying, flew, superman, superman pose, superhero, super hero, superhero flying,
+      flying pose, up up and away, takeoff, take off, lift off, liftoff, blast off, zoom zoom, flying high, airplane, aeroplane,
+      plane mode, flying superhero, heroic, save the day, saving the day, to the rescue, i can fly]
+    means: {motion: soar}
+    suggests: {face: determined, effects: [speed_lines]}
+  kick_feet:
+    words: [kick feet, kicking feet, kicking my feet, kicking its feet, kicks feet, swinging legs, swinging feet, legs swinging,
+      giddy kicking, kicking feet giddy, dangling feet, feet dangling, kicking legs, kicking my legs]
+    means: {motion: kick_feet}
+    suggests: {face: joy}
+  meditate:
+    words: [meditate, meditating, meditates, meditation, zen mode, mindful, mindfulness, om, ommm, ohm, find peace, breathe in,
+      breathing, breathe, keep calm, stay calm, namaste meditation, chakra, chakras, enlightened, enlightenment, yoga time, nirvana,
+      buddha, spiritual, mantra, mindful moment, yoga, doing yoga, yoga session, yogi, namaste yoga, sun salutation]
+    means: {motion: meditate}
+    suggests: {face: calm, effects: [aura]}
+  nod_off:
+    words: [nod off, nodding off, nods off, nodded off, dozing off, dozes off, drifting off, falling asleep, fall asleep,
+      falling asleep at desk, can not keep my eyes open, cannot keep my eyes open, eyes closing, struggling to stay awake,
+      sleepy at work, sleepy in class, boring lecture, power nap at desk, head bobbing, so sleepy]
+    means: {motion: nod_off}
+    suggests: {face: drowsy, effects: [zzz]}
+  headbang:
+    words: [headbang, headbanging, headbangs, rock on, rock out, rocking out, rock and roll, rock n roll, rocknroll, metal,
+      heavy metal, metalhead, mosh, moshing, mosh pit, punk, punk rock, rocker, rockstar, rock star, air guitar, guitar solo,
+      let us rock, horns up]
+    means: {motion: headbang}
+    suggests: {face: excited, effects: [notes]}
+  wiggle:
+    words: [wiggle, wiggling, wiggles, wiggled, wiggly dance, jiggle, jiggling, jiggles, squirm, squirming, twerk, twerking,
+      shake it, shaking it, shake your booty, booty shake, butt wiggle, waddle, waddling, wobble dance, noodle dance, silly dance,
+      goofy dance, derp dance]
+    means: {motion: wiggle}
+    suggests: {face: silly}
+  spin:
+    words: [spin, spinning, spins, spun, twirl, twirling, twirls, twirled, pirouette, spin around, spinning around, turn around,
+      turning around, whirl, whirling, whirls, round and round, do a spin, twirly, spinny, spin spin, ice skating, skating,
+      figure skating, roller skating, skates]
+    means: {motion: spin}
+    suggests: {face: joy, effects: [sparkles]}
+  flip:
+    words: [flip, flips, flipped, backflip, back flip, backflips, front flip, frontflip, somersault, somersaults, cartwheel,
+      cartwheels, tumble, tumbling, acrobat, acrobatic, acrobatics, gymnast, gymnastics, parkour, stunt, stunts, trick, tricks,
+      do a flip, did a flip, sick trick]
+    means: {motion: flip}
+    suggests: {face: excited}
+  moonwalk:
+    words: [moonwalk, moonwalking, moonwalks, moon walk, smooth moves, so smooth, slick, slick moves, sliding, slide, glide,
+      gliding, cool moves]
+    means: {motion: moonwalk}
+    suggests: {face: cool}
+  robot:
+    words: [robot, robots, robotic, robot dance, the robot, doing the robot, beep boop, beep beep boop, boop beep, bleep bloop,
+      android dance, cyborg, mechanical, beep bop, i am a robot, does not compute dance, ai, artificial intelligence, bot]
+    means: {motion: robot}
+    suggests: {face: neutral}
+  floss:
+    words: [floss, flossing, flosses, flossed, floss dance, the floss, fortnite dance, emote dance, default dance, griddy,
+      hitting the griddy]
+    means: {motion: floss}
+    suggests: {face: grin}
+  disco:
+    words: [disco, disco dance, disco fever, disco ball, funky disco, seventies, 70s, retro dance, dance fever, night fever,
+      groovy baby]
+    means: {motion: disco}
+    suggests: {face: cool, effects: [spotlight]}
+  jumping_jacks:
+    words: [jumping jacks, jumping jack, star jumps, star jump, cardio jumps, warm up jumps, calisthenics, aerobics, exercise jumps,
+      jump rope, skipping rope, skip rope, hiit, hiit workout, burpees, burpee]
+    means: {motion: jumping_jacks}
+    suggests: {face: determined, effects: [sweat], accessories: [headband]}
+  workout:
+    words: [workout, working out, work out, works out, worked out, exercise, exercising, exercises, squat, squats, squatting,
+      lunges, lunge, leg day, training, train, trains, fitness, fit, get fit, getting fit, gym time, hit the gym, at the gym,
+      gym session, crossfit, pilates, push ups, pushups, sit ups, situps, plank, planking, cardio, sweat it out, no pain no gain,
+      fitness goals, new year fitness, personal trainer, coach]
+    means: {motion: workout}
+    suggests: {face: determined, effects: [sweat], accessories: [headband]}
+  sneeze:
+    words: [sneeze, sneezing, sneezes, sneezed, achoo, atchoo, ah choo, ahchoo, hachoo, hatchoo, allergies, allergy, allergic,
+      hay fever, hayfever, pollen, pollen season, dust allergy, gesundheit, sneezy]
+    means: {motion: sneeze}
+    suggests: {face: sick}
+  shake:
+    words: [shake off, shaking off, shakes off, shook off, shake it off, shaking it off, wet, soaked, soaking wet, dripping wet,
+      drenched, shake dry, drying off, dry off, after a bath, bath time over, out of the bath, out of the pool, splash, splashed,
+      got wet, all wet]
+    means: {motion: shake}
+    suggests: {face: flustered, effects: [bubbles]}
+  tremble:
+    words: [tremble, trembling, trembles, trembled, quiver, quivering, quivers, shudder, shuddering, shudders, knees shaking,
+      shaking in fear, shaking with fear, shaking like a leaf, quaking, quaking in my boots, horror, so scared, too scared,
+      i am scared]
+    means: {motion: tremble}
+    suggests: {face: scared, effects: [sweat]}
+
+  # ---------------------------------------------------------------- acting with things (each brings what it needs)
+  eat:
+    words: [eat, eating, eats, ate, eaten, eating time, snack, snacking, snacks, snack time, snacky, munch, munching, munches, nom,
+      nom nom, nomnom, om nom, om nom nom, chomp, chomping, chomps, bite, biting, bites, chew, chewing, chews, devour, devouring,
+      feast, feasting, gobble, gobbling, yum, yummy, yum yum, delicious, tasty, so good food, mukbang, foodie, food time, lunch,
+      lunch time, lunchtime, dinner, dinner time, dinnertime, breakfast, breakfast time, brunch, supper, meal, meals, meal time,
+      dessert, dessert time, treat, treats, treat yourself, cheat day, cheat meal, eating good, eat well, let us eat, time to eat,
+      stuffing my face, pig out, pigging out, binge eating, midnight snack, grub, chow, chow time, stuffing its cheeks,
+      stuff my face, cheeks full, chipmunk cheeks, stuffed cheeks]
+    means: {motion: eat}
+    suggests: {face: joy}
+  sip:
+    words: [sip, sipping, sips, sipped, drink, drinking, drinks, drank, slurp, slurping, gulp it down, sip sip, sip the tea,
+      spilling tea, hydrate, hydrating, stay hydrated, thirsty, so thirsty, parched, quench, refreshing, refreshed, refreshment,
+      beverage, beverages]
+    means: {motion: sip}
+    suggests: {face: calm}
+  typing:
+    words: [typing, type, types, typed, typing away, keyboard, keyboarding, computer, pc, mac, macbook, coding, code, coder,
+      programmer, programming, developer, dev, debugging, debug, hacking, hacker, emails, email, emailing, working from home, wfh,
+      remote work, at my desk, desk job, office work, spreadsheets, excel, data entry, blogging, blogger, writing code, deploying,
+      deploy, pull request, git push, in a meeting online, online class, zoom meeting, teams meeting, homework on laptop]
+    means: {motion: typing}
+    suggests: {face: focused}
+  read:
+    words: [read, reading, reads, bookworm, book worm, reader, novel, novels, story, stories, storytime, story time, bedtime story,
+      library, studying a book, reading time, book club, chapter, chapters, page turner, literature, poem, poetry, comic, comics,
+      manga, magazine, newspaper, textbook, study, studying, studies, revision, revising, cramming, cram, exam prep, exam season,
+      finals, finals week, midterms, study time, study session, hitting the books, learning, learn, learns, knowledge, news,
+      reading the news, news paper, morning paper]
+    means: {motion: read}
+    suggests: {face: curious}
+  phone_call:
+    words: [phone call, on the phone, call, calling, calls, called, call me, calling you, ring ring, give me a call, ring me,
+      hit me up, hmu, hello who is this, who is calling, hello mom, hi mom, call mom, calling mom, phoning, phone home, telephone,
+      chatting on the phone, gossiping on the phone, long call, video call, facetime, facetiming, voice call, voice note,
+      customer service, hotline, hold the line, please hold]
+    means: {motion: phone_call}
+    suggests: {face: smiley}
+  selfie:
+    words: [selfie, selfies, taking a selfie, take a selfie, selfie time, selfie stick, but first let me take a selfie, photo op,
+      photo opportunity, pose for the camera, posing for a photo, influencer, instagram, insta, insta worthy, instagrammable, ootd,
+      outfit of the day, profile picture, pfp, new pfp, story post, posting a story, content creator, vlog, vlogging, vlogger,
+      streamer selfie, say cheese selfie]
+    means: {motion: selfie}
+    suggests: {face: grin}
+  texting:
+    words: [texting, text, texts, texted, text me, texting you, message, messages, messaging, message me, dm, dms, dm me, chat,
+      chatting, chats, whatsapp, telegram, messenger, signal app, imessage, sms, replying, reply, replies, reply soon, typing dots,
+      left on read, seen, on read, unread, read receipts, group chat, gc, sliding into dms, slide into dms, scrolling,
+      doomscrolling, doom scrolling, social media, posting, online, notifications, notification, screen time, glued to my phone,
+      phone addict]
+    means: {motion: texting}
+    suggests: {face: focused}
+  sing:
+    words: [sing, singing, sings, sang, sung, singer, sing along, singalong, serenade, serenading, karaoke, karaoke night, la la la,
+      lalala, tra la la, do re mi, belting, belt it out, high note, opera, aria, choir, solo, vocalist, idol singing,
+      concert singer, singing in the shower, shower singing, music star, pop star, popstar, diva, sing for you, song for you,
+      birthday song, howl, howling, howls, awoo, awooo, arooo]
+    means: {motion: sing}
+    suggests: {face: joy, effects: [notes]}
+  toast:
+    words: [toast, toasting, a toast, raise a glass, raising a glass, raise your glass, cheers, cheers mate, cheers to that,
+      cheers to you, cheers to us, kampai, kanpai, salud, prost, sante, skal, chin chin, bottoms up, clink, clinking, champagne,
+      prosecco, bubbly, wine, wine time, wine o clock, beer, beers, cocktail, cocktails, happy hour, mocktail, mimosa,
+      celebrate with a drink]
+    means: {motion: toast}
+    suggests: {face: joy}
+  paint:
+    words: [paint, painting, paints, painted, painter, artist, art, arts, artsy, arty, art time, drawing art, doodle, doodling,
+      doodles, sketch, sketching, sketches, illustrate, illustrating, illustration, illustrator, masterpiece, my masterpiece,
+      creative, creativity, being creative, artwork, canvas, watercolour, watercolor, acrylic, mural, color in, colouring, coloring,
+      crafts, craft, painting a picture, paint a picture, drawing a picture]
+    means: {motion: paint}
+    suggests: {face: smiley}
+  gaming:
+    words: [gaming, gamer, gamers, game, games, video game, video games, playing games, play games, game time, gaming time,
+      game night, playstation, ps5, ps4, xbox, nintendo, switch, pc gaming, console, joystick, esports, e sports, rank up, ranked,
+      level up, levelled up, leveled up, boss fight, final boss, respawn, gg ez game, just one more game, one more round, minecraft,
+      fortnite, pokemon, mario, zelda, among us, valorant, league, roblox]
+    means: {motion: gaming}
+    suggests: {face: determined}
+  photo:
+    words: [photo, photos, photograph, photographs, photographer, photography, picture, pictures, pic, pics, take a picture,
+      taking a picture, taking pictures, take a photo, taking a photo, taking photos, snapshot, snap, snapping, shutter, shutterbug,
+      cheese for the camera, smile for the camera, tourist, sightseeing, travel photo, paparazzi, click click]
+    means: {motion: photo}
+    suggests: {face: focused}
+  brush_teeth:
+    words: [brush teeth, brushing teeth, brush my teeth, brushing my teeth, brushes teeth, brushing its teeth, toothpaste,
+      tooth paste, teeth, dental, dentist, floss teeth, oral hygiene, clean teeth, minty fresh, morning routine, night routine,
+      bedtime routine, getting ready for bed, before bed]
+    means: {motion: brush_teeth}
+    suggests: {face: grin}
+  lift:
+    words: [lift weights, lifting weights, lifts weights, weightlifting, weight lifting, weights, barbell, bicep curl, bicep curls,
+      curls, curling, pumping iron, pump iron, deadlift, deadlifts, bench press, benching, heavy lifting, powerlifting, gym gains,
+      sets and reps, reps, one more rep]
+    means: {motion: lift}
+    suggests: {face: determined, effects: [sweat]}
+  strum:
+    words: [strum, strumming, strums, strummed, playing guitar, play guitar, plays guitar, playing the guitar, playing ukulele,
+      playing the ukulele, guitarist, guitar player, jam session, campfire song, campfire songs, serenading with a guitar, busking,
+      busker, singer songwriter, unplugged, acoustic session, music practice, band practice]
+    means: {motion: strum}
+    suggests: {face: joy, effects: [notes]}
+  juggle:
+    words: [juggle, juggling, juggles, juggled, juggler, multitasking, multitask, multi tasking, juggling everything, circus,
+      circus act, clown act, keeping balls in the air]
+    means: {motion: juggle}
+    suggests: {face: focused}
+  cuddle:
+    words: [cuddle, cuddles, cuddling, cuddled, cuddly, snuggle, snuggles, snuggling, snuggled, snuggly, comfort toy, cozy cuddle,
+      cuddle buddy, hugging a teddy, blankie, cuddle time, snuggle time, nap buddy]
+    means: {motion: cuddle}
+    suggests: {face: joy, effects: [hearts]}
+  write:
+    words: [write, writing, writes, wrote, written, writer, author, note, notes, note taking, taking notes, notes taking, jot,
+      jotting, jot down, scribble, scribbling, scribbles, journal, journaling, journalling, diary, dear diary, letter writing,
+      writing a letter, essay, essays, homework, assignment, assignments, to do list, todo list, list making, making a list,
+      sign here, signing, autograph, signature, poet, writing poetry, script, scriptwriting, planner, planning my day,
+      bullet journal]
+    means: {motion: write}
+    suggests: {face: focused}
+  magic:
+    words: [magic, magical, magician, sorcery, spell, spells, casting a spell, cast a spell, spellcasting, alakazam, hocus pocus,
+      enchant, enchanting, enchantment, fairy magic, poof, make a wish come true, magic time, it is magic, casting, cast, casts,
+      casting spells, cast spells, spellcaster, casting magic, doing magic, magic trick, magic tricks, abracadabra,
+      bippity boppity boo, wingardium leviosa, expelliarmus, accio]
+    means: {motion: magic}
+    suggests: {face: excited, effects: [sparkles]}
+  fan_self:
+    words: [fanning, fan myself, fanning myself, fanning itself, fan self, it is so hot, so hot in here, hot in here,
+      too hot in here, sweltering heat, heat wave fan, flustered fanning, oh my fanning, vapors, the vapours, swoon fan,
+      be still my heart, is it hot in here]
+    means: {motion: fan_self}
+    suggests: {face: flustered}
+  blow_nose:
+    words: [blow nose, blowing nose, blowing my nose, blows nose, blowing its nose, runny nose, stuffy nose, blocked nose, honk,
+      honking, cold and flu, caught a cold, got a cold, having a cold, head cold, snot, snotty, congested, congestion, sinus,
+      sinuses, man flu, sick day, sick days, calling in sick]
+    means: {motion: blow_nose}
+    suggests: {face: sick}
+  show_off:
+    words: [show off, showing off, shows off, showed off, look what i got, look what i have, guess what i got, new thing, just got,
+      finally got, i got the, unboxed, haul, my haul, proud owner, flaunt, flaunting, brag, bragging, brags, humble brag,
+      humblebrag, look mom, ta da look]
+    means: {motion: show_off}
+    suggests: {face: proud, effects: [sparkles]}
+  wave_flag:
+    words: [wave flag, waving flag, waving a flag, waves flag, flag waving, team spirit, go team go, fan zone, sports fan,
+      supporter, supporters, match day, game day, world cup, finals day, olympics, national day, independence day, country pride,
+      waving the flag, rally, rallying]
+    means: {motion: wave_flag}
+    suggests: {face: excited}
+  knock:
+    words: [knock, knocking, knocks, knocked, knock knock, knock knock who is there, anyone home, anybody there, is anybody there,
+      hello is anyone there, can i come in, may i come in, open up, open the door, let me in, door, at your door, visiting, visit,
+      surprise visit, guess who, it is me knocking, ding dong ditch]
+    means: {motion: knock}
+    suggests: {face: curious}

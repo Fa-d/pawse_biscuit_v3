@@ -53,7 +53,35 @@ CHANNELS = {
     "tail.front": 0.0,           # 0 behind the body, 1 in the lap (in front of the body, behind the feet), 2 in front of the feet
     # ground shadow
     "shadow.o": 1.0,
+    # ---- added in v4.  At these rest values every file draws exactly what it drew before they existed.
+    # brows, one at a time: offsets on top of brow.y / brow.tilt (a raised eyebrow, a skeptical look)
+    "brow.L.y": 0.0, "brow.R.y": 0.0, "brow.L.tilt": 0.0, "brow.R.tilt": 0.0,
+    # eye shape, held (not blended): 0 normal, 1 heart, 2 star, 3 spiral, 4 cross (x x), 5 squeezed shut (> <),
+    # 6 sparkling (extra highlights on the normal eye)
+    "eye.style": 0.0,
+    "eye.spin": 0.0,             # degrees: turns spiral and star eyes
+    "eye.L.s": 1.0, "eye.R.s": 1.0,   # size of one eye (a confused face has one eye bigger than the other)
+    "eye.wet": 0.0,              # 0..1 teary: a water line along the bottom of the eye
+    "lid.top": 0.0, "lid.L.top": 0.0, "lid.R.top": 0.0,   # 0..1 upper lids come down over open eyes (bored, smug, sleepy)
+    # mouth shapes, each 0 at rest
+    "mouth.teeth": 0.0,          # a row of teeth in the open mouth (grin)
+    "mouth.grit": 0.0,           # clenched teeth instead of lips (nervous, straining)
+    "mouth.wave": 0.0,           # wobbly line (queasy, nervous, about to cry)
+    "mouth.kiss": 0.0,           # pursed lips
+    "mouth.smirk": 0.0,          # -1..1 one corner of the mouth up
+    "mouth.wail": 0.0,           # open frown (crying out loud)
+    "blush.lines": 0.0,          # 0..1 hatch marks on the cheeks (flustered)
+    # paws, held: 0 open paw, 1 fist, 2 thumb up, 3 pointing finger, 4 peace sign
+    "hand.L.shape": 0.0, "hand.R.shape": 0.0,
+    "arm.L.back": 0.0, "arm.R.back": 0.0,   # 1 = the arm is drawn behind the body (paws behind the back)
 }
+
+# channels added in v4 that expressions may set; a face that does not mention one puts it back to rest, so going
+# from a heart-eyed face to a smile clears the hearts
+FACE_V4 = ("brow.L.y", "brow.R.y", "brow.L.tilt", "brow.R.tilt", "eye.style", "eye.L.s", "eye.R.s", "eye.wet", "lid.top",
+           "lid.L.top", "lid.R.top", "mouth.teeth", "mouth.grit", "mouth.wave", "mouth.kiss", "mouth.smirk", "mouth.wail",
+           "blush.lines", "mouth.w")
+HELD = ("eye.style", "hand.L.shape", "hand.R.shape")      # channels whose values are names, so they jump instead of blending
 
 # ---------------------------------------------------------------- expressions
 # Only face channels; any mascot with eyes, brows and a mouth can play them.
@@ -81,6 +109,56 @@ FACES = {
     "focused":   {"eye.open": 0.6, "eye.arc": -0.45, "eye.w": 1, "eye.h": 1, "look.x": 0, "look.y": 0.35, "brow.show": 1, "brow.y": -4, "brow.tilt": -10,
                   "mouth.smile": 0.8, "mouth.open": 0, "mouth.o": 0, "tongue": 0, "blush": 0},
 }
+
+
+def _face(base, **kw):
+    """An expression written as changes to another one (keyword names use _ for the dots)."""
+    out = dict(FACES[base])
+    out.pop("eye.L.blink", None)
+    out.update({k.replace("__", ".").replace("_", "."): v for k, v in kw.items()})
+    return out
+
+
+# ---- v4 expressions.  Built from the channels above, so every mascot with eyes, brows and a mouth can play them.
+FACES.update({
+    "laugh":       _face("joy", eye_style=5, eye_open=1, mouth_open=1.25, blush=1.3),
+    "grin":        _face("smiley", eye_h=0.95, mouth_smile=1.2, mouth_open=0.9, mouth_teeth=1, blush=1.1),
+    "sad":         _face("worried", eye_w=0.92, eye_h=0.9, look_y=0.45, brow_y=2, brow_tilt=22, mouth_smile=-0.8, lid_top=0.22,
+                         blush=0.4, eye_wet=0.35),
+    "cry":         _face("worried", eye_open=0, eye_arc=0.35, brow_tilt=24, brow_y=3, mouth_smile=-1, mouth_wail=1, blush=1.2),
+    "pleading":    _face("worried", eye_w=1.14, eye_h=1.16, look_y=-0.15, eye_style=6, eye_wet=1, brow_tilt=18, brow_y=4,
+                         mouth_smile=-0.3, mouth_wave=0.5, blush=1.25),
+    "love":        _face("smiley", eye_style=1, eye_w=1.06, eye_h=1.06, mouth_open=0.9, blush=1.4),
+    "starry":      _face("smiley", eye_style=2, eye_w=1.06, eye_h=1.06, mouth_open=1.0, blush=1.2),
+    "dizzy":       _face("neutral", eye_style=3, mouth_smile=0.2, mouth_wave=0.8, tongue=0.6, blush=0.6),
+    "dead":        _face("neutral", eye_style=4, mouth_smile=0, tongue=1.7, blush=0),
+    "shocked":     _face("surprised", eye_w=0.55, eye_h=0.6, brow_y=14, brow_tilt=8, mouth_o=1.35, blush=0.2),
+    "smug":        _face("smiley", lid_top=0.45, look_x=0.35, brow_show=1, brow_R_y=7, brow_tilt=-6, mouth_open=0, mouth_smirk=0.9,
+                         mouth_smile=0.6, blush=0.8),
+    "unamused":    _face("neutral", lid_top=0.55, look_x=-0.5, brow_show=1, brow_y=-2, brow_tilt=-4, mouth_smile=0, tongue=0, blush=0.3),
+    "pout":        _face("neutral", eye_h=0.92, lid_top=0.15, look_x=0.5, brow_show=1, brow_tilt=-16, brow_y=-3, mouth_smile=-0.6,
+                         mouth_w=0.7, tongue=0, blush=1.35, blush_lines=0.6),
+    "nervous":     _face("worried", eye_w=0.95, eye_h=1.0, brow_tilt=16, brow_y=4, look_x=-0.3, mouth_grit=1, blush=0.5),
+    "kiss":        _face("joy", mouth_open=0, mouth_kiss=1, blush=1.4),
+    "silly":       _face("wink", eye_L_blink=1, tongue=1.8, mouth_open=0, blush=1.2),
+    "yawn":        _face("sleep", eye_style=5, eye_open=1, brow_show=1, brow_tilt=10, mouth_open=1.25, mouth_w=0.72, blush=0.8),
+    "drowsy":      _face("neutral", lid_top=0.62, eye_h=0.95, look_y=0.2, mouth_smile=0.2, tongue=0, blush=0.9, eye_wet=0.3),
+    "determined":  _face("focused", eye_open=1, lid_top=0.3, brow_y=-5, brow_tilt=-22, mouth_smile=0.8, look_y=0.1),
+    "mischief":    _face("smiley", lid_top=0.4, look_x=0.4, brow_show=1, brow_tilt=-20, mouth_smile=1.2, mouth_open=0.7, mouth_teeth=1,
+                         blush=0.6),
+    "sick":        _face("worried", lid_top=0.5, eye_h=0.9, brow_tilt=14, mouth_smile=-0.2, mouth_wave=1, blush=0, eye_wet=0.4),
+    "confused":    _face("curious", eye_L_s=0.82, eye_R_s=1.1, brow_show=1, brow_L_y=-4, brow_R_y=8, mouth_o=0, mouth_smile=0.1,
+                         mouth_wave=0.6, look_x=0.3, look_y=-0.3),
+    "flustered":   _face("worried", eye_style=5, eye_open=1, brow_tilt=14, mouth_smile=0.2, mouth_wave=0.7, blush=1.5, blush_lines=1),
+    "relieved":    _face("calm", brow_show=1, brow_tilt=10, mouth_smile=0.8, blush=0.9),
+    "proud":       _face("joy", mouth_open=0, blush=1.2),
+    "scared":      _face("worried", eye_w=0.72, eye_h=0.76, eye_wet=0.5, brow_y=10, brow_tilt=24, mouth_smile=-0.6, mouth_wave=0.5,
+                         blush=0),
+    "hungry":      _face("smiley", eye_style=6, eye_w=1.1, eye_h=1.1, mouth_open=0.6, tongue=1.2, blush=1.1),
+    "cool":        _face("smiley", lid_top=0.35, mouth_open=0, mouth_smirk=0.6, mouth_smile=0.8, blush=0.5),
+    "furious":     _face("angry", eye_w=0.9, eye_h=0.7, brow_y=-8, brow_tilt=-28, mouth_grit=1, blush=0),
+    "excited":     _face("joy", eye_style=6, eye_open=1, eye_w=1.1, eye_h=1.12, mouth_open=1.15, blush=1.3),
+})
 FACE_CHANNELS = sorted({k for f in FACES.values() for k in f})
 
 # ---------------------------------------------------------------- stances
@@ -194,12 +272,16 @@ def evaluate(clip, char):
     # ---- driving signals (approximate world motion of the head top and of the hips)
     lever = float(getattr(char, "head_lever", 150.0))
     sc = np.maximum(T["root.scale"], 0.2)
-    hrot = T["root.rot"] + T["hip.rot"] + T["body.rot"] + T["head.rot"]
+    # a clip that turns the whole mascot right round (a flip) ends a full turn away from where it began: the same
+    # picture, but the springs would see the turn snap back at the loop point, so they follow the body without it
+    turn = float(T["root.rot"][-1] - T["root.rot"][0])
+    whole = loop and abs(turn) > 1.0 and abs(turn / 360.0 - round(turn / 360.0)) < 1e-6
+    hrot = (0.0 if whole else T["root.rot"]) + T["hip.rot"] + T["body.rot"] + T["head.rot"]
     hy = T["root.y"] / sc + T["hip.y"] + T["body.y"] + T["head.y"]
     hy = hy - (T["root.sy"] - 1.0) * 330.0 - (T["head.sy"] - 1.0) * 120.0   # squash moves the head too
     hx = T["root.x"] + T["hip.x"] + T["body.x"] + T["head.x"] + lever * np.sin(np.radians(hrot))
     ry = T["root.y"] / sc + T["hip.y"] - (T["root.sy"] - 1.0) * 60.0
-    rrot = T["root.rot"] + T["hip.rot"] + T["body.rot"]
+    rrot = (0.0 if whole else T["root.rot"]) + T["hip.rot"] + T["body.rot"]
     rx = T["root.x"] + T["hip.x"] + T["body.x"]
 
     # window that takes the follow-through to zero at the ends that have to match another clip's first frame

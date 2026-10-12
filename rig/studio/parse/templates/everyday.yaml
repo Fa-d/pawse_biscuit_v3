@@ -1,0 +1,738 @@
+# Scenario recipes: a phrase -> a whole sticker.  A template is the base layer (weight 3): any word in the prompt
+# that MEANS something else wins ("sleepy birthday" keeps the birthday things and takes the sleepy face), and a
+# template wins over what words merely suggest.  When several templates match, the one whose phrases cover the most
+# words wins, then the one mentioned first.
+#   words:    the first one is the idea shown in the editor; every test checks it picks this template
+#   spec:     slots from studio/spec.py, names from the registry (python -m studio.cli --list ...)
+#   caption:  suggested text, used when the prompt has none and auto captions are on
+# A motion that acts with something brings it by itself (sip -> a mug, eat -> the mascot's favourite snack), so a
+# recipe only names a prop when it wants a particular one.
+
+# ---------------------------------------------------------------- the day
+monday:
+  words: [monday, mondays, monday morning, back to work, work week, monday blues, case of the mondays, i hate mondays, monday again]
+  spec: {face: drowsy, stance: sit, motion: sip, props: [mug], effects: [zzz]}
+  caption: "Monday..."
+good_morning:
+  words: [good morning, morning, gm, rise and shine, top of the morning, morning sunshine, good morning sunshine, morning everyone,
+    mornin, early bird, morning all, good morning everyone, good morning world]
+  spec: {face: smiley, motion: wave, props: [mug], effects: [sun]}
+  caption: "Good morning!"
+wake_up:
+  words: [wake up, waking up, woke up, just woke up, five more minutes, 5 more minutes, snooze, snoozing, alarm went off,
+    i overslept, not a morning person, too early, so early, why is it morning]
+  spec: {face: drowsy, stance: sit, motion: yawn, props: [alarm_clock]}
+  caption: "5 more minutes..."
+good_afternoon:
+  words: [good afternoon, afternoon, afternoon everyone, lunch break, siesta time]
+  spec: {face: smiley, motion: wave, effects: [sun]}
+  caption: "Good afternoon!"
+good_evening:
+  words: [good evening, evening, evening everyone, sunset, golden hour]
+  spec: {face: calm, motion: wave, effects: [night_sky]}
+  caption: "Good evening"
+good_night:
+  words: [good night, goodnight, gn, nighty night, sweet dreams, night night, nite nite, sleep tight, sleep well, nighty nite,
+    night, nighty, good nite, have a good night, rest well, see you in the morning]
+  spec: {face: sleep, stance: sit, motion: sleep, effects: [zzz, night_sky], accessories: [nightcap]}
+  caption: "Good night"
+bedtime:
+  words: [bedtime routine, getting ready for bed, before bed, brushing teeth before bed, time for bed, off to bed, going to bed]
+  spec: {face: drowsy, motion: brush_teeth, accessories: [nightcap]}
+  caption: "Bedtime!"
+nap_time:
+  words: [nap time, naptime, power nap, cat nap, catnap, quick nap, need a nap, nap, napping, do not wake me up, do not wake me,
+    let me sleep, sleeping in, do not disturb]
+  spec: {face: sleep, stance: sit, motion: sleep, props: [pillow], effects: [zzz]}
+  caption: "Nap time"
+sleepy:
+  words: [so sleepy, sleepy, too sleepy, falling asleep, can not stay awake, sleepy head, sleepyhead]
+  spec: {face: drowsy, stance: sit, motion: nod_off, effects: [zzz]}
+  caption: "So sleepy..."
+tired:
+  words: [so tired, tired, exhausted, i am exhausted, drained, burnt out, burned out, no energy, low battery, running on empty]
+  spec: {face: drowsy, stance: sit, motion: yawn, effects: [sweat]}
+  caption: "So tired..."
+insomnia:
+  words: [can not sleep, cannot sleep, insomnia, up all night, all nighter, still awake, wide awake, 3am thoughts]
+  spec: {face: drowsy, stance: sit, motion: sway, props: [pillow], effects: [night_sky]}
+  caption: "Can't sleep"
+
+# ---------------------------------------------------------------- hello and goodbye
+hello:
+  words: [hello there, hi there, hey there, what is up, sup, wassup, yo, hey hey hey, howdy there, hellooo, hi everyone,
+    hello everyone, hey everyone, hey guys, hi friends, hello friend, hey you there, long time no see, nice to meet you]
+  spec: {face: smiley, motion: wave}
+  caption: "Hi!"
+welcome:
+  words: [welcome, welcome home, welcome back, welcome to the team, welcome aboard, welcome everyone, glad you are here,
+    so glad you came]
+  spec: {face: joy, motion: ta_da, effects: [confetti]}
+  caption: "Welcome!"
+bye:
+  words: [goodbye, see you later, talk later, talk to you later, ttyl, gotta go, got to go, later, laters, catch you later,
+    signing off, logging off, see ya later, until next time, take care, bye for now, farewell for now]
+  spec: {face: smiley, motion: wave}
+  caption: "Bye!"
+brb:
+  words: [brb, be right back, back in a bit, back soon, afk, away from keyboard, one sec brb]
+  spec: {face: smiley, motion: run, effects: [speed_lines]}
+  caption: "BRB!"
+knock_knock:
+  words: [knock knock, anyone home, is anyone there, are you there, hello anybody, ping, pinging you]
+  spec: {face: curious, motion: knock}
+  caption: "Knock knock!"
+on_my_way:
+  words: [on my way, omw, almost there, be right there, running late, on the way, heading over, leaving now, five minutes,
+    5 minutes, there in 5, be there soon, i am coming, be there in a sec, en route, otw]
+  spec: {face: determined, motion: run, effects: [speed_lines]}
+  caption: "On my way!"
+late:
+  words: [sorry i am late, so late, i am late, late again, overslept, missed the bus, stuck in traffic, traffic jam, late for work]
+  spec: {face: nervous, motion: run, props: [alarm_clock], effects: [panic_sweat]}
+  caption: "Sorry I'm late!"
+call_me:
+  words: [call me, call me maybe, call me back, ring me, answer the phone, pick up the phone, phone call, can we talk,
+    call you later]
+  spec: {face: smiley, motion: phone_call}
+  caption: "Call me!"
+text_me:
+  words: [text me, dm me, message me, text me back, reply please, slide into my dms, check your messages, check your dms, ping me]
+  spec: {face: smiley, motion: texting}
+  caption: "Text me!"
+miss_you:
+  words: [i miss you, miss you, missing you, miss u, miss you so much, i miss you so much, wish you were here, come back soon]
+  spec: {face: sad, motion: cuddle, effects: [tear]}
+  caption: "Miss you"
+
+# ---------------------------------------------------------------- replies
+ok:
+  words: [ok, okay, okie, okey, sounds good, on it, will do, noted, alright then, okie dokie, ok ok, got it boss, no problem,
+    no worries, no prob, all good, can do, consider it done, roger roger, you bet, sure thing]
+  spec: {face: smiley, motion: nod}
+  caption: "OK!"
+yes_please:
+  words: [yes please, oh yes please, absolutely yes, yes yes yes, hell yes, heck yes, yesss please, 100 percent yes, count me in]
+  spec: {face: excited, motion: fist_pump}
+  caption: "Yes please!"
+no_way:
+  words: [no way jose, absolutely not, not happening, hard pass, nope, nuh uh, no thanks, no thank you, i will pass,
+    over my dead body]
+  spec: {face: unamused, motion: "no"}
+  caption: "Nope"
+deal:
+  words: [deal, it is a deal, done deal, you have a deal, we have a deal, agreed, partners, team up, teamwork, dream team]
+  spec: {face: excited, motion: high_five, effects: [sparkles]}
+  caption: "Deal!"
+thumbs_up:
+  words: [looks good to me, lgtm, approved, sounds great, nice one, good stuff, love it, like it, i like it, nice nice]
+  spec: {face: grin, motion: thumbs_up}
+  caption: "Nice!"
+thumbs_down:
+  words: [not good, nah not good, do not like it, hate it, that sucks, this sucks, boo this, two thumbs down]
+  spec: {face: unamused, motion: thumbs_down}
+  caption: "Nah."
+omg:
+  words: [omg, oh my god, oh my gosh, no way, omfg, oh em gee, holy cow, holy moly, are you serious, wait what]
+  spec: {face: shocked, motion: jump, effects: [shock_lines, exclaim]}
+  caption: "OMG!"
+lol:
+  words: [lol, haha, hahaha, so funny, rofl, lmao, too funny, i am dead, i am dying, laughing out loud, that is hilarious,
+    im crying lol]
+  spec: {face: laugh, motion: laugh, effects: [tear]}
+  caption: "LOL"
+idk:
+  words: [idk, i do not know, dunno, who knows, no idea, beats me, no clue]
+  spec: {face: confused, motion: shrug, effects: [question]}
+  caption: "Who knows?"
+whatever:
+  words: [whatever, whatevs, meh whatever, eh whatever, sure whatever, whatever you say, fine whatever]
+  spec: {face: unamused, motion: shrug}
+  caption: "Whatever."
+bruh:
+  words: [bruh, bruh moment, bro what, dude what, really bro, seriously bro]
+  spec: {face: unamused, motion: facepalm}
+  caption: "Bruh."
+facepalm:
+  words: [seriously, are you serious right now, why are you like this, i can not believe this, ugh seriously, not this again]
+  spec: {face: unamused, motion: facepalm}
+  caption: "Seriously?"
+please:
+  words: [pretty please, please please, pleeease, i am begging, please please please, please say yes, can i pleaase]
+  spec: {face: pleading, motion: plead}
+  caption: "Pretty please?"
+thinking:
+  words: [let me think, thinking about it, hmm let me see, good question, let me see, i will think about it, thinking thinking,
+    let me check, let me get back to you]
+  spec: {face: curious, motion: think, effects: [thought]}
+  caption: "Hmm..."
+confused:
+  words: [what do you mean, i do not get it, i am confused, so confused, confused, huh what, what just happened, wait huh]
+  spec: {face: confused, motion: scratch_head, effects: [question]}
+  caption: "Huh?"
+idea:
+  words: [i have an idea, i got an idea, great idea, good idea, new idea, big idea, brilliant idea, idea time, what if]
+  spec: {face: excited, motion: eureka, effects: [idea]}
+  caption: "Idea!"
+secret:
+  words: [it is a secret, keep it secret, do not tell anyone, our little secret, top secret, between us two, can you keep a secret]
+  spec: {face: wink, motion: shush}
+  caption: "Shh!"
+spill_tea:
+  words: [spill the tea, spilling the tea, the tea is hot, tea time gossip, gossip time, tell me everything, i need the tea]
+  spec: {face: smug, motion: sip, props: [mug]}
+  caption: "Spill the tea"
+oops:
+  words: [oops, oopsie, whoops, my mistake, i messed up, messed up, i did a thing, i broke it, uh oh, oh oh]
+  spec: {face: nervous, motion: bashful, effects: [sweat]}
+  caption: "Oops!"
+awkward:
+  words: [awkward, so awkward, awkward silence, this is awkward, awkward moment, cringe moment, ahem awkward]
+  spec: {face: nervous, motion: idle, effects: [sweat]}
+  caption: "Awkward..."
+mind_blown:
+  words: [mind blown, my mind is blown, mind blowing, minds blown, blew my mind, that blew my mind]
+  spec: {face: shocked, motion: jump, effects: [boom]}
+  caption: "Mind blown!"
+i_am_dead:
+  words: [i am deceased, dead lol, i died, this killed me, rip me, i can not breathe, i cannot breathe]
+  spec: {face: dead, motion: faint, effects: [dizzy_stars]}
+  caption: "I'm dead"
+
+# ---------------------------------------------------------------- kind words and celebrations
+birthday:
+  words: [happy birthday, birthday, bday, b day, hbd, birthday girl, birthday boy, it is my birthday, birthday party, bday party,
+    many happy returns, happy bday, happy b day, another year older, birthday wishes, birthday bash, born day, cake day]
+  spec: {face: joy, motion: cheer, props: [gift], effects: [confetti], accessories: [party_hat]}
+  caption: "Happy birthday!"
+birthday_cake:
+  words: [birthday cake, make a wish, blow out the candles, cake time, cake with candles, party cake, blowing out candles,
+    blowing out birthday candles, birthday candles, candles]
+  spec: {face: excited, motion: idle, props: [cake], effects: [confetti], accessories: [party_hat]}
+  caption: "Make a wish!"
+anniversary:
+  words: [happy anniversary, anniversary, our anniversary, work anniversary, years together, one year together]
+  spec: {face: love, motion: sway, props: [heart], effects: [hearts, sparkles]}
+  caption: "Happy anniversary!"
+gift:
+  words: [for you, got you something, surprise for you, gift for you, present for you, this is for you, a little something, a gift,
+    here you go, just for you, made this for you]
+  spec: {face: joy, motion: idle, props: [gift]}
+  caption: "For you!"
+thank_you:
+  words: [thank you, thank you so much, thanks a lot, many thanks, ty so much, thanks so much, thank you very much,
+    thanks a million, thanks a bunch, much obliged, thank you thank you, thanks again, big thanks, thanks heaps, tysm]
+  spec: {face: joy, motion: bow, props: [heart], effects: [sparkles]}
+  caption: "Thank you!"
+you_are_welcome:
+  words: [you are welcome, you are so welcome, anytime, any time, my pleasure, happy to help, no problem at all, np]
+  spec: {face: smiley, motion: bow}
+  caption: "Anytime!"
+sorry:
+  words: [i am sorry, so sorry, my bad, forgive me, apologies, sorry about that, sorry for that, my apologies, sorry sorry sorry,
+    i apologize, i apologise, please forgive me]
+  spec: {face: pleading, motion: bow, effects: [sweat], tail: low}
+  caption: "Sorry!"
+love_you:
+  words: [love you, i love you, ily, luv u, love u, love ya, love you so much, i love you so much, love you lots, ily so much,
+    love you more, love you too, love you to the moon and back, ilysm]
+  spec: {face: love, motion: blow_kiss, effects: [hearts]}
+  caption: "Love you!"
+hugs:
+  words: [sending hugs, hugs for you, big hugs, virtual hugs, hug, hugs, group hug, bear hug, need a hug, i need a hug,
+    come here hug]
+  spec: {face: joy, motion: hug, effects: [hearts]}
+  caption: "Hugs!"
+kisses:
+  words: [kisses, mwah, muah, xoxo, smooches, kiss kiss, hugs and kisses, sending kisses]
+  spec: {face: kiss, motion: blow_kiss, effects: [hearts]}
+  caption: "Mwah!"
+crush:
+  words: [crush, my crush, i have a crush, crushing on you, you are cute, you are so cute, butterflies in my tummy, smitten]
+  spec: {face: flustered, motion: bashful, effects: [hearts]}
+  caption: "Crush"
+date_night:
+  words: [date night, date, a date, our date, romantic dinner, candlelight dinner, will you go out with me, dinner date]
+  spec: {face: love, motion: sway, props: [rose], effects: [hearts], accessories: [bow_tie]}
+  caption: "Date night"
+heartbroken:
+  words: [heartbroken, heartbreak, broken heart, my heart is broken, he left me, she left me, they left me, got dumped, break up]
+  spec: {face: cry, motion: sob, effects: [broken_heart, rain]}
+  caption: "Heartbroken"
+besties:
+  words: [besties, bestie, best friend, best friends, bff, bffs, my bestie, my best friend, friends forever, bestfriend]
+  spec: {face: joy, motion: high_five, effects: [hearts]}
+  caption: "Besties!"
+congrats:
+  words: [congratulations, congrats, well done, good job, great job, you did it, way to go, kudos, props to you, hats off,
+    congrats on, congratulations on, big congrats, so happy for you, happy for you, well deserved, you earned it, you deserve it]
+  spec: {face: joy, motion: clap, effects: [confetti, sparkles]}
+  caption: "Congrats!"
+proud:
+  words: [so proud, proud of you, i am so proud of you, so proud of you, proud moment, personal best, new record, proud of myself]
+  spec: {face: proud, motion: show_off, props: [badge], effects: [sparkles]}
+  caption: "So proud!"
+achievement:
+  words: [achievement unlocked, level up, leveled up, levelled up, new high score, high score, milestone reached, unlocked]
+  spec: {face: excited, motion: show_off, props: [badge], effects: [sparkles]}
+  caption: "Level up!"
+good_luck:
+  words: [good luck, best of luck, good luck on your exam, break a leg, fingers crossed for you, wish you luck, all the best,
+    rooting for you, go get them, go get em, you will do great, you will be great, knock them dead, good luck today]
+  spec: {face: determined, motion: cheer, props: [pom_poms], effects: [sparkles]}
+  caption: "Good luck!"
+you_got_this:
+  words: [you got this, you can do it, you have got this, believe in yourself, i believe in you, keep going, do not give up,
+    never give up, stay strong, hang in there, keep it up, fighting, hwaiting, ganbatte]
+  spec: {face: determined, motion: fist_pump, effects: [sparkles]}
+  caption: "You got this!"
+get_well:
+  words: [get well soon, get well, feel better, feel better soon, hope you feel better, speedy recovery, rest up,
+    sending get well wishes, get better soon, recover soon, wishing you a speedy recovery]
+  spec: {face: smiley, motion: sway, props: [heart], effects: [sparkles]}
+  caption: "Get well soon!"
+cute:
+  words: [so cute, too cute, cuteness overload, you are adorable, aww so cute, cutie pie, cutie, uwu]
+  spec: {face: joy, arm_L: cheek, arm_R: cheek, motion: bounce, effects: [hearts]}
+  caption: "So cute!"
+pet_me:
+  words: [pet me, pat me, head pats, headpats, scritches, belly rubs, give me attention, notice me senpai]
+  spec: {face: pleading, motion: plead, accessories: [bell_collar], effects: [hearts]}
+  caption: "Pet me!"
+
+# ---------------------------------------------------------------- feelings
+bad_day:
+  words: [bad day, rough day, worst day, not my day, gloomy day, terrible day, awful day, hard day, rough week, bad week, fml,
+    worst day ever, today sucks, life sucks, everything is going wrong, what a week]
+  spec: {face: sad, motion: sigh, tail: low, effects: [rain]}
+  caption: "Ugh."
+sad:
+  words: [so sad, sad day, feeling sad, feeling down, feeling blue, down in the dumps, not okay, i am not okay, crying inside]
+  spec: {face: sad, motion: sulk, effects: [tear, rain]}
+  caption: "Sad..."
+crying:
+  words: [i am crying, crying so hard, so emotional, tears, in tears, crying rn, sobbing rn, ugly crying rn]
+  spec: {face: cry, motion: sob, effects: [waterfall_tears]}
+  caption: "*sob*"
+angry:
+  words: [so mad, i am so mad, so angry, i am angry, i am furious, angry, mad, pissed, pissed off, so annoyed, rage mode]
+  spec: {face: angry, motion: stomp, effects: [anger, steam]}
+  caption: "Grr!"
+jealous:
+  words: [jealous, so jealous, i am jealous, envy, envious, not fair at all, why not me]
+  spec: {face: pout, motion: sulk, effects: [steam]}
+  caption: "Jealous!"
+scared:
+  words: [so scared, help me, i am scared, scary, scary night, too scary, horror movie, i am terrified, boo]
+  spec: {face: scared, motion: tremble, effects: [sweat, ghost]}
+  caption: "Eek!"
+panic:
+  words: [aaaa, aaaaaa, panic mode, everything is fine, this is fine, help help, mayday mayday, oh no oh no, i am freaking out]
+  spec: {face: scared, motion: panic, effects: [panic_sweat]}
+  caption: "AAAA!"
+stressed:
+  words: [so stressed, stressed, i am stressed, deadline tomorrow, exam tomorrow, too much to do, so much to do, overwhelmed]
+  spec: {face: nervous, motion: typing, effects: [panic_sweat]}
+  caption: "Stressed!!"
+shy:
+  words: [so shy, do not look, i am shy, peekaboo, peek a boo, do not look at me, not looking, too shy]
+  spec: {face: flustered, motion: hide}
+  caption: "Don't look!"
+bored:
+  words: [bored, so bored, i am bored, boring, so boring, nothing to do, bored out of my mind, boredom]
+  spec: {face: unamused, stance: sit, motion: sigh, effects: [clock]}
+  caption: "Bored..."
+hurry_up:
+  words: [hurry up, come on hurry up, waiting for you, still waiting for you, where are you, what is taking so long, any minute now]
+  spec: {face: unamused, motion: impatient, effects: [clock]}
+  caption: "Hurry up!"
+relieved:
+  words: [phew, that was close, close call, finally over, made it out alive, crisis averted, dodged a bullet]
+  spec: {face: relieved, motion: sigh}
+  caption: "Phew!"
+happy:
+  words: [so happy, i am so happy, happy happy, happy day, happy vibes, good vibes only, feeling good, feeling great, best day ever]
+  spec: {face: joy, motion: hop, effects: [sparkles]}
+  caption: "So happy!"
+excited:
+  words: [so excited, i am so excited, can not wait, cannot wait, so hyped, hyped, let us gooo, lets go, yay]
+  spec: {face: excited, motion: jump, effects: [sparkles]}
+  caption: "Yay!!"
+evil_plan:
+  words: [evil plan, master plan, i have a plan, plan in motion, all according to plan, just as planned, muahaha, mwahaha]
+  spec: {face: mischief, motion: scheme, accessories: [devil_horns]}
+  caption: "Muahaha"
+innocent:
+  words: [who me, not me, it was not me, i am innocent, i did nothing, i did not do it, innocent face]
+  spec: {face: proud, arm_L: behind, arm_R: behind, motion: sway, accessories: [halo]}
+  caption: "Who, me?"
+slay:
+  words: [slay, slaying, ate and left no crumbs, serve, serving, queen behavior, iconic behavior, mother, mothered, it is giving]
+  spec: {face: cool, motion: wiggle, effects: [sparkles], accessories: [crown]}
+  caption: "Slay!"
+like_a_boss:
+  words: [like a boss, boss mode, boss moves, big boss, the boss, girlboss, cool boss]
+  spec: {face: cool, motion: march, accessories: [sunglasses, necktie]}
+  caption: "Like a boss"
+cool:
+  words: [stay cool, too cool for you, cool as a cucumber, chill out, cool vibes, deal with it]
+  spec: {face: cool, motion: peace, accessories: [sunglasses]}
+  caption: "Cool."
+
+# ---------------------------------------------------------------- work and school
+busy:
+  words: [busy, so busy, swamped, too much work, overworked, busy busy, buried in work, snowed under, no time, workaholic, busy day,
+    crunch time, working late, back to back meetings, drowning in work]
+  spec: {face: focused, motion: typing, effects: [sweat]}
+  caption: "Busy!"
+working:
+  words: [working from home, wfh, work from home, home office, remote work, working hard, hard at work, at my desk, office life]
+  spec: {face: focused, motion: typing, props: [laptop]}
+  caption: "Working..."
+coding:
+  words: [coding, code, programming, debugging, it works on my machine, deploy friday, push to prod, bug fix, bug fixing,
+    hacking away]
+  spec: {face: focused, motion: typing, accessories: [glasses]}
+  caption: "Debugging..."
+meeting:
+  words: [in a meeting, meeting time, zoom meeting, video meeting, conference call, stand up meeting, all hands, another meeting]
+  spec: {face: smiley, motion: typing, accessories: [headphones]}
+  caption: "In a meeting"
+study:
+  words: [study time, studying, study mode, study session, hitting the books, exam prep, revision time, library time, bookworm]
+  spec: {face: focused, motion: read, accessories: [glasses]}
+  caption: "Study mode"
+homework:
+  words: [homework, doing homework, assignment due, essay due, writing an essay, taking notes, notes]
+  spec: {face: focused, motion: write}
+  caption: "Homework..."
+exam:
+  words: [exam, exams, exam day, test day, finals, finals week, midterms, wish me luck exam, pop quiz]
+  spec: {face: nervous, motion: write, effects: [panic_sweat]}
+  caption: "Exam day!"
+passed:
+  words: [i passed, passed the exam, passed my exam, i aced it, aced the test, straight as, top marks, full marks]
+  spec: {face: excited, motion: victory, props: [diploma], effects: [confetti]}
+  caption: "I passed!"
+new_job:
+  words: [new job, got the job, i got the job, first day at work, first day of work, hired, i got hired, job offer, promoted,
+    promotion, got promoted]
+  spec: {face: proud, motion: show_off, accessories: [necktie], effects: [confetti]}
+  caption: "New job!"
+interview:
+  words: [job interview, interview, interview today, wish me luck interview, nervous interview]
+  spec: {face: nervous, motion: idle, accessories: [necktie], effects: [sweat]}
+  caption: "Wish me luck!"
+payday:
+  words: [payday, pay day, got paid, salary day, money day, paycheck, it is payday, bonus day]
+  spec: {face: excited, motion: show_off, props: [money], effects: [money_rain]}
+  caption: "Payday!"
+broke:
+  words: [broke, i am broke, so broke, no money, zero money, bank account empty, end of the month, poor me, wallet empty,
+    bank account, rip my bank account, rip my wallet, my wallet, empty wallet]
+  spec: {face: cry, motion: sob, effects: [cross_mark]}
+  caption: "Broke..."
+done:
+  words: [done, all done, finished, task complete, mission complete, mission accomplished, nailed it, shipped, deployed,
+    finally done, it is done, done and done, finished it, all finished, job done, job well done, finally finished, completed it,
+    done for the day]
+  spec: {face: joy, motion: fist_pump, effects: [check]}
+  caption: "Done!"
+reminder:
+  words: [reminder, do not forget, heads up, attention please, ding ding, friendly reminder, just a reminder, remember,
+    gentle reminder, did you forget, you forgot]
+  spec: {face: smiley, motion: idle, props: [bell], effects: [exclaim]}
+  caption: "Reminder!"
+deadline:
+  words: [deadline, deadlines, due today, due tomorrow, last minute, last minute work, cutting it close, running out of time]
+  spec: {face: nervous, motion: typing, effects: [clock, panic_sweat]}
+  caption: "Deadline!!"
+multitasking:
+  words: [multitasking, juggling it all, too many things at once, doing it all, juggling everything]
+  spec: {face: focused, motion: juggle, effects: [sweat]}
+  caption: "Juggling it all"
+
+# ---------------------------------------------------------------- food and drink
+coffee_time:
+  words: [coffee time, coffee break, need coffee, coffee first, but first coffee, need caffeine, caffeine please, more coffee,
+    coffee please, tea break, time for tea]
+  spec: {face: calm, motion: sip, props: [mug]}
+  caption: "Coffee first"
+coffee_run:
+  words: [coffee run, iced coffee time, pumpkin spice season, starbucks run, latte time, coffee to go please]
+  spec: {face: smiley, motion: walk, props: [takeaway]}
+  caption: "Coffee run!"
+tea_time:
+  words: [tea time, teatime, afternoon tea, tea party, high tea, cup of tea time, tea and biscuits]
+  spec: {face: smug, motion: sip, props: [mug], accessories: [monocle]}
+  caption: "Tea time"
+boba_time:
+  words: [boba time, boba run, bubble tea time, need boba, boba please]
+  spec: {face: joy, motion: sip, props: [boba]}
+  caption: "Boba time!"
+hydrate:
+  words: [drink water, stay hydrated, hydration check, water break, drink your water]
+  spec: {face: smiley, motion: sip, props: [water_bottle]}
+  caption: "Drink water!"
+hungry:
+  words: [hungry, starving, food time, snack time, snacc, what is for dinner, feed me now, i am starving, so hungry, tummy rumbling]
+  spec: {face: hungry, motion: sway, arm_L: belly, arm_R: belly}
+  caption: "Hungry..."
+lunch:
+  words: [lunch time, lunchtime, lunch, dinner time, dinnertime, dinner, breakfast time, breakfast, brunch time, brunch, let us eat]
+  spec: {face: joy, motion: eat}
+  caption: "Yum!"
+pizza_night:
+  words: [pizza night, pizza party, pizza time, pizza day, order pizza, ordering pizza]
+  spec: {face: joy, motion: eat, props: [pizza]}
+  caption: "Pizza time!"
+dessert:
+  words: [dessert time, dessert, sweet tooth, ice cream time, treat yourself, treat yo self, cheat day, sugar rush]
+  spec: {face: joy, motion: eat, props: [ice_cream]}
+  caption: "Treat time!"
+healthy:
+  words: [eat healthy, healthy eating, diet starts tomorrow, on a diet, eat your veggies, clean eating, salad time]
+  spec: {face: determined, motion: eat, props: [carrot]}
+  caption: "Eat healthy!"
+cooking:
+  words: [cooking, let him cook, let her cook, let them cook, chef mode, cooking time, cooking dinner, home cooking, masterchef]
+  spec: {face: proud, motion: bounce, accessories: [chef_hat, apron]}
+  caption: "Let me cook!"
+baking:
+  words: [baking, baking time, bake off, baking cookies, bake sale, fresh from the oven, homemade cookies, i baked]
+  spec: {face: joy, motion: show_off, props: [cupcake], accessories: [apron]}
+  caption: "Fresh baked!"
+cheers:
+  words: [cheers, cheers mate, cheers to that, cheers to us, raise your glass, a toast, toast to that, here is to us, bottoms up]
+  spec: {face: joy, motion: toast, props: [glass], effects: [sparkles]}
+  caption: "Cheers!"
+food_coma:
+  words: [food coma, so full, too full, ate too much, i am stuffed, stuffed, full belly, belly full]
+  spec: {face: relieved, stance: sit, motion: sigh, arm_L: belly, arm_R: belly}
+  caption: "So full..."
+
+# ---------------------------------------------------------------- fun
+weekend:
+  words: [weekend, its friday, it is friday, tgif, friday night, party time, lets party, let us party, friday feeling, friyay,
+    weekend vibes, happy friday, finally friday, saturday, saturday night, weekend mode, weekend loading, party]
+  spec: {face: joy, motion: dance, effects: [notes, confetti], accessories: [sunglasses]}
+  caption: "Weekend!"
+dance_party:
+  words: [dance party, disco night, club night, dance all night, boogie night, rave time]
+  spec: {face: cool, motion: disco, effects: [spotlight, notes]}
+  caption: "Dance party!"
+chill:
+  words: [chill day, lazy day, self care day, me time, day off, lazy sunday, sunday, self care sunday, rest day, slow day,
+    pajama day, staycation, sunday funday, relaxing day, chill vibes]
+  spec: {face: calm, stance: sit, motion: sip, props: [mug]}
+  caption: "Me time"
+self_care:
+  words: [self care, selfcare, spa day, bubble bath, bath time, pamper day, face mask night, skincare, skin care routine]
+  spec: {face: calm, motion: sway, effects: [bubbles], accessories: [sleep_mask]}
+  caption: "Self care"
+zen:
+  words: [keep calm, stay calm, deep breath, inner peace, meditation time, breathe in, breathe out, just breathe, find your peace,
+    calm down, relax and breathe, serenity now, mindful moment, yoga time]
+  spec: {face: calm, motion: meditate, effects: [aura, orbs]}
+  caption: "Breathe"
+gym:
+  words: [gym, gym time, leg day, arm day, chest day, hit the gym, at the gym, gym session, crossfit, burpees, squat day]
+  spec: {face: determined, motion: workout, effects: [sweat], accessories: [headband]}
+  caption: "No pain no gain"
+lifting:
+  words: [lifting weights, pump iron, gains day, bicep day, curl day, sets and reps]
+  spec: {face: determined, motion: lift, props: [dumbbell], effects: [sweat]}
+  caption: "Gains!"
+running:
+  words: [going for a run, morning run, jogging time, run club, marathon training, 5k, 10k, half marathon, cardio time]
+  spec: {face: determined, motion: run, effects: [sweat, speed_lines], accessories: [headband]}
+  caption: "Let's run!"
+gaming:
+  words: [game night, gaming night, gaming session, gamer mode, let us play, play with me, one more game, ranked match]
+  spec: {face: determined, motion: gaming, accessories: [headphones]}
+  caption: "Game on!"
+movie_night:
+  words: [movie night, movie time, netflix and chill, watch party, film night, cinema date, binge watching, popcorn time]
+  spec: {face: excited, stance: sit, motion: eat, props: [popcorn], accessories: [glasses_3d]}
+  caption: "Movie night!"
+music:
+  words: [vibing to music, music time, listening to music, my jam, on repeat, new song, favourite song, favorite song,
+    playlist time]
+  spec: {face: calm, motion: sway, effects: [notes], accessories: [headphones]}
+  caption: "Vibing"
+karaoke:
+  words: [karaoke, karaoke night, sing with me, let us sing, singing time, concert time, live music]
+  spec: {face: joy, motion: sing, props: [microphone], effects: [spotlight, notes]}
+  caption: "Karaoke!"
+rock_on:
+  words: [rock on, let us rock, rock and roll, metal time, gig tonight, mosh pit]
+  spec: {face: excited, motion: headbang, effects: [notes]}
+  caption: "Rock on!"
+selfie_time:
+  words: [selfie time, selfie, new selfie, photo dump, new pfp, ootd, outfit of the day, mirror selfie]
+  spec: {face: grin, motion: selfie, effects: [sparkles]}
+  caption: "Selfie!"
+photo_time:
+  words: [say cheese, photo time, picture time, take a picture, group photo, picture please]
+  spec: {face: focused, motion: photo}
+  caption: "Say cheese!"
+shopping:
+  words: [shopping, shopping spree, retail therapy, shopping day, mall time, black friday sale, online shopping, add to cart]
+  spec: {face: excited, motion: walk, props: [shopping_bag], effects: [sparkles]}
+  caption: "Shopping!"
+art:
+  words: [art time, painting time, drawing time, doodle time, my masterpiece, art attack, creative time]
+  spec: {face: smiley, motion: paint, accessories: [beret]}
+  caption: "Art time!"
+magic:
+  words: [magic time, it is magic, abracadabra, poof magic, wish granted, abra kadabra]
+  spec: {face: excited, motion: magic, props: [wand], accessories: [wizard_hat], effects: [sparkles]}
+  caption: "Magic!"
+superhero:
+  words: [superhero, super hero, my hero, you are my hero, hero time, save the day, to the rescue, saving the day]
+  spec: {face: determined, motion: soar, accessories: [hero_cape], effects: [speed_lines]}
+  caption: "Hero!"
+pirate:
+  words: [pirate, pirate day, talk like a pirate, arr matey, ahoy matey, treasure hunt, yo ho ho]
+  spec: {face: grin, motion: march, accessories: [pirate_hat, eye_patch]}
+  caption: "Arr!"
+cowboy:
+  words: [cowboy, cowgirl, howdy partner, yeehaw, wild west, rodeo, giddy up]
+  spec: {face: grin, motion: hop, accessories: [cowboy_hat]}
+  caption: "Yeehaw!"
+royal:
+  words: [king, queen, your majesty, royalty, king of the world, queen of everything, royal decree, bow down]
+  spec: {face: proud, motion: show_off, accessories: [crown], effects: [sparkles]}
+  caption: "Your Majesty"
+princess:
+  words: [princess, little princess, princess vibes, princess mode, birthday princess]
+  spec: {face: joy, motion: spin, accessories: [tiara], effects: [sparkles]}
+  caption: "Princess!"
+angel:
+  words: [angel, little angel, my angel, angel baby, guardian angel, heaven sent]
+  spec: {face: calm, motion: float, accessories: [halo, angel_wings], effects: [sparkles]}
+  caption: "Angel"
+devil:
+  words: [little devil, devil, trouble maker, troublemaker, bad to the bone, chaos mode]
+  spec: {face: mischief, motion: scheme, accessories: [devil_horns]}
+  caption: "Trouble!"
+fairy:
+  words: [fairy, fairy mode, fairy tale, fairytale, pixie dust, enchanted, fairycore]
+  spec: {face: joy, motion: float, props: [wand], accessories: [fairy_wings], effects: [sparkles]}
+  caption: "Magic!"
+unicorn:
+  words: [unicorn, unicorn vibes, i am a unicorn, magical unicorn, believe in unicorns]
+  spec: {face: starry, motion: hop, accessories: [unicorn_horn], effects: [rainbow, sparkles]}
+  caption: "Unicorn!"
+clown:
+  words: [clown, clown around, clowning around, circus, class clown, joker, circus act]
+  spec: {face: silly, motion: juggle, accessories: [clown_nose]}
+  caption: "Honk honk!"
+robot:
+  words: [robot, robot mode, beep boop, i am a robot, ai mode, does not compute]
+  spec: {face: neutral, motion: robot}
+  caption: "Beep boop"
+space:
+  words: [space, outer space, astronaut, to the moon, moon mission, space cadet, among the stars, zero gravity]
+  spec: {face: calm, motion: float, effects: [night_sky]}
+  caption: "To the stars!"
+detective:
+  words: [detective, investigating, investigation, case closed, mystery, who did this, crime scene, on the case]
+  spec: {face: curious, motion: look_around, props: [magnifier]}
+  caption: "Investigating..."
+science:
+  words: [science, science time, lab time, experiment time, mad scientist, chemistry class, it is science]
+  spec: {face: excited, motion: eureka, accessories: [goggles], effects: [idea]}
+  caption: "Science!"
+construction:
+  words: [under construction, work in progress, wip, coming soon, fixing it, building something, diy time, renovation]
+  spec: {face: determined, motion: march, accessories: [hard_hat]}
+  caption: "Work in progress"
+juggling:
+  words: [juggling, juggle, juggle time]
+  spec: {face: focused, motion: juggle}
+  caption: "Juggling!"
+
+# ---------------------------------------------------------------- out and about, weather
+travel:
+  words: [vacation, holiday, vacation mode, holiday mode, travel, travelling, traveling, road trip, trip, going on a trip, airport,
+    flight, jet set, bon voyage, wanderlust, getaway, weekend getaway, packing, packed and ready]
+  spec: {face: excited, motion: walk, props: [suitcase], accessories: [sunglasses]}
+  caption: "Vacation mode"
+adventure:
+  words: [adventure, adventure time, hiking, hike, camping, camping trip, explore, exploring, outdoors, nature walk,
+    road trip vibes]
+  spec: {face: excited, motion: march, accessories: [backpack, sun_hat]}
+  caption: "Adventure!"
+beach_day:
+  words: [beach day, beach, beach vibes, at the beach, pool day, pool party, surf day, sunbathing, tanning, island life]
+  spec: {face: cool, motion: sway, effects: [sun], accessories: [sunglasses, lei]}
+  caption: "Beach day!"
+summer:
+  words: [summer, summer vibes, summertime, summer time, hello summer, summer break, summer holidays]
+  spec: {face: joy, motion: eat, props: [ice_cream], effects: [sun], accessories: [sunglasses]}
+  caption: "Summer!"
+hot_day:
+  words: [it is so hot, so hot today, too hot, heatwave, heat wave, hot today, summer heat, i am melting, melting]
+  spec: {face: flustered, motion: fan_self, effects: [sweat, sun]}
+  caption: "So hot..."
+cold_day:
+  words: [so cold, it is freezing, freezing, cold day, too cold, brr, cold outside, baby it is cold outside, winter is coming]
+  spec: {face: nervous, motion: shiver, effects: [cold_breath, snow], accessories: [scarf, beanie]}
+  caption: "Brrr..."
+rainy_day:
+  words: [rainy day, rain rain go away, it is raining, raining today, rainy weather, rainy season, monsoon season, april showers]
+  spec: {face: calm, motion: sway, props: [umbrella], effects: [rain]}
+  caption: "Rainy day"
+snow_day:
+  words: [snow day, it is snowing, first snow, let it snow, snowball fight, building a snowman, winter wonderland]
+  spec: {face: joy, motion: hop, effects: [snow], accessories: [beanie, scarf]}
+  caption: "Snow day!"
+spring:
+  words: [spring, spring is here, hello spring, springtime, spring vibes, spring has sprung, cherry blossom season, hanami]
+  spec: {face: joy, motion: sway, effects: [petals, butterflies], accessories: [flower_crown]}
+  caption: "Hello spring!"
+autumn:
+  words: [autumn, fall, fall vibes, autumn vibes, hello autumn, hello fall, sweater weather, cozy season, leaf season]
+  spec: {face: smiley, motion: sip, props: [takeaway], effects: [leaves], accessories: [scarf]}
+  caption: "Autumn vibes"
+winter:
+  words: [winter, winter vibes, hello winter, cozy winter, winter time, wintertime]
+  spec: {face: smiley, motion: sip, props: [mug], effects: [snow], accessories: [earmuffs]}
+  caption: "Cozy winter"
+storm:
+  words: [storm, stormy, thunderstorm, thunder and lightning, stormy weather, storm coming]
+  spec: {face: scared, motion: tremble, effects: [lightning, rain]}
+  caption: "Stormy!"
+sunny_day:
+  words: [sunny day, sunny, sunshine day, beautiful day, lovely weather, nice weather, blue skies]
+  spec: {face: joy, motion: hop, effects: [sun], accessories: [sun_hat]}
+  caption: "Sunny day!"
+starry_night:
+  words: [starry night, under the stars, look at the stars, full moon tonight, moon tonight, night sky]
+  spec: {face: calm, stance: sit, motion: sway, effects: [night_sky]}
+  caption: "Under the stars"
+
+# ---------------------------------------------------------------- health
+sick_day:
+  words: [sick day, i am sick, feeling sick, caught a cold, got the flu, flu season, i have a cold, under the weather,
+    staying home sick]
+  spec: {face: sick, stance: sit, motion: blow_nose, props: [tissue]}
+  caption: "Sick day..."
+achoo:
+  words: [achoo, bless you achoo, allergy season, hay fever season, pollen everywhere]
+  spec: {face: sick, motion: sneeze}
+  caption: "Achoo!"
+doctor:
+  words: [doctor, at the doctor, doctor appointment, check up, checkup, hospital visit, nurse, health check]
+  spec: {face: smiley, motion: idle, props: [thermometer], accessories: [face_mask]}
+  caption: "Doctor's orders"
+stay_safe:
+  words: [stay safe, stay home, wear a mask, mask up, wash your hands, take care of yourself]
+  spec: {face: smiley, motion: wave, accessories: [face_mask]}
+  caption: "Stay safe!"
+caffeinated:
+  words: [coffee kicks in, when the coffee kicks in, caffeine rush, caffeinated, wired, too much coffee, hyper on coffee,
+    espresso shot]
+  spec: {face: excited, motion: jump, props: [mug], effects: [speed_lines]}
+  caption: "Caffeinated!"

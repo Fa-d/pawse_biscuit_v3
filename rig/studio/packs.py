@@ -24,14 +24,8 @@ TG_MAX_SECONDS = 3.0
 WA_MIN, WA_MAX = 3, 30
 TRAY_MAX = 50 * 1024
 
-# emoji for a sticker, most telling first: what it does, what it holds, what is around it, its face
-MOTION_EMOJI = {"wave": "👋", "dance": "💃", "sleep": "😴", "cheer": "🎉", "jump": "🤸", "nod": "👍", "no": "🙅",
-                "hide": "🙈", "think": "🤔", "walk": "🚶", "shiver": "🥶"}
-PROP_EMOJI = {"mug": "☕", "gift": "🎁", "heart": "❤️", "phone": "📱", "badge": "🏅", "bell": "🔔", "clipboard": "📋", "cloud": "✅"}
-EFFECT_EMOJI = {"confetti": "🎉", "hearts": "💕", "zzz": "💤", "rain": "🌧️", "anger": "💢", "tear": "😢", "sweat": "😅",
-                "notes": "🎵", "sparkles": "✨", "thought": "💭"}
-FACE_EMOJI = {"joy": "😄", "smiley": "🙂", "neutral": "😐", "worried": "😟", "curious": "🤔", "sleep": "😴", "calm": "😌",
-              "surprised": "😮", "focused": "🧐", "angry": "😠", "wink": "😉"}
+# motions too plain to say much on their own: the face tells more
+PLAIN_MOTIONS = ("idle", "bounce", "sway", "walk")
 
 
 class PackError(ValueError):
@@ -43,31 +37,46 @@ class PackError(ValueError):
 
 
 def emojis_for(spec, n=3):
-    """Up to n emoji that describe the sticker, without repeats."""
+    """Up to n emoji that describe the sticker, without repeats, most telling first: what it does, its face, what it holds,
+    what is around it (Telegram suggests the sticker when someone types the first one)."""
+    from .registry import ensure_loaded
+    reg = ensure_loaded()
+    cands = []
+    m = reg.motions.get(spec.motion)
+    if m and spec.motion not in PLAIN_MOTIONS:
+        cands.append(m.emoji)
+    f = reg.faces.get(spec.face)
+    cands.append(f.emoji if f else "")
+    cands += [reg.props[x].emoji for x in spec.props if x in reg.props]
+    cands += [reg.effects[x].emoji for x in spec.effects if x in reg.effects]
+    cands += [reg.wear[x].emoji for x in spec.accessories if x in reg.wear]
+    if m and spec.motion in PLAIN_MOTIONS:
+        cands.append(m.emoji)
     out = []
-    for e in [MOTION_EMOJI.get(spec.motion)] + [PROP_EMOJI.get(p) for p in spec.props] + \
-             [EFFECT_EMOJI.get(e) for e in spec.effects] + [FACE_EMOJI.get(spec.face, "🙂")]:
+    for e in cands:
         if e and e not in out:
             out.append(e)
     return out[:n] or ["🙂"]
 
 
 def describe(spec):
-    """Short accessibility text: 'A cat waving, holding a mug, with the words "Hi!"'."""
-    from .spec import BASES
-    animal = {"biscuit": "fox", "mochi": "cat", "bruno": "bear"}.get(spec.base, "mascot") if spec.base in BASES else "mascot"
-    doing = {"idle": "standing", "bounce": "bouncing", "jump": "jumping", "cheer": "cheering", "wave": "waving", "dance": "dancing",
-             "walk": "walking", "nod": "nodding", "no": "shaking its head", "shiver": "shivering", "sway": "swaying",
-             "sleep": "dozing", "think": "thinking", "hide": "hiding its eyes"}.get(spec.motion, "")
-    mood = {"joy": "joyful", "sleep": "sleepy"}.get(spec.face, spec.face)
+    """Short accessibility text: 'A joyful cat waving, holding a mug of something hot, with the words "Hi!"'."""
+    from .registry import ensure_loaded
+    reg = ensure_loaded()
+    base = reg.bases.get(spec.base)
+    animal = base.animal if base else "mascot"
+    m = reg.motions.get(spec.motion)
+    doing = m.doing if m else ""
+    f = reg.faces.get(spec.face)
+    mood = (f.mood if f and f.mood else (f.label.lower() if f else spec.face)) or "happy"
     bits = [f"{'An' if mood[0] in 'aeiou' else 'A'} {mood} {animal} {doing}".strip()]
     if spec.props:
-        bits.append("holding a " + " and a ".join(p.replace("badge", "medal").replace("cloud", "cloud balloon") for p in spec.props))
+        bits.append("holding " + " and ".join(reg.props[x].noun or ("a " + x.replace("_", " ")) for x in spec.props if x in reg.props))
     if spec.accessories:
-        bits.append("wearing a " + " and a ".join(a.replace("_", " ") for a in spec.accessories))
+        bits.append("wearing " + " and ".join(reg.wear[x].noun or ("a " + x.replace("_", " ")) for x in spec.accessories if x in reg.wear))
     if spec.caption and spec.caption.text.strip():
         bits.append(f'with the words "{spec.caption.text.strip()}"')
-    return ", ".join(bits)[:250]
+    return ", ".join(b for b in bits if b)[:250]
 
 
 def _slug(text, n=24):

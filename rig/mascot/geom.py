@@ -114,3 +114,34 @@ def pchip(xs, ys, x):
     h01 = -2 * t ** 3 + 3 * t ** 2
     h11 = t ** 3 - t ** 2
     return h00 * y0 + h10 * h * m0 + h01 * y1 + h11 * h * m1
+
+
+def heart_path(R, cx=0.0, cy=0.0):
+    """A heart about R wide on each side of its centre line, tip at the bottom."""
+    v = [(0, R), (-R, -0.25 * R), (0, -0.55 * R), (R, -0.25 * R)]
+    i = [(0.5 * R, -0.5 * R), (0, 0.45 * R), (-0.3 * R, -0.5 * R), (0, -0.6 * R)]
+    o = [(-0.5 * R, -0.5 * R), (0, -0.6 * R), (0.3 * R, -0.5 * R), (0, 0.45 * R)]
+    return Path([(x + cx, y + cy) for x, y in v], i, o, closed=True)
+
+
+def star_path(c, R, k=0.45, n=5, rot=-90.0, round_=0.0):
+    """An n-pointed star (k = inner radius / outer radius).  round_ > 0 softens the points a little."""
+    pts = []
+    for q in range(2 * n):
+        r = R if q % 2 == 0 else R * k
+        a = math.radians(rot) + q * math.pi / n
+        pts.append((c[0] + r * math.cos(a), c[1] + r * math.sin(a)))
+    if not round_:
+        return Path(pts, closed=True)
+    return smooth(pts, closed=True, tension=round_, sharp={q: 0.25 for q in range(0, 2 * n, 2)})
+
+
+def spiral_points(c, R, turns=2.25, n=26, r0=0.12):
+    """Points along an Archimedean spiral from near the centre out to radius R."""
+    out = []
+    for q in range(n):
+        u = q / (n - 1)
+        r = R * (r0 + (1 - r0) * u)
+        a = 2 * math.pi * turns * u
+        out.append((c[0] + r * math.cos(a), c[1] + r * math.sin(a)))
+    return out

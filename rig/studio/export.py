@@ -8,6 +8,7 @@ import gzip
 import json
 import os
 
+import numpy as np
 from PIL import Image, ImageChops, ImageFilter
 
 TGS_MAX = 64 * 1024            # Telegram animated sticker: gzipped Lottie, 512x512, 60 fps, up to 3 s
@@ -20,22 +21,57 @@ def _anim(doc):
     return LottieAnimation.from_data(json.dumps(doc, separators=(",", ":")))
 
 
+_PREMULTIPLIED = None
+
+
+def _premultiplied():
+    """Does the rasteriser hand back premultiplied pixels?  rlottie draws into a premultiplied surface and
+    rlottie-python passes it on as if it were plain RGBA, so a white pixel at 50 % comes back as (127, 127, 127, 127).
+    Checked once with a test drawing, so a future version that converts by itself is not converted twice."""
+    global _PREMULTIPLIED
+    if _PREMULTIPLIED is None:
+        from mascot.lottie import Layer, document, el, fl, gr
+        probe = document("probe", [Layer("probe", [gr("g", [el((8, 8), (40, 40)), fl([1.0, 1.0, 1.0], 50)])])], op=1, w=16, h=16)
+        a = _anim(probe)
+        try:
+            r, g, b, al = a.render_pillow_frame(frame_num=0, width=16, height=16).getpixel((8, 8))
+        finally:
+            a.lottie_animation_destroy()
+        _PREMULTIPLIED = 0 < al < 255 and r <= al + 1
+    return _PREMULTIPLIED
+
+
+def straight(img):
+    """A rendered RGBA image with straight (not premultiplied) alpha, which is what PNG, WebP and GIF store.
+    Without this every soft edge gets a dark fringe and every translucent glow turns grey."""
+    if not _premultiplied():
+        return img
+    a = np.asarray(img, dtype=np.uint16)
+    al = a[..., 3:4]
+    rgb = np.where(al > 0, np.minimum(255, (a[..., :3] * 255 + al // 2) // np.maximum(al, 1)), 0)
+    return Image.fromarray(np.concatenate([rgb, al], axis=2).astype(np.uint8), "RGBA")
+
+
+def _render(a, f, size):
+    return straight(a.render_pillow_frame(frame_num=int(f), width=size, height=size).convert("RGBA"))
+
+
 def frame(doc, f, size=512):
-    """One frame as an RGBA image."""
+    """One frame as an RGBA image (straight alpha)."""
     a = _anim(doc)
     try:
-        return a.render_pillow_frame(frame_num=int(f), width=size, height=size).convert("RGBA")
+        return _render(a, f, size)
     finally:
         a.lottie_animation_destroy()
 
 
 def frames(doc, size=512, step=1):
-    """Frames ip .. op-1.  The frame at op equals frame ip in a loop, so it is left out (playing it would show the
-    first pose twice at every loop, a small stutter)."""
+    """Frames ip .. op-1 (straight alpha).  The frame at op equals frame ip in a loop, so it is left out (playing it
+    would show the first pose twice at every loop, a small stutter)."""
     a = _anim(doc)
     try:
         total = min(a.lottie_animation_get_totalframe(), int(doc["op"] - doc["ip"]))
-        return [a.render_pillow_frame(frame_num=f, width=size, height=size).convert("RGBA") for f in range(0, total, step)]
+        return [_render(a, f, size) for f in range(0, total, step)]
     finally:
         a.lottie_animation_destroy()
 
@@ -53,10 +89,18 @@ def die_cut(img, r=8):
 
 
 def watermark(img, text="pawse studio"):
-    from PIL import ImageDraw
+    """Small mark in the bottom-right corner, in the caption font (any Pillow build can draw it)."""
+    from PIL import ImageDraw, ImageFont
     d = ImageDraw.Draw(img)
-    w = img.width
-    d.text((w - 8, img.height - 8), text, fill=(59, 42, 32, 110), anchor="rd")
+    try:
+        from .caption import FONT_CANDIDATES
+        path = next(p for p in FONT_CANDIDATES if p and os.path.exists(p))
+        font = ImageFont.truetype(path, max(10, img.width // 32))
+        d.text((img.width - 8, img.height - 8), text, fill=(59, 42, 32, 110), anchor="rd", font=font)
+    except (StopIteration, OSError, ValueError):
+        font = ImageFont.load_default()
+        w = d.textlength(text, font=font)
+        d.text((img.width - 8 - w, img.height - 20), text, fill=(59, 42, 32, 110), font=font)
     return img
 
 
@@ -114,7 +158,7 @@ def save(doc, out_dir, name, formats=("png", "webp", "tgs", "json"), still=0, ma
         if "webp" in formats:
             p = os.path.join(out_dir, f"{name}.webp")
             img.save(p, "WEBP", quality=90, method=6)
-            put("webp", p, f"over WhatsApp's 100 KB static limit" if os.path.getsize(p) > WA_STILL_MAX else None)
+            put("webp", p, "over WhatsApp's 100 KB static limit" if os.path.getsize(p) > WA_STILL_MAX else None)
     if "awebp" in formats or "gif" in formats:
         allf = frames(doc)
         if outline:

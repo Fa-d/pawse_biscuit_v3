@@ -1,0 +1,53 @@
+# Which mascot.  A mascot word MEANS the mascot (weight 6).  `colour:` gives the fur a colour (a name from
+# colours.yaml) unless the prompt names one itself: "polar bear" is a white bear, "black cat" stays black either way.
+# Mascots: python -m studio.cli --list bases.
+
+bases:
+  biscuit: {words: [fox, foxy, foxes, fox cub, kit fox, biscuit, kitsune, vixen, fennec, fennec fox, foxie, foxxy],
+    means: {base: biscuit}}
+  arctic_fox: {words: [arctic fox, snow fox, white fox, polar fox], means: {base: biscuit}, colour: arctic}
+  silver_fox: {words: [silver fox], means: {base: biscuit}, colour: silver}
+  mochi: {words: [cat, cats, kitty, kitten, kittens, kitteh, kitties, mochi, meow, meowing, meows, neko, puss, pussycat, kitty cat,
+            feline, tabby, tabby cat, tomcat, tom cat, moggy, mog, catto, kitter, purr, purring, purrs, nyan, nya, mew, mrow],
+    means: {base: mochi}}
+  ginger_cat: {words: [ginger cat, orange cat, marmalade cat, ginger tabby, orange tabby], means: {base: mochi}, colour: orange}
+  black_cat: {words: [black cat, black kitty, void cat, house panther], means: {base: mochi}, colour: black}
+  white_cat: {words: [white cat, white kitty, snow cat], means: {base: mochi}, colour: white}
+  grey_cat: {words: [grey cat, gray cat, grey kitty, gray kitty, russian blue], means: {base: mochi}, colour: grey}
+  siamese_cat: {words: [siamese, siamese cat, ragdoll, ragdoll cat], means: {base: mochi}, colour: cream}
+  bruno: {words: [bear, bears, teddy, teddy bear, teddies, bruno, cub, bear cub, cubs, grizzly, grizzly bear, brown bear, beary,
+            bearbear, honey bear, kodiak, teddy bears, bearly], means: {base: bruno}}
+  polar_bear: {words: [polar bear, polar bears, ice bear, white bear, snow bear], means: {base: bruno}, colour: arctic}
+  black_bear: {words: [black bear, black bears], means: {base: bruno}, colour: charcoal}
+  pip: {words: [dog, dogs, doggy, doggie, doggo, doggos, pupper, puppers, puppy, puppies, pup, pups, pip, pooch, hound, mutt, woof,
+          woofs, woof woof, bork, borking, arf, bark, barking, barks, ruff, good doggo, canine, beagle, corgi, shiba, shiba inu,
+          doge, pug, puppy dog, labrador, lab, retriever, cockapoo, poodle, spaniel, terrier, puppers love, borker],
+    means: {base: pip}}
+  golden_dog: {words: [golden retriever, golden doodle, goldendoodle, golden dog, yellow lab], means: {base: pip}, colour: golden}
+  black_dog: {words: [black dog, black lab, black puppy, black labrador], means: {base: pip}, colour: black}
+  white_dog: {words: [white dog, white puppy, samoyed, westie, maltese], means: {base: pip}, colour: white}
+  grey_dog: {words: [husky, huskies, grey dog, gray dog, wolf pup, schnauzer], means: {base: pip}, colour: grey}
+  brown_dog: {words: [chocolate lab, brown dog, dachshund, sausage dog, wiener dog, doxie], means: {base: pip}, colour: brown}
+  clover: {words: [bunny, bunnies, rabbit, rabbits, bun, buns, bunbun, hare, hares, clover, lop, lop eared, bunny rabbit, binky,
+             bunny boo, easter bunny, cottontail], means: {base: clover}}
+  brown_bunny: {words: [brown bunny, brown rabbit, chocolate bunny], means: {base: clover}, colour: brown}
+  bao: {words: [panda, pandas, panda bear, giant panda, bao, panda cub, baby panda, pandy, po], means: {base: bao}}
+  tora: {words: [tiger, tigers, tigress, tiger cub, tora, bengal tiger, big cat],
+    means: {base: tora}}
+  white_tiger: {words: [white tiger, snow tiger, siberian tiger], means: {base: tora}, colour: arctic}
+  kiko: {words: [koala, koalas, koala bear, kiko, joey, aussie, australia, australian, down under, mate g day, g day],
+    means: {base: kiko}}
+  rocco: {words: [raccoon, raccoons, racoon, racoons, trash panda, trash pandas, rocco, bandit, masked bandit, coon, raccoon gang],
+    means: {base: rocco}}
+  truffle: {words: [pig, pigs, piggy, piggies, piglet, piglets, hog, hogs, swine, oink, oink oink, truffle, pink pig, piggy bank,
+              porky, sow, boar], means: {base: truffle}}
+  fern: {words: [frog, frogs, froggy, froggie, froggo, toad, toads, ribbit, ribbit ribbit, croak, croaking, tadpole, fern, froge,
+           frog prince, lily pad, lilypad], means: {base: fern}}
+  pebble: {words: [penguin, penguins, pengu, penguino, emperor penguin, baby penguin, pebble, waddle waddle, tuxedo bird, pinguin,
+             bird, birdie, birb, little bird, birdy], means: {base: pebble}}
+  nib: {words: [mouse, mice, mousey, mousy, rat, rats, ratty, hamster, hamsters, gerbil, gerbils, nib, squeak, squeaky,
+          squeak squeak, rodent, field mouse, little mouse, chuchu], means: {base: nib}}
+  white_mouse: {words: [white mouse, white rat, lab mouse], means: {base: nib}, colour: white}
+  golden_hamster: {words: [golden hamster, syrian hamster], means: {base: nib}, colour: caramel}
+  leo: {words: [lion, lions, lioness, lion cub, leo, king of the jungle, mane, kitty lion, big kitty], means: {base: leo}}
+  white_lion: {words: [white lion], means: {base: leo}, colour: cream}

@@ -1,0 +1,898 @@
+# Things: props held in the paws, effects around the mascot, things it wears.  Each word MEANS its item (a colour
+# right before it paints it: "a red mug") and may SUGGEST a face or motion ("a laptop" suggests typing, so "fox with
+# a laptop" types; "fox waving with a laptop" waves).
+# Items: python -m studio.cli --list props | effects | wear.
+
+props:
+  # ---------------------------------------------------------------- the first eight
+  phone:
+    words: [phone, phones, smartphone, cellphone, cell phone, mobile, mobile phone, iphone, android, phone in hand, new phone,
+      phone screen, bar chart, stats, analytics, growth chart, numbers going up, stonks]
+    means: {props: [phone]}
+    suggests: {motion: texting}
+  clipboard:
+    words: [clipboard, report, reports, chart, charts, checklist, check list, checklists, todo, todos, to do, lists, work, working,
+      office, meeting, meetings, deadline, deadlines, task, tasks, paperwork, documents, document, presentation, agenda, schedule,
+      schedules, inventory, survey, memo, project, projects, boss approval, review, reviewing, audit, accounting, taxes, tax,
+      invoice, invoices, bills, budget, plans written, grocery list, shopping list, wishlist, wish list, checking it twice, exam,
+      exams, test, tests, quiz, quizzes, school, college, university, uni, class, classes, lecture, lessons, lesson, teacher,
+      student, students]
+    means: {props: [clipboard]}
+    suggests: {face: focused}
+  bell:
+    words: [bell, bells, ring, ringing, rings, reminder, reminders, remind, remind me, alarm bell, ding, ding dong, dingaling,
+      announcement, announce, announcing, service bell, bell reminder, warning, heads up, attention needed, jingle, jingling,
+      jingle bells, school bell, dinner bell, time is up, times up, last call, ring the bell, ring a bell]
+    means: {props: [bell]}
+  badge:
+    words: [badge, badges, medal, medals, award, awards, achievement, achievements, gold medal, silver medal, bronze medal,
+      unlocked, milestone, rank up badge, prize, prizes, ribbon award, blue ribbon, honor roll, honour roll, employee of the month,
+      mvp, best in show, top of the class, top dog, hall of fame, certificate, certified, credential, achievement badge,
+      sticker star]
+    means: {props: [badge]}
+    suggests: {face: proud}
+  cloud:
+    words: [cloud, clouds, cloud balloon, complete, completed, synced, sync, syncing, upload, uploaded, uploading, backup,
+      backed up, in the cloud, cloud storage]
+    means: {props: [cloud]}
+  gift:
+    words: [gift, gifts, present, presents, surprise, surprises, unboxing, unbox, opening present, open present, opening a gift,
+      gift box, giftbox, birthday present, wrapped, wrapped present, gift wrap, gift wrapped, a gift for you, got you something,
+      something for you, goodies, treat box, gift card, giveaway, give away, care package, package, parcel, delivery, secret santa,
+      box, boxes, cardboard box, in a box, unboxing day]
+    means: {props: [gift]}
+    suggests: {face: excited}
+  mug:
+    words: [coffee, coffees, tea, teas, mug, mugs, cup, cups, cuppa, cup of tea, cup of coffee, latte, lattes, espresso, cappuccino,
+      americano, mocha, chai, matcha, cocoa, hot chocolate, hot cocoa, caffeine, caffeinated, morning brew, brew, java, cup of joe,
+      tea time, teatime, warm drink, hot drink, decaf, flat white, macchiato, herbal tea, green tea, chamomile, earl grey,
+      sippy cup, soup, chicken soup, broth, ramen, noodles, cup noodles, instant noodles, milk, glass of milk, warm milk, hot milk,
+      chocolate milk, drinking milk]
+    means: {props: [mug]}
+    suggests: {face: calm, motion: sip}
+  heart:
+    words: [heart, heart shape, holding a heart, big heart, love heart, heart hands, heart for you, my heart, giving heart, thanks,
+      thanking, thank, appreciate it, much appreciated, valentine heart, gift heart, sparkling heart, red heart, hearty, with love,
+      you have my heart, here is my heart, take my heart]
+    means: {props: [heart]}
+    suggests: {face: joy}
+
+  # ---------------------------------------------------------------- food
+  pizza:
+    words: [pizza, pizzas, pizza slice, slice of pizza, pizza party, pizza time, pepperoni, margherita, cheesy pizza, pizza night]
+    means: {props: [pizza]}
+    suggests: {motion: eat}
+  burger:
+    words: [burger, burgers, hamburger, hamburgers, cheeseburger, cheeseburgers, fast food, junk food, mcdonalds, whopper, big mac]
+    means: {props: [burger]}
+    suggests: {motion: eat}
+  donut:
+    words: [donut, donuts, doughnut, doughnuts, sprinkles donut, glazed, glazed donut, krispy kreme]
+    means: {props: [donut]}
+    suggests: {motion: eat}
+  ice_cream:
+    words: [ice cream, ice creams, icecream, ice cream cone, cone, gelato, soft serve, frozen yogurt, froyo, sundae, popsicle,
+      ice lolly, ice cream truck, scoop, scoops, two scoops]
+    means: {props: [ice_cream]}
+    suggests: {motion: eat}
+  cupcake:
+    words: [cupcake, cupcakes, muffin, muffins, fairy cake, frosting, frosted, sweet treat, baked goods, bake, baking, baker,
+      bakery]
+    means: {props: [cupcake]}
+    suggests: {motion: eat}
+  cookie:
+    words: [cookie, cookies, biscuit cookie, chocolate chip, chocolate chip cookie, milk and cookies, oreo, oreos, shortbread,
+      gingerbread, gingerbread man, cookie jar]
+    means: {props: [cookie]}
+    suggests: {motion: eat}
+  popcorn:
+    words: [popcorn, pop corn, movie, movies, movie night, film, films, cinema, watching a movie, netflix, netflix and chill,
+      binge watch, binge watching, series, tv show, tv shows, show time popcorn, drama, the drama, grab the popcorn,
+      this is getting good]
+    means: {props: [popcorn]}
+    suggests: {motion: eat, face: excited}
+  apple:
+    words: [apple, apples, fruit, fruits, healthy snack, an apple a day, teachers pet, green apple, red apple, healthy,
+      healthy eating, diet, eat healthy, vitamins]
+    means: {props: [apple]}
+    suggests: {motion: eat}
+  banana:
+    words: [banana, bananas, banana peel, monkey business, going bananas, go bananas, potassium]
+    means: {props: [banana]}
+    suggests: {motion: eat}
+  watermelon:
+    words: [watermelon, watermelons, melon, melons, watermelon slice, juicy, summer fruit]
+    means: {props: [watermelon]}
+    suggests: {motion: eat}
+  sushi:
+    words: [sushi, sushi roll, sashimi, nigiri, maki, onigiri, japanese food, tuna]
+    means: {props: [sushi]}
+    suggests: {motion: eat}
+  lollipop:
+    words: [lollipop, lollipops, lolly, lollies, sucker, candy, candies, sweets, sweet tooth, sugar, sugary, sugar high, candy shop,
+      rainbow lollipop, swirl lollipop]
+    means: {props: [lollipop]}
+    suggests: {motion: eat}
+  candy_cane:
+    words: [candy cane, candy canes, peppermint, peppermint stick, christmas candy, striped candy]
+    means: {props: [candy_cane]}
+    suggests: {motion: eat}
+  chocolate:
+    words: [chocolate, chocolates, choco, chocolate bar, candy bar, cocoa bar, chocoholic, dark chocolate, milk chocolate, kitkat,
+      snickers, twix, chocolate lover]
+    means: {props: [chocolate]}
+    suggests: {motion: eat}
+  taco:
+    words: [taco, tacos, taco tuesday, burrito, burritos, mexican food, nachos, quesadilla]
+    means: {props: [taco]}
+    suggests: {motion: eat}
+  hotdog:
+    words: [hotdog, hotdogs, hot dog, hot dogs, sausage, sausages, frankfurter, wiener, bbq, barbecue, cookout, grill, grilling]
+    means: {props: [hotdog]}
+    suggests: {motion: eat}
+  carrot:
+    words: [carrot, carrots, veggie, veggies, vegetable, vegetables, eat your veggies, vegan, vegetarian, salad, crunchy carrot,
+      bunny food]
+    means: {props: [carrot]}
+    suggests: {motion: eat}
+  fish:
+    words: [fish, fishes, fishy, fish snack, fresh fish, tuna fish, catch of the day, fishing, gone fishing, cat food]
+    means: {props: [fish]}
+    suggests: {motion: eat}
+  bone:
+    words: [bone, bones, dog bone, chew toy, dog treat, dog treats, good boy treat, doggy treat, puppy treat]
+    means: {props: [bone]}
+    suggests: {motion: eat}
+  cheese:
+    words: [cheese, cheeses, cheesy snack, cheese wedge, wedge of cheese, swiss cheese, cheddar, mouse food, say cheese cheese]
+    means: {props: [cheese]}
+    suggests: {motion: eat}
+  bamboo:
+    words: [bamboo, bamboo stick, bamboo shoot, bamboo shoots, panda food, panda snack, tanabata tree, tanabata]
+    means: {props: [bamboo]}
+    suggests: {motion: eat}
+  honey:
+    words: [honey, honey pot, honeypot, pot of honey, hunny, beehive, bees, bee, honeycomb, sweet as honey]
+    means: {props: [honey]}
+    suggests: {motion: eat}
+  cake:
+    words: [cake, cakes, birthday cake, cake with candles, candles, candle, blow out the candles, make a wish cake, layer cake,
+      cheesecake, slice of cake, cake time, wedding cake, party cake]
+    means: {props: [cake]}
+    suggests: {face: excited}
+  boba:
+    words: [boba, boba tea, bubble tea, milk tea, pearl milk tea, tapioca, taro tea, brown sugar boba, boba run]
+    means: {props: [boba]}
+    suggests: {motion: sip}
+  soda:
+    words: [soda, sodas, pop, soft drink, fizzy drink, cola, coke, pepsi, sprite, fanta, juice, juice box, smoothie, smoothies,
+      milkshake, milkshakes, shake drink, lemonade, iced tea, slushie, slurpee, straw]
+    means: {props: [soda]}
+    suggests: {motion: sip}
+  glass:
+    words: [glass, glasses of wine, wine glass, champagne glass, a glass of, glass of wine, glass of champagne, flute, goblet,
+      drink up]
+    means: {props: [glass]}
+    suggests: {motion: toast}
+  water_bottle:
+    words: [water bottle, water, bottle, bottles, bottle of water, drink some water, hydration, sports drink, gym bottle, flask,
+      thermos]
+    means: {props: [water_bottle]}
+    suggests: {motion: sip}
+  takeaway:
+    words: [coffee to go, takeaway coffee, takeout coffee, take away coffee, iced coffee, cold brew, frappe, frappuccino, starbucks,
+      pumpkin spice, pumpkin spice latte, psl, coffee run, latte to go, to go cup, paper cup]
+    means: {props: [takeaway]}
+    suggests: {motion: sip}
+
+  # ---------------------------------------------------------------- things
+  laptop:
+    words: [laptop, laptops, notebook computer, macbook pro, chromebook, open laptop, laptop work]
+    means: {props: [laptop]}
+    suggests: {motion: typing, face: focused}
+  book:
+    words: [book, books, hardcover, paperback, storybook, picture book, spellbook, spell book, cookbook, notebook, sketchbook,
+      a good book, new book, favourite book, favorite book]
+    means: {props: [book]}
+    suggests: {motion: read}
+  pencil:
+    words: [pencil, pencils, pen, pens, crayon, crayons, marker, markers, quill, ballpoint, highlighter, pencil case, stationery]
+    means: {props: [pencil]}
+    suggests: {motion: write}
+  guitar:
+    words: [guitar, guitars, acoustic guitar, electric guitar, bass guitar, ukulele, uke, banjo, mandolin, guitar case]
+    means: {props: [guitar]}
+    suggests: {motion: strum}
+  microphone:
+    words: [microphone, microphones, mic, mics, mic drop, karaoke mic, open mic, podcast, podcasts, podcaster, podcasting, mc, host,
+      hosting, announcer, stand up comedy, comedian]
+    means: {props: [microphone]}
+    suggests: {motion: sing}
+  camera:
+    words: [camera, cameras, polaroid, dslr, film camera, instant camera, camcorder]
+    means: {props: [camera]}
+    suggests: {motion: photo}
+  controller:
+    words: [controller, controllers, gamepad, game controller, game pad, joypad]
+    means: {props: [controller]}
+    suggests: {motion: gaming}
+  paintbrush:
+    words: [paintbrush, paint brush, paintbrushes, brush, brushes, palette, paint palette, easel]
+    means: {props: [paintbrush]}
+    suggests: {motion: paint}
+  magnifier:
+    words: [magnifier, magnifying glass, magnifying, detective, investigate, investigating, investigation, inspect, inspecting,
+      inspection, clue, clues, mystery, mysteries, case closed, look closer, closer look, zoom in, examine, examining, evidence,
+      snooping, snoop]
+    means: {props: [magnifier]}
+    suggests: {face: curious, motion: look_around}
+  balloons:
+    words: [balloon, balloons, party balloons, balloon bunch, bunch of balloons, helium, red balloon, floating balloon,
+      balloon on a string, heart balloon]
+    means: {props: [balloons]}
+    suggests: {face: joy}
+  bouquet:
+    words: [bouquet, bouquets, bunch of flowers, flowers for you, flower bouquet, bouquet of flowers, florist, wedding bouquet,
+      these are for you, for you flowers, mothers day flowers, get well flowers]
+    means: {props: [bouquet]}
+    suggests: {face: joy}
+  rose:
+    words: [rose, roses, red rose, single rose, a rose, rose for you, long stem rose, romantic rose, rose in mouth]
+    means: {props: [rose]}
+    suggests: {face: love}
+  sign:
+    words: [sign, signs, holding a sign, placard, protest sign, banner, poster, board, sign board, signboard, cardboard sign,
+      message board, notice, notice board]
+    means: {props: [sign]}
+  flag:
+    words: [flag, flags, little flag, pennant, banner flag, red flag, green flag, white flag, surrender, i surrender, pirate flag,
+      flag day]
+    means: {props: [flag]}
+    suggests: {motion: wave_flag}
+  pom_poms:
+    words: [pom poms, pom pom, pompom, pompoms, pom-poms, cheer pom poms, cheerleader pom poms, rah rah]
+    means: {props: [pom_poms]}
+    suggests: {motion: cheer, face: excited}
+  trophy:
+    words: [trophy, trophies, cup trophy, golden cup, world cup trophy, winner trophy, champion trophy, first place trophy,
+      gold trophy, prize cup, championship, champs]
+    means: {props: [trophy]}
+    suggests: {motion: show_off, face: proud}
+  wand:
+    words: [wand, wands, magic wand, fairy wand, star wand, magic stick]
+    means: {props: [wand]}
+    suggests: {motion: magic}
+  umbrella:
+    words: [umbrella, umbrellas, brolly, parasol, rainy day umbrella]
+    means: {props: [umbrella]}
+    suggests: {effects: [rain]}
+  fan:
+    words: [hand fan, folding fan, paper fan, uchiwa, sensu]
+    means: {props: [fan]}
+    suggests: {motion: fan_self}
+  party_horn:
+    words: [party horn, party horns, party blower, noisemaker, noise maker, blowout, party whistle, toot, toot toot, tooting,
+      party favor, party favour]
+    means: {props: [party_horn]}
+    suggests: {face: joy, effects: [confetti]}
+  sparkler:
+    words: [sparkler, sparklers, sparkler stick, firecracker, firecrackers, bonfire night, guy fawkes, fourth of july, 4th of july,
+      july 4th, independence day sparkler]
+    means: {props: [sparkler]}
+    suggests: {face: excited}
+  pumpkin:
+    words: [pumpkin, pumpkins, jack o lantern, jack-o-lantern, jackolantern, carved pumpkin, pumpkin patch, gourd, gourds,
+      spooky pumpkin]
+    means: {props: [pumpkin]}
+    suggests: {face: mischief}
+  lantern:
+    words: [lantern, lanterns, paper lantern, chinese lantern, sky lantern, lamp, lamplight, fanoos, fanous, ramadan lantern,
+      mid autumn, mid autumn festival, mooncake, mooncakes, lantern festival]
+    means: {props: [lantern]}
+    suggests: {face: calm}
+  diya:
+    words: [diya, diyas, deepam, oil lamp, clay lamp, deepak, rangoli, puja, pooja, aarti]
+    means: {props: [diya]}
+    suggests: {face: calm, effects: [sparkles]}
+  red_envelope:
+    words: [red envelope, red envelopes, red packet, red packets, hongbao, hong bao, ang pao, ang pow, lai see, lucky money,
+      gong xi fa cai, gong hei fat choy, kung hei fat choy, xin nian kuai le, salami envelope, eidi envelope]
+    means: {props: [red_envelope]}
+    suggests: {face: joy}
+  easter_egg:
+    words: [easter egg, easter eggs, egg, eggs, egg hunt, easter egg hunt, painted egg, decorated egg, chocolate egg, egg hunting]
+    means: {props: [easter_egg]}
+    suggests: {face: joy}
+  love_letter:
+    words: [love letter, love letters, letter, letters, envelope, envelopes, mail, you have got mail, you got mail, card, cards,
+      greeting card, valentine card, note for you, a letter for you, postcard, snail mail, post, invitation, invite, invited]
+    means: {props: [love_letter]}
+    suggests: {face: love}
+  diploma:
+    words: [diploma, diplomas, degree, degrees, certificate scroll, scroll, graduated, graduate, graduating, grad, class of,
+      bachelors, masters, phd, doctorate, alumni, commencement, convocation]
+    means: {props: [diploma]}
+    suggests: {face: proud}
+  money:
+    words: [money, cash, dollars, dollar, bucks, cash money, payday, pay day, salary, paycheck, pay check, paid, get paid, got paid,
+      wealthy, millionaire, billionaire, money money, make it rain, bling money, savings, saving money, budget win, profit, profits,
+      income, jackpot, lottery, bonus, tip, tips, payment, pay up, pay me, you owe me, broke no more]
+    means: {props: [money]}
+    suggests: {face: excited}
+  shopping_bag:
+    words: [shopping, shopping bag, shopping bags, shopper, shopaholic, retail therapy, mall, sale, sales, black friday,
+      cyber monday, discount, deal of the day, bought, buying, buy, add to cart, checkout, online shopping, haul bag, boutique,
+      spree, shopping spree]
+    means: {props: [shopping_bag]}
+    suggests: {face: excited, motion: walk}
+  suitcase:
+    words: [suitcase, suitcases, luggage, baggage, travel, travelling, traveling, traveller, traveler, trip, trips, vacation,
+      vacations, holiday trip, road trip, journey, airport, flight, flying out, jet set, jetset, jet lag, abroad, packing, packed,
+      bon voyage, wanderlust, backpacking, getaway, weekend getaway, tourist trip, departure, check in]
+    means: {props: [suitcase]}
+    suggests: {face: excited, motion: walk}
+  toothbrush:
+    words: [toothbrush, tooth brush, toothbrushes, electric toothbrush]
+    means: {props: [toothbrush]}
+    suggests: {motion: brush_teeth}
+  pillow:
+    words: [pillow, pillows, cushion, cushions, pillow fight, blanket, blankets, duvet, comforter, bedding, sleepover pillow]
+    means: {props: [pillow]}
+    suggests: {face: drowsy}
+  plushie:
+    words: [plushie, plushies, plush, plush toy, stuffed animal, stuffie, stuffies, soft toy, squishmallow, toy, toys, doll, dolls,
+      teddy toy, cuddly toy, stuffed toy]
+    means: {props: [plushie]}
+    suggests: {motion: cuddle}
+  dumbbell:
+    words: [dumbbell, dumbbells, dumbell, dumbells, kettlebell, kettlebells, weight, free weights, hand weights]
+    means: {props: [dumbbell]}
+    suggests: {motion: lift}
+  ball:
+    words: [ball, balls, football, soccer, soccer ball, futbol, playing ball, play ball, fetch, play fetch, beach ball, volleyball,
+      tennis ball, sport, sports, match, kick off, penalty, goal keeper, goalie, striker]
+    means: {props: [ball]}
+    suggests: {face: excited}
+  basketball:
+    words: [basketball, basket ball, hoops, shooting hoops, slam dunk, dunk, nba, baller, ballin, ballin out, three pointer, swish]
+    means: {props: [basketball]}
+    suggests: {face: determined}
+  tissue:
+    words: [tissue, tissues, kleenex, hanky, hankie, handkerchief, tissue box, paper towel]
+    means: {props: [tissue]}
+    suggests: {motion: blow_nose}
+  thermometer:
+    words: [thermometer, temperature, fever check, high temperature, running a fever, checking temperature, feeling feverish,
+      38 degrees, flu season, doctor visit, at the doctor, check up, checkup]
+    means: {props: [thermometer]}
+    suggests: {face: sick}
+  alarm_clock:
+    words: [alarm clock, alarm, alarms, clock, clocks, alarm ringing, snooze button, snoozing alarm, five more minutes,
+      5 more minutes, wake up alarm, wake up call, time to wake up, early alarm, 6am, 7am, oversleep, overslept, late alarm,
+      ticking clock, what time is it, time check, on time, punctual, deadline clock, countdown clock]
+    means: {props: [alarm_clock]}
+    suggests: {face: shocked}
+
+effects:
+  # ---------------------------------------------------------------- the first twelve
+  sparkles:
+    words: [sparkle, sparkles, sparkly, sparkling, shiny, shine, shining, shines, glitter, glittery, glitters, glittering, twinkle,
+      twinkles, twinkling, twinkly, magic dust, fairy dust, pixie dust, bling, bling bling, star sparkle, stars, dazzling, glam,
+      glamorous, glamour, fabulous sparkle, gleam, gleaming, glimmer, glimmering, shimmer, shimmering, new and shiny, brand new,
+      fresh, so fresh, clean, squeaky clean, polished, wish come true, dreams come true, extra sparkle, sparkle sparkle, aesthetic]
+    means: {effects: [sparkles]}
+  confetti:
+    words: [confetti, party popper, festive, festivities, streamers, party confetti, confetti cannon, ticker tape, throw confetti,
+      celebration confetti, popper, poppers, party time confetti, confetti rain, tada confetti]
+    means: {effects: [confetti]}
+    suggests: {face: joy}
+  zzz:
+    words: [z's, zs, zzzs, zzzz, zzzzz, sleep zs, floating zs]
+    means: {effects: [zzz]}
+    suggests: {face: sleep}
+  thought:
+    words: [thought bubble, thought cloud, thought dots, thinking bubble, daydream, daydreaming, daydreams, dots, dot dot dot,
+      ellipsis, thinking dots, wondering about, imagine, imagining, imagination, typing bubble, speech bubble]
+    means: {effects: [thought]}
+    suggests: {face: curious}
+  tear:
+    words: [tear, teardrop, tear drop, single tear, a tear, one tear, shed a tear, tearing, a single tear, little tear, tears up,
+      tearing up, teary, teary eyed, misty eyed, getting emotional, emotional, i am not crying]
+    means: {effects: [tear]}
+    suggests: {face: sad}
+  sweat:
+    words: [sweat, sweating, sweaty, sweats, sweat drop, sweatdrop, sweat drops, perspiring, perspiration, nervous sweat,
+      cold sweat, dripping sweat, sweating bullets, sweaty palms, awkward sweat, sweat smile, nervous laugh]
+    means: {effects: [sweat]}
+    suggests: {face: nervous}
+  hearts:
+    words: [hearts, love hearts, floating hearts, heart bubbles, lots of hearts, flying hearts, many hearts, hearts everywhere,
+      heart eyes effect, lovey hearts, love is in the air, hearts all around, so much love, full of love, lovestruck hearts]
+    means: {effects: [hearts]}
+    suggests: {face: love}
+  notes:
+    words: [notes music, music notes, musical notes, melody, melodies, tune, tunes, beat, beats, dj, music, song, songs, humming,
+      hum, hums, singing along, playlist, soundtrack, jingle tune, musical, lyric, lyrics, radio, spotify, concert, gig, band,
+      orchestra, symphony, listening to music, music lover, vibing to music, earworm, whistle, whistling a tune, piano, pianist,
+      playing piano, keyboard player, violin, violinist, playing violin, cello, trumpet, saxophone, sax, harp, drums, drummer,
+      playing drums, making music]
+    means: {effects: [notes]}
+    suggests: {face: joy, motion: sway}
+  aura:
+    words: [aura, glow ring, glowing ring, holy, holiness, saint aura, divine, blessed aura, glowing aura, energy field,
+      force field, shield, chosen one, ascended, heavenly, celestial, radiant, radiating, radiate, good aura, main character,
+      main character energy, glow up, glowing up, power aura, level 100]
+    means: {effects: [aura]}
+    suggests: {face: calm}
+  orbs:
+    words: [orbs, orb, lights, light orbs, fireflies, firefly, glow, glowing, glows, floating lights, wisps, will o the wisp,
+      spirit lights, fairy lights, string lights, glowworms, lanterns floating, floating lanterns, bokeh]
+    means: {effects: [orbs]}
+  rain:
+    words: [rain, raining, rainy, rains, rained, storm, stormy, storms, rain cloud, raincloud, drizzle, drizzling, downpour,
+      gloomy weather, rain storm, rainstorm, pouring, pouring rain, monsoon, showers, rainy day, rainy mood, cloud over head,
+      cloud above, dark cloud, little rain cloud, black cloud, raining on me, dreary, under a cloud, raincoat, rain coat,
+      rain jacket, rain boots, rainboots, wellies, galoshes, puddle, puddles, splashing in puddles]
+    means: {effects: [rain]}
+    suggests: {face: sad}
+  anger:
+    words: [anger mark, anger symbol, anger vein, angry mark, vein, veins, popping vein, fuming mark, tick mark, irritation mark,
+      angry symbol, rage mark, cross popping vein, annoyed mark]
+    means: {effects: [anger]}
+    suggests: {face: angry}
+
+  # ---------------------------------------------------------------- over the head
+  question:
+    words: [question mark, question marks, question, questions, confused question, what question, questioning, hmm what, ask,
+      asking, asks, curious question, i have a question, any questions, faq]
+    means: {effects: [question]}
+    suggests: {face: confused}
+  exclaim:
+    words: [exclamation, exclamation mark, exclamation point, alert mark, surprise mark, wait a minute, oh shoot, alarmed, alarming,
+      warning sign, important, urgent, breaking news, notice this, omfg]
+    means: {effects: [exclaim]}
+    suggests: {face: surprised}
+  idea:
+    words: [light bulb, lightbulb, bulb, idea bulb, bright light idea, creative spark, spark, brainwave, brain wave,
+      a thought struck]
+    means: {effects: [idea]}
+    suggests: {face: excited}
+  clock:
+    words: [clock over head, ticking, tick tock tick, waiting game, time flies, taking forever, long time, hours, minutes, overtime,
+      late night, late, later, soon, coming soon, eta, timer, stopwatch, countdown, hourglass, deadline coming]
+    means: {effects: [clock]}
+    suggests: {face: unamused}
+  check:
+    words: [check mark, checkmark, tick, tick box, ticked, done, all done, done and done, finished, finish, task done,
+      task complete, completed task, checked, checked off, check off, verified, confirmed, confirm, approved stamp, correct answer,
+      right answer, yes done]
+    means: {effects: [check]}
+    suggests: {face: proud}
+  cross_mark:
+    words: [cross mark, x mark, red x, big x, wrong answer, reject, cancelled, canceled, cancel, errors, not allowed, forbidden,
+      banned, prohibited, nope mark, invalid]
+    means: {effects: [cross_mark]}
+    suggests: {face: unamused}
+  broken_heart:
+    words: [broken heart, broken hearted, brokenhearted, heartbreak, heartbroken, heart break, breakup, break up, broke up, dumped,
+      got dumped, rejected love, unrequited, unrequited love, lonely heart, heartache, my heart hurts, ex, missing you, miss you,
+      i miss you, miss u, missing u, sad love]
+    means: {effects: [broken_heart]}
+    suggests: {face: cry}
+  dizzy_stars:
+    words: [dizzy stars, seeing stars stars, stars spinning, circling stars, knocked silly, birds circling, tweety birds,
+      bonk stars, head injury, concussed, dazed, daze, woozy stars]
+    means: {effects: [dizzy_stars]}
+    suggests: {face: dizzy}
+
+  # ---------------------------------------------------------------- on the face
+  steam:
+    words: [steam, steaming, steamy, steam from ears, smoke from ears, steaming ears, fuming, fumes, blowing off steam, hot headed,
+      hothead, boiling, pressure cooker, venting, vent]
+    means: {effects: [steam]}
+    suggests: {face: furious}
+  panic_sweat:
+    words: [panic sweat, stress sweat, sweating a lot, sweating buckets, buckets of sweat, nervous wreck, stressed sweat,
+      sweaty panic, exam stress, so stressed, nervous breakdown]
+    means: {effects: [panic_sweat]}
+    suggests: {face: nervous}
+  waterfall_tears:
+    words: [waterfall tears, river of tears, rivers of tears, streams of tears, flood of tears, crying waterfall, anime tears,
+      tears streaming, tears pouring, crying rivers, wailing tears, crocodile tears]
+    means: {effects: [waterfall_tears]}
+    suggests: {face: cry}
+  snore_bubble:
+    words: [snot bubble, snore bubble, snoring bubble, nose bubble, sleep bubble, sleeping bubble, bubble snore]
+    means: {effects: [snore_bubble]}
+    suggests: {face: sleep}
+  cold_breath:
+    words: [cold breath, frosty breath, breath cloud, visible breath, foggy breath, frosty, frosted window, freezing breath]
+    means: {effects: [cold_breath]}
+    suggests: {face: nervous}
+  shock_lines:
+    words: [shock lines, shocked lines, shooketh, i am shook, startle lines, jumpscare, jump scare, boo scare, mind blown lines,
+      double take]
+    means: {effects: [shock_lines]}
+    suggests: {face: shocked}
+
+  # ---------------------------------------------------------------- around
+  flies:
+    words: [flies, fly buzzing, buzzing flies, stinky, stink, stinks, smelly, smell, smells, stench, gross smell, garbage smell,
+      need a shower, need a bath, did not shower, unwashed, dirty, filthy, messy, mess, trash panda vibes, rotten, trash can,
+      trash bin, garbage can, garbage bin, dumpster, dumpster diving, digging in the trash, eating trash, trash day]
+    means: {effects: [flies]}
+    suggests: {face: sick}
+  sun:
+    words: [sun, sunny day sun, sunshine, sunlight, sunrays, sun rays, sunbeam, sunbeams, sunny weather, bright day, hot sun,
+      summer sun, sunny side up, good weather, nice weather, beautiful day, clear sky, blue sky]
+    means: {effects: [sun]}
+    suggests: {face: joy}
+  snow:
+    words: [snow, snowy, snowing, snowfall, snowflake, snowflakes, snow day, first snow, let it snow, flurries, blizzard, snowstorm,
+      snow storm, winter wonderland, white christmas, snowman, snowmen, snowball, snowball fight, ice, on ice]
+    means: {effects: [snow]}
+    suggests: {face: joy, accessories: [scarf]}
+  petals:
+    words: [petals, petal, falling petals, flower petals, rose petals, cherry blossom, cherry blossoms, sakura, sakura season,
+      hanami, blossom, blossoms, spring breeze, spring is here, springtime petals, romantic petals]
+    means: {effects: [petals]}
+    suggests: {face: love}
+  leaves:
+    words: [leaves, leaf, falling leaves, autumn leaves, fall leaves, autumn, fall, fall season, autumn vibes, fall vibes, autumnal,
+      maple leaf, maple, foliage, leaf pile, sweater weather, cozy season, harvest, thanksgiving leaves, november, october vibes,
+      branch, branches, tree, trees, forest, woods, jungle, in the woods]
+    means: {effects: [leaves]}
+    suggests: {face: smiley}
+  money_rain:
+    words: [money rain, raining money, cash rain, raining cash, make it rain money, money everywhere, rich vibes, stacks, bands,
+      big money, money shower, it is raining money]
+    means: {effects: [money_rain]}
+    suggests: {face: excited}
+  lightning:
+    words: [lightning, lightning bolt, lightning bolts, thunder, thunderstorm, thunder and lightning, electricity, electrified, zap,
+      zapped, zapping, shocked electric, bolt, power surge, storm cloud, thunderbolt]
+    means: {effects: [lightning]}
+    suggests: {face: furious}
+  rainbow:
+    words: [rainbow, rainbows, rainbow behind, double rainbow, pride month, lgbt, lgbtq, gay pride, love is love, colorful,
+      colourful, technicolor, unicorn vibes, rainbow vibes, after the rain]
+    means: {effects: [rainbow]}
+    suggests: {face: joy}
+  bubbles:
+    words: [bubbles, bubble, soap bubbles, blowing bubbles, bubble bath, bubbly vibes, foam, foamy, soap, soapy, bath, bath time,
+      bathtime, shower, showering, taking a bath, taking a shower, spa, spa day, self care, selfcare, pamper, pampering]
+    means: {effects: [bubbles]}
+    suggests: {face: calm}
+  butterflies:
+    words: [butterflies, butterfly, butterflies in tummy, fluttering, flutter, flutters, garden party, nature, nature walk, meadow,
+      springtime butterflies]
+    means: {effects: [butterflies]}
+    suggests: {face: love}
+  bats:
+    words: [bats, bat, flying bats, vampire, vampires, dracula, spooky, spooky season, spooky vibes, spooktober, haunted,
+      haunted house, gothic, goth, night creature, batty]
+    means: {effects: [bats]}
+    suggests: {face: mischief}
+  ghost:
+    words: [ghost, ghosts, ghostie, ghosty, boo ghost, spooky ghost, ghosted, ghosting, phantom, spirit, spirits, poltergeist,
+      haunting]
+    means: {effects: [ghost]}
+    suggests: {face: scared}
+
+  # ---------------------------------------------------------------- behind
+  fireworks:
+    words: [fireworks, firework, fireworks show, firework display, sky full of fireworks, boom boom fireworks, bang,
+      kaboom fireworks, celebration fireworks, guy fawkes night, new years fireworks, diwali fireworks, pyrotechnics]
+    means: {effects: [fireworks]}
+    suggests: {face: excited}
+  spotlight:
+    words: [spotlight, spotlights, in the spotlight, center stage, centre stage, on stage, stage, stage lights, limelight,
+      star of the show, showtime, show time, performance, performing, perform, debut, premiere, red carpet, famous, celebrity,
+      superstar, star]
+    means: {effects: [spotlight]}
+    suggests: {face: proud}
+  speed_lines:
+    words: [speed lines, speed, speedy lines, zoom lines, fast lines, zooming past, whoosh, swoosh, vroom, vroom vroom,
+      fast as lightning, gotta go fast, sonic speed, warp speed, light speed, nyoom, nyoooom, in a flash]
+    means: {effects: [speed_lines]}
+    suggests: {face: determined}
+  boom:
+    words: [boom, kaboom, ka boom, explosion, exploded, blast, blown up, mind blown, mind blowing, my mind is blown, bombshell,
+      bomb, nuke, big news, epic, epic win, pow, bam, wham, kapow, impact, dramatic, drama queen, dramatic entrance]
+    means: {effects: [boom]}
+    suggests: {face: shocked}
+  night_sky:
+    words: [night sky, starry night, starry sky, moon, moonlight, moonlit, full moon, crescent moon, half moon, stars at night,
+      galaxy, cosmos, cosmic, universe, outer space, midnight, nighttime, night time, late night vibes, shooting star,
+      wish upon a star]
+    means: {effects: [night_sky]}
+    suggests: {face: calm}
+
+accessories:
+  # ---------------------------------------------------------------- the first nine
+  party_hat:
+    words: [party hat, party hats, birthday hat, cone hat, celebration hat, festive hat, little hat, new year hat, party cone, hat,
+      hats]
+    means: {accessories: [party_hat]}
+  crown:
+    words: [crown, crowns, crowned, king, queen, royal, royals, royalty, majesty, your majesty, his majesty, her majesty,
+      king of the world, queen bee, boss baby, crown king, king of everything, queen of everything, emperor, empress, monarch,
+      ruler, rule the world, birthday queen, birthday king, prom queen, prom king, diadem, queen energy, king energy]
+    means: {accessories: [crown]}
+    suggests: {face: proud}
+  glasses:
+    words: [glasses, eyeglasses, spectacles, specs, nerd, nerdy, geek, geeky, smart, intellectual, scholar, professor, scientist,
+      librarian, reading glasses, round glasses, nerd glasses, smarty, clever, intelligent, brainy, brainiac, genius glasses, wise,
+      wisdom, owl like, study buddy, teacher glasses, teacher look]
+    means: {accessories: [glasses]}
+  sunglasses:
+    words: [sunglasses, sun glasses, sunnies, shades, shades on, aviators, cool glasses, summer, summertime, summer time,
+      summer vibes, beach, beach day, beach vibes, sunny, sunny day, sunshine day, sunbathing, sun bathing, tanning, pool party,
+      poolside, tropical, vacation mode, holiday mode, deal with it, too bright, the future is bright, throwing shade]
+    means: {accessories: [sunglasses]}
+    suggests: {face: cool}
+  bow:
+    words: [bow ribbon, hair bow, ribbon, ribbons, hair ribbon, pretty, prettiest, girly, coquette, cutie, dainty, ladylike,
+      princess bow, cute bow, big bow, bows, bow]
+    means: {accessories: [bow]}
+  flower:
+    words: [flower, flowers, flowery, floral, blooming, bloom, blooms, daisy, daisies, tulip, tulips, sunflower, sunflowers, lily,
+      lilies, hibiscus, flower in hair, spring, springtime, spring time, spring vibes, garden, gardening, botanical, plant lover,
+      flower behind ear, flower clip]
+    means: {accessories: [flower]}
+  headphones:
+    words: [headphones, headphone, headset, earphones, earbuds, airpods, listening, podcast listening, streamer, streaming, twitch,
+      dj set, music on, tunes on, noise cancelling, audiobook, call center, support agent, gamer headset]
+    means: {accessories: [headphones]}
+  scarf:
+    words: [scarf, scarves, winter, wintery, wintry, knit, knitted, knitting, woolly, wooly, chilly day, winter vibes, cold season,
+      hot cocoa season, bundled up, bundle up, wrapped up warm, cozy scarf]
+    means: {accessories: [scarf]}
+  star_clip:
+    words: [hair clip, star clip, hairclip, hair pin, hairpin, barrette, clip, star hair clip, hair accessory, sparkly clip,
+      star pin, star barrette]
+    means: {accessories: [star_clip]}
+
+  # ---------------------------------------------------------------- hats
+  santa_hat:
+    words: [santa hat, santa hats, christmas hat, xmas hat, santa cap, festive santa hat, elf, elves, santa helper, santas helper,
+      santa's helper]
+    means: {accessories: [santa_hat]}
+    suggests: {face: joy}
+  witch_hat:
+    words: [witch hat, witches hat, witchy, witch costume, halloween costume, halloween hat, broomstick, broom, cauldron, coven,
+      hex, hexed, potion, potions, trick or treat witch, witch, witches, witchcraft, witchy vibes, little witch]
+    means: {accessories: [witch_hat]}
+    suggests: {face: mischief, motion: magic}
+  wizard_hat:
+    words: [wizard hat, wizards hat, wizard costume, merlin, mage hat, sorcerer hat, magic hat, starry hat, wizard, wizards,
+      wizardry, sorcerer, sorceress, mage, warlock, archmage, little wizard]
+    means: {accessories: [wizard_hat]}
+    suggests: {face: proud, motion: magic, effects: [sparkles]}
+  cowboy_hat:
+    words: [cowboy hat, cowboy, cowboys, cowgirl, cowgirls, yeehaw, howdy cowboy, western, wild west, rodeo, sheriff, ranch,
+      rancher, giddy up, giddyup, saddle up, texas, country, country music, line dancing, stetson]
+    means: {accessories: [cowboy_hat]}
+    suggests: {face: grin}
+  top_hat:
+    words: [top hat, top hats, tophat, gentleman, gentlemen, gentlemanly, dapper, classy, fancy, fancy pants, posh, sophisticated,
+      ringmaster, magician hat, black tie, formal, formal wear, gala, tuxedo, tux]
+    means: {accessories: [top_hat]}
+    suggests: {face: smug}
+  cap:
+    words: [cap, caps, baseball cap, ball cap, snapback, trucker hat, trucker cap, backwards cap, cap on, sporty, sporty look,
+      baseball, skater, skateboard, skateboarding, street style, streetwear, hip hop cap]
+    means: {accessories: [cap]}
+    suggests: {face: cool}
+  beanie:
+    words: [beanie, beanies, toque, tuque, knit hat, knitted hat, wool hat, woolly hat, winter hat, bobble hat, pom pom hat,
+      ski hat, skiing, ski, snowboard, snowboarding, slopes, ski trip, apres ski]
+    means: {accessories: [beanie]}
+    suggests: {face: smiley}
+  chef_hat:
+    words: [chef hat, chefs hat, toque blanche, chef, chefs, cook, cooking, cooks, cooked, cooking time, kitchen, recipe, recipes,
+      master chef, masterchef, sous chef, head chef, let him cook, let her cook, let them cook, chef mode, homemade, home cooked,
+      gourmet]
+    means: {accessories: [chef_hat]}
+    suggests: {face: proud}
+  grad_cap:
+    words: [graduation cap, grad cap, mortarboard, mortar board, graduation, graduation day, grad day, graduation hat, cap and gown,
+      tassel, i graduated, we graduated, finally graduated, senior, seniors, class of 2025, class of 2026, class of 2027,
+      toss the cap]
+    means: {accessories: [grad_cap]}
+    suggests: {face: proud, props: [diploma]}
+  pirate_hat:
+    words: [pirate hat, pirate, pirates, arr, arrr, arrrr, ahoy matey, matey, treasure, treasure hunt, treasure map, booty treasure,
+      walk the plank, jolly roger, buccaneer, sea dog, shiver me timbers, yo ho ho, talk like a pirate]
+    means: {accessories: [pirate_hat]}
+    suggests: {face: grin}
+  flower_crown:
+    words: [flower crown, flower crowns, floral crown, flower wreath, daisy chain, garland, festival, festival vibes, coachella,
+      boho, bohemian, fairy core, fairycore, cottagecore, cottage core, may day, midsummer, flower child, hippie, hippy]
+    means: {accessories: [flower_crown]}
+    suggests: {face: joy}
+  halo:
+    words: [halo, halos, angel, angels, little angel, innocent angel, heaven, heavenly halo, holy halo, good boy halo,
+      good girl halo, purity, was not me, i am innocent]
+    means: {accessories: [halo]}
+    suggests: {face: proud}
+  devil_horns:
+    words: [devil horns, devil, devils, little devil, demon, demons, imp, impish, horns, evil horns, being naughty, bad boy,
+      bad girl, troublemaker, trouble maker, chaos gremlin, rascal, little rascal]
+    means: {accessories: [devil_horns]}
+    suggests: {face: mischief}
+  bunny_ears:
+    words: [bunny ears, rabbit ears, bunny ear headband, ears headband, easter bunny ears, bunny costume, bunny girl]
+    means: {accessories: [bunny_ears]}
+    suggests: {face: joy}
+  unicorn_horn:
+    words: [unicorn horn, unicorn, unicorns, magical unicorn, unicorn costume, i am a unicorn, mythical, mythical creature,
+      majestic, rare, one of a kind, special snowflake]
+    means: {accessories: [unicorn_horn]}
+    suggests: {face: starry, effects: [rainbow]}
+  hard_hat:
+    words: [hard hat, hardhat, construction, construction worker, under construction, builder, building, build, builds, engineer,
+      engineering, work in progress, wip, safety first, safety helmet, helmet, handyman, fixing, fix it, repair, repairing, diy,
+      tools]
+    means: {accessories: [hard_hat]}
+    suggests: {face: determined}
+  beret:
+    words: [beret, berets, french, france, paris, parisian, oui oui, baguette, croissant, bonjour beret, artist beret, mime,
+      art student]
+    means: {accessories: [beret]}
+    suggests: {face: smug}
+  sun_hat:
+    words: [sun hat, sunhat, straw hat, straw hats, garden hat, wide brim hat, floppy hat, beach hat, picnic, picnics,
+      gardening hat, farmer, farmers market, summer hat]
+    means: {accessories: [sun_hat]}
+    suggests: {face: smiley}
+  headband:
+    words: [headband, head band, sweatband, sweat band, athletic, athlete, athletes, sporty headband, tennis, jogger, 80s workout,
+      aerobics class, yoga class]
+    means: {accessories: [headband]}
+    suggests: {face: determined}
+  propeller_cap:
+    words: [propeller cap, propeller hat, propeller beanie, beanie copter, silly hat, goofy hat, beanie propeller, nerd hat, kiddo,
+      kid]
+    means: {accessories: [propeller_cap]}
+    suggests: {face: silly}
+  nightcap:
+    words: [nightcap, night cap, sleeping cap, sleep cap, pajamas, pyjamas, pjs, jammies, onesie, pajama party, pyjama party,
+      slumber party, bedtime hat, ready for bed hat, sleepover]
+    means: {accessories: [nightcap]}
+    suggests: {face: drowsy}
+  viking_helmet:
+    words: [viking helmet, viking, vikings, horned helmet, warrior, warriors, barbarian, valhalla, odin, thor, norse, shield maiden,
+      berserker, battle ready, conquer, conquering, raid, raiding]
+    means: {accessories: [viking_helmet]}
+    suggests: {face: determined}
+  tiara:
+    words: [tiara, tiaras, princess, princesses, prince, princely, princess vibes, little princess, fairy princess, pageant,
+      beauty queen, birthday princess, quinceanera, sweet sixteen, sweet 16, debutante]
+    means: {accessories: [tiara]}
+    suggests: {face: proud}
+  earmuffs:
+    words: [earmuffs, ear muffs, earmuff, fluffy earmuffs, ear warmers, too loud, so loud, noisy, noise, la la la not listening,
+      i am not listening, not listening, blocking you out]
+    means: {accessories: [earmuffs]}
+    suggests: {face: unamused}
+
+  # ---------------------------------------------------------------- eyes, nose and mouth
+  heart_glasses:
+    words: [heart glasses, heart shaped glasses, heart sunglasses, heart shades, love glasses, lovey glasses, valentine glasses]
+    means: {accessories: [heart_glasses]}
+    suggests: {face: love}
+  star_glasses:
+    words: [star glasses, star shaped glasses, star sunglasses, star shades, party glasses, novelty glasses, popstar glasses]
+    means: {accessories: [star_glasses]}
+    suggests: {face: grin}
+  goggles:
+    words: [goggles, swim goggles, swimming goggles, ski goggles, lab goggles, safety goggles, swim, swimming, swimmer, pool,
+      diving, dive, snorkel, snorkeling, scuba, laboratory, science, chemistry, experiment, experiments, mad scientist, steampunk]
+    means: {accessories: [goggles]}
+    suggests: {face: focused}
+  glasses_3d:
+    words: [3d glasses, 3d, three d glasses, red blue glasses, anaglyph, 3d movie, imax, movie glasses]
+    means: {accessories: [glasses_3d]}
+    suggests: {face: excited, props: [popcorn]}
+  monocle:
+    words: [monocle, monocles, monocle man, indeed sir, quite so, jolly good, splendid sir, distinguished, aristocrat, aristocratic,
+      fancy sir, posh sir, rich uncle, tea and crumpets]
+    means: {accessories: [monocle]}
+    suggests: {face: smug}
+  eye_patch:
+    words: [eye patch, eyepatch, one eye, patch over eye, pirate patch, edgy, edgelord]
+    means: {accessories: [eye_patch]}
+    suggests: {face: determined}
+  sleep_mask:
+    words: [sleep mask, eye mask, sleeping mask, blindfold, beauty sleep mask, do not disturb sleeping, mask on sleeping,
+      eye pillow]
+    means: {accessories: [sleep_mask]}
+    suggests: {face: sleep, motion: sleep}
+  mustache:
+    words: [mustache, moustache, mustaches, moustaches, stache, tache, fake mustache, handlebar mustache, disguise, disguised,
+      in disguise, undercover mustache, mister, sir mustache, movember, father, dad joke, dad jokes, daddy]
+    means: {accessories: [mustache]}
+    suggests: {face: smug}
+  face_mask:
+    words: [face mask, mask, masks, masked, surgical mask, medical mask, wear a mask, mask up, covid, quarantine, quarantined,
+      isolation, self isolating, social distancing, pandemic, lockdown, nurse, doctor, doctors, hospital, healthcare, health worker]
+    means: {accessories: [face_mask]}
+    suggests: {face: sick}
+  clown_nose:
+    words: [clown nose, red nose, clown, clowns, clown around, honk honk, circus clown, i am a clown, class clown, jester, joker,
+      pranks, april fools, april fool, fooled you, got you good]
+    means: {accessories: [clown_nose]}
+    suggests: {face: silly}
+
+  # ---------------------------------------------------------------- neck
+  bow_tie:
+    words: [bow tie, bowtie, bow ties, bowties, dickie bow, cute bow tie, wedding guest, best man, groom, groomsman, prom,
+      prom night, formal party, dressed up, dress up, suited up, suit up, looking sharp, sharp dressed]
+    means: {accessories: [bow_tie]}
+    suggests: {face: proud}
+  necktie:
+    words: [necktie, tie, ties, neck tie, suit and tie, business, businessman, businesswoman, business meeting, corporate, ceo,
+      manager, office job, job interview, interview, first day at work, first day of work, new job, promotion, promoted,
+      nine to five, 9 to 5, salaryman, entrepreneur, startup, grind mode]
+    means: {accessories: [necktie]}
+    suggests: {face: determined}
+  lei:
+    words: [lei, leis, flower lei, hawaii, hawaiian, aloha vibes, luau, island, island life, islands, maui, tiki, tiki party, hula,
+      hula dance, beach party, tropical party, surf, surfing, surfer]
+    means: {accessories: [lei]}
+    suggests: {face: joy}
+  bell_collar:
+    words: [bell collar, collar, collars, cat collar, dog collar, collar with bell, jingle collar, pet collar, good kitty,
+      good doggy, pet me, belly rubs please, adopt me, adopted, rescue pet, forever home, gotcha day]
+    means: {accessories: [bell_collar]}
+    suggests: {face: joy}
+  bib:
+    words: [bib, bibs, baby bib, messy eater, feeding time, baby food, high chair, little baby, babyface, baby mode, newborn,
+      baby shower, it is a boy, it is a girl, gender reveal, toddler]
+    means: {accessories: [bib]}
+    suggests: {face: joy}
+
+  # ---------------------------------------------------------------- back
+  hero_cape:
+    words: [cape, hero cape, superhero cape, red cape, capes, caped, super mom, super dad, supermom, superdad, hero of the day,
+      my hero, everyday hero, real hero, unsung hero, vigilante, justice, thank you hero]
+    means: {accessories: [hero_cape]}
+    suggests: {face: determined}
+  angel_wings:
+    words: [angel wings, wings, winged, feathered wings, feathers, guardian angel, cherub, cupid, heavenly wings, earth angel,
+      angel baby]
+    means: {accessories: [angel_wings]}
+    suggests: {face: calm}
+  fairy_wings:
+    words: [fairy wings, fairy, fairies, faerie, pixie, pixies, fae, fairytale, fairy tale, enchanted forest]
+    means: {accessories: [fairy_wings]}
+    suggests: {face: joy, effects: [sparkles]}
+  backpack:
+    words: [backpack, backpacks, rucksack, schoolbag, school bag, bookbag, book bag, first day of school, back to school,
+      school day, field trip, school trip, adventure, adventures, adventurer, explorer, exploring, explore, outdoors, camping, camp,
+      scout, scouts]
+    means: {accessories: [backpack]}
+    suggests: {face: excited, motion: walk}
+
+  # ---------------------------------------------------------------- body
+  apron:
+    words: [apron, aprons, kitchen apron, baking apron, barista, waiter apron, cafe, cafe owner, coffee shop, home baker, bake sale,
+      cookie baking, baking cookies, bake off]
+    means: {accessories: [apron]}
+    suggests: {face: smiley}
+  xmas_sweater:
+    words: [christmas sweater, xmas sweater, christmas jumper, xmas jumper, ugly sweater, ugly christmas sweater, holiday sweater,
+      festive sweater, christmas pajamas, cozy christmas, christmas party, office christmas party, holiday party]
+    means: {accessories: [xmas_sweater]}
+    suggests: {face: joy}
+  tshirt:
+    words: [t shirt, tshirt, t-shirt, tee, tees, shirt, shirts, top, tops, casual outfit, outfit, outfits, clothes, dressed, merch,
+      team shirt, band shirt, jersey, jerseys, uniform, kit, hoodie, hoodies, sweatshirt, sweatshirts, sweater, sweaters, jumper,
+      pullover, cardigan]
+    means: {accessories: [tshirt]}
+  tutu:
+    words: [tutu, tutus, ballerina, ballet, ballet dancer, ballet class, swan lake, nutcracker, prima ballerina, dance recital,
+      recital, princess dress, skirt, dress, dresses, twirly skirt, frilly]
+    means: {accessories: [tutu]}
+    suggests: {face: joy, stance: tiptoe}

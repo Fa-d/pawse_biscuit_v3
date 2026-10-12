@@ -319,23 +319,27 @@ def aura(color="teal", period=480, center=None, size=360.0):
     return spec
 
 
-def cloud_on_string(side="R", offset=(34.0, -208.0), bob=5.0, period=60, sway=7.0, scale=1.0):
-    """A cloud with a tick that floats above the paw like a balloon; the string trails with a soft lag."""
+def cloud_on_string(side="R", offset=(34.0, -208.0), bob=5.0, period=60, sway=7.0, scale=1.0, sway_period=None, shapes=None, nm="cloud"):
+    """A cloud with a tick that floats above the paw like a balloon; the string trails with a soft lag.
+    sway_period defaults to two bob periods; a looping clip needs one that divides its length.
+    shapes: draw something else on the string (a balloon), centred on (0, 0) with the string tied at (0, 38)."""
+    sway_period = period * 2.0 if sway_period is None else sway_period
+
     def spec(char, T, n):
         from .clip import spring_follow
         loop = char.clip.loop
         hand = np.array([char.hand_to_world(side, f, (0.0, 17.0)) for f in range(n)])
         target = hand + np.array(offset)
         target[:, 1] += [bob * math.sin(2 * math.pi * f / period) for f in range(n)]
-        target[:, 0] += [sway * math.sin(2 * math.pi * (f / (period * 2.0) + 0.1)) for f in range(n)]
+        target[:, 0] += [sway * math.sin(2 * math.pi * (f / sway_period + 0.1)) for f in range(n)]
         pos = spring_follow(target, freq=0.9, damp=0.5, loop=loop)
         lean = (target[:, 0] - pos[:, 0]) * 0.6
-        cloud_shapes = [
+        cloud_shapes = shapes if shapes is not None else [
             gr("check", [sh(Path([(-16, 6), (-4, 18), (20, -8)], closed=False)), st(C["blue"], 7)]),
             gr("cloud shine", [el((-20, -20), (30, 14)), fl(C["lightblue"], 70)]),
             gr("cloud", [el((-44, 6), (70, 54)), el((0, -12), (84, 70)), el((46, 4), (72, 56)), rc((0, 20), (150, 40), 20), fl(C["white"])]),
         ]
-        cloud = Layer("cloud", cloud_shapes, a=(0, 0), p=Anim([tuple(p) for p in pos]), r=Anim(list(np.clip(lean, -9, 9))),
+        cloud = Layer(nm, cloud_shapes, a=(0, 0), p=Anim([tuple(p) for p in pos]), r=Anim(list(np.clip(lean, -9, 9))),
                       s=(scale * 100, scale * 100))
 
         def string(f):
@@ -345,7 +349,7 @@ def cloud_on_string(side="R", offset=(34.0, -208.0), bob=5.0, period=60, sway=7.
             sag = 10.0 + 0.5 * (target[f][0] - pos[f][0])
             return Path([tuple(a), b], i=[(0, 0), (-dx * 0.1 - sag, -dy * 0.36)], o=[(dx * 0.1 + sag, dy * 0.36), (0, 0)], closed=False)
 
-        line = Layer("string", [gr("string", [sh(F(n, string)), st(C["cardline"], 3)])])
+        line = Layer("string" if nm == "cloud" else f"{nm} string", [gr("string", [sh(F(n, string)), st(C["cardline"], 3)])])
         return [("top", cloud), ("front", line)]
     return spec
 

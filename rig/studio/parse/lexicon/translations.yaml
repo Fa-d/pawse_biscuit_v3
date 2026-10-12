@@ -1,0 +1,565 @@
+# Other languages: a phrase as people type it -> the English words the lexicon knows.  Read before anything else,
+# longest phrase first, so "feliz cumpleanos" becomes "happy birthday" and then reads like any English prompt.
+# Accents may be left out ("cumpleanos" and "cumpleaños" are the same here).  Only whole words match.
+# Add a language by adding its phrases; the English side must use words from this folder.
+
+translations:
+  # ---------------------------------------------------------------- Spanish
+  hola: hello
+  buenos dias: good morning
+  buen dia: good morning
+  buenas tardes: hello
+  buenas noches: good night
+  adios: goodbye
+  hasta luego: see you later
+  hasta manana: see you later
+  nos vemos: see you later
+  gracias: thanks
+  muchas gracias: thank you so much
+  mil gracias: thank you so much
+  de nada: no worries
+  te amo: i love you
+  te quiero: love you
+  te quiero mucho: love you so much
+  te extrano: i miss you
+  te echo de menos: i miss you
+  lo siento: sorry
+  perdon: sorry
+  perdoname: forgive me
+  feliz cumpleanos: happy birthday
+  feliz navidad: merry christmas
+  feliz ano nuevo: happy new year
+  felicidades: congrats
+  felicitaciones: congratulations
+  enhorabuena: congratulations
+  buena suerte: good luck
+  mejorate: get well soon
+  que te mejores: get well soon
+  feliz: happy
+  contento: happy
+  contenta: happy
+  triste: sad
+  enojado: angry
+  enojada: angry
+  enfadado: angry
+  cansado: tired
+  cansada: tired
+  sueno: sleepy
+  tengo sueno: sleepy
+  hambre: hungry
+  tengo hambre: hungry
+  miedo: scared
+  sorpresa: surprised
+  jaja: haha
+  jajaja: haha
+  si: yes
+  vale: ok
+  claro: of course
+  no se: i do not know
+  amor: love
+  besos: kisses
+  un abrazo: hug
+  abrazo: hug
+  abrazos: hugs
+  fiesta: party
+  cafe: coffee
+  gato: cat
+  gatito: kitten
+  oso: bear
+  zorro: fox
+  vamos: let us go
+  ole: cheer
+  # ---------------------------------------------------------------- Portuguese
+  ola: hello
+  oi: hi
+  bom dia: good morning
+  boa tarde: hello
+  boa noite: good night
+  tchau: bye
+  obrigado: thanks
+  obrigada: thanks
+  muito obrigado: thank you so much
+  muito obrigada: thank you so much
+  eu te amo: i love you
+  te amo muito: love you so much
+  saudade: i miss you
+  saudades: i miss you
+  desculpa: sorry
+  desculpe: sorry
+  feliz aniversario: happy birthday
+  parabens: congrats
+  feliz natal: merry christmas
+  feliz ano novo: happy new year
+  boa sorte: good luck
+  melhoras: get well soon
+  fome: hungry
+  estou com fome: hungry
+  kkkk: haha
+  kkkkk: haha
+  rsrs: haha
+  beijos: kisses
+  beijo: kiss
+  abraco: hug
+  gatinho: kitten
+  urso: bear
+  raposa: fox
+  # ---------------------------------------------------------------- French
+  bonjour: good morning
+  salut: hi
+  coucou: hi
+  bonsoir: hello
+  bonne nuit: good night
+  au revoir: goodbye
+  a bientot: see you soon
+  merci: thanks
+  merci beaucoup: thank you so much
+  je t'aime: i love you
+  je t aime: i love you
+  bisous: kisses
+  bisou: kiss
+  desole: sorry
+  desolee: sorry
+  joyeux anniversaire: happy birthday
+  bon anniversaire: happy birthday
+  joyeux noel: merry christmas
+  bonne annee: happy new year
+  felicitations: congratulations
+  bonne chance: good luck
+  bon courage: you got this
+  bon retablissement: get well soon
+  heureux: happy
+  heureuse: happy
+  fatigue: tired
+  fatiguee: tired
+  j'ai faim: hungry
+  faim: hungry
+  mdr: haha
+  ptdr: haha
+  oui: yes
+  d'accord: ok
+  renard: fox
+  # ---------------------------------------------------------------- German
+  hallo: hello
+  guten morgen: good morning
+  guten tag: hello
+  gute nacht: good night
+  tschuss: bye
+  auf wiedersehen: goodbye
+  danke: thanks
+  danke schon: thank you so much
+  vielen dank: thank you so much
+  ich liebe dich: i love you
+  hab dich lieb: love you
+  entschuldigung: sorry
+  tut mir leid: sorry
+  alles gute zum geburtstag: happy birthday
+  alles gute: happy birthday
+  frohe weihnachten: merry christmas
+  frohes neues jahr: happy new year
+  gluckwunsch: congrats
+  herzlichen gluckwunsch: congratulations
+  viel gluck: good luck
+  gute besserung: get well soon
+  glucklich: happy
+  traurig: sad
+  mude: tired
+  hunger: hungry
+  katze: cat
+  fuchs: fox
+  # ---------------------------------------------------------------- Italian
+  ciao ciao: bye bye
+  buongiorno: good morning
+  buonanotte: good night
+  grazie: thanks
+  grazie mille: thank you so much
+  ti amo: i love you
+  ti voglio bene: love you
+  scusa: sorry
+  mi dispiace: sorry
+  buon compleanno: happy birthday
+  buon natale: merry christmas
+  felice anno nuovo: happy new year
+  auguri: congrats
+  complimenti: congrats
+  in bocca al lupo: good luck
+  felice: happy
+  stanco: tired
+  stanca: tired
+  gatto: cat
+  orso: bear
+  volpe: fox
+  # ---------------------------------------------------------------- Indonesian / Malay
+  selamat pagi: good morning
+  selamat malam: good night
+  selamat tidur: good night
+  terima kasih: thank you
+  terima kasih banyak: thank you so much
+  makasih: thanks
+  aku cinta kamu: i love you
+  aku sayang kamu: love you
+  sayang: love
+  maaf: sorry
+  selamat ulang tahun: happy birthday
+  selamat hari raya: eid mubarak
+  selamat lebaran: eid mubarak
+  mohon maaf lahir dan batin: eid mubarak
+  selamat: congrats
+  semangat: you got this
+  senang: happy
+  sedih: sad
+  marah: angry
+  capek: tired
+  lapar: hungry
+  wkwk: haha
+  wkwkwk: haha
+  kucing: cat
+  beruang: bear
+  rubah: fox
+  # ---------------------------------------------------------------- Tagalog / Filipino
+  magandang umaga: good morning
+  magandang gabi: good night
+  salamat: thanks
+  maraming salamat: thank you so much
+  mahal kita: i love you
+  mahal na mahal kita: i love you so much
+  pasensya: sorry
+  pasensya na: sorry
+  maligayang kaarawan: happy birthday
+  maligayang pasko: merry christmas
+  masaya: happy
+  malungkot: sad
+  gutom: hungry
+  pagod: tired
+  # ---------------------------------------------------------------- Turkish
+  merhaba: hello
+  gunaydin: good morning
+  iyi geceler: good night
+  tesekkurler: thanks
+  tesekkur ederim: thank you
+  seni seviyorum: i love you
+  ozur dilerim: sorry
+  iyi ki dogdun: happy birthday
+  dogum gunun kutlu olsun: happy birthday
+  bayramin mubarek olsun: eid mubarak
+  iyi bayramlar: eid mubarak
+  tebrikler: congratulations
+  mutlu: happy
+  uzgun: sad
+  yorgun: tired
+  # ---------------------------------------------------------------- Arabic (romanized and script)
+  marhaba: hello
+  ahlan: hello
+  salam: hello
+  as salamu alaikum: hello
+  assalamu alaikum: hello
+  assalamualaikum: hello
+  salam alaikum: hello
+  sabah al khair: good morning
+  sabah el kheir: good morning
+  tisbah ala khair: good night
+  shukran: thanks
+  shukran jazeelan: thank you so much
+  jazakallah: thank you
+  jazakallah khair: thank you so much
+  habibi: love
+  habibti: love
+  ana behebak: i love you
+  ana uhibbuk: i love you
+  asif: sorry
+  aasif: sorry
+  eid saeed: eid mubarak
+  kul am wa antum bikhair: eid mubarak
+  mabrook: congrats
+  mabruk: congrats
+  alhamdulillah: grateful
+  mashallah: congrats
+  masha allah: congrats
+  yalla: let us go
+  khalas: done
+  "مرحبا": hello
+  "السلام عليكم": hello
+  "صباح الخير": good morning
+  "تصبح على خير": good night
+  "شكرا": thanks
+  "شكرا جزيلا": thank you so much
+  "احبك": i love you
+  "أحبك": i love you
+  "آسف": sorry
+  "عيد مبارك": eid mubarak
+  "عيد سعيد": eid mubarak
+  "رمضان كريم": ramadan kareem
+  "رمضان مبارك": ramadan mubarak
+  "مبروك": congrats
+  "الحمد لله": grateful
+  "ماشاء الله": congrats
+  "يلا": let us go
+  "هههه": haha
+  "ههههه": haha
+  # ---------------------------------------------------------------- Bangla (romanized and script)
+  shubho shokal: good morning
+  suprovat: good morning
+  shuprovat: good morning
+  shubho ratri: good night
+  shuvo ratri: good night
+  dhonnobad: thank you
+  dhonyobad: thank you
+  ami tomake bhalobashi: i love you
+  ami tomay bhalobashi: i love you
+  bhalobashi: love you
+  bhalobasha: love
+  sorry re: sorry
+  maf koro: forgive me
+  shubho jonmodin: happy birthday
+  shuvo jonmodin: happy birthday
+  shuvo noboborsho: shubho noboborsho
+  pohela baisakh: pohela boishakh
+  eid mubarak bhai: eid mubarak
+  ami khushi: i am happy
+  khushi: happy
+  anondo: happy
+  mon kharap: sad
+  dukkho: sad
+  rag: angry
+  ragi: angry
+  klanto: tired
+  ghum: sleep
+  ghumabo: sleep
+  khida: hungry
+  khide: hungry
+  khida legeche: hungry
+  bhoy: scared
+  obak: surprised
+  hashi: laugh
+  biral: cat
+  beral: cat
+  bhalluk: bear
+  shial: fox
+  "শুভ সকাল": good morning
+  "সুপ্রভাত": good morning
+  "শুভ রাত্রি": good night
+  "ধন্যবাদ": thank you
+  "আমি তোমাকে ভালোবাসি": i love you
+  "ভালোবাসি": love you
+  "ভালোবাসা": love
+  "দুঃখিত": sorry
+  "শুভ জন্মদিন": happy birthday
+  "শুভ নববর্ষ": shubho noboborsho
+  "পহেলা বৈশাখ": pohela boishakh
+  "ঈদ মোবারক": eid mubarak
+  "রমজান মোবারক": ramadan mubarak
+  "অভিনন্দন": congratulations
+  "আমি খুশি": i am happy
+  "খুশি": happy
+  "আনন্দ": happy
+  "মন খারাপ": sad
+  "দুঃখ": sad
+  "রাগ": angry
+  "ক্লান্ত": tired
+  "ঘুম": sleep
+  "ক্ষুধা": hungry
+  "খিদে": hungry
+  "ভয়": scared
+  "হাসি": laugh
+  "হাহা": haha
+  "বিড়াল": cat
+  "ভাল্লুক": bear
+  "শিয়াল": fox
+  "কফি": coffee
+  "চা": tea
+  # ---------------------------------------------------------------- Hindi / Urdu (romanized and script)
+  namaskar: hello
+  suprabhat: good morning
+  shubh ratri: good night
+  shukriya: thanks
+  bahut shukriya: thank you so much
+  dhanyavaad: thank you
+  dhanyawad: thank you
+  main tumse pyar karta hoon: i love you
+  main tumse pyaar karti hoon: i love you
+  pyar: love
+  pyaar: love
+  maaf karo: forgive me
+  maafi: sorry
+  janamdin mubarak: happy birthday
+  janmdin ki shubhkamnayein: happy birthday
+  happy wala birthday: happy birthday
+  naya saal mubarak: happy new year
+  diwali mubarak: happy diwali
+  shubh deepavali: happy diwali
+  badhai ho: congrats
+  mubarak ho: congrats
+  khush: happy
+  udaas: sad
+  gussa: angry
+  thaka hua: tired
+  thak gaya: tired
+  neend: sleepy
+  bhookh: hungry
+  bhook lagi: hungry
+  darr: scared
+  billi: cat
+  bhalu: bear
+  lomdi: fox
+  chai: tea
+  "नमस्ते": hello
+  "सुप्रभात": good morning
+  "शुभ रात्रि": good night
+  "धन्यवाद": thank you
+  "शुक्रिया": thanks
+  "मैं तुमसे प्यार करता हूँ": i love you
+  "प्यार": love
+  "माफ़ करो": forgive me
+  "जन्मदिन मुबारक": happy birthday
+  "नया साल मुबारक": happy new year
+  "दिवाली मुबारक": happy diwali
+  "बधाई हो": congrats
+  "खुश": happy
+  "उदास": sad
+  "गुस्सा": angry
+  "شکریہ": thanks
+  # ---------------------------------------------------------------- Russian
+  privet: hi
+  "привет": hi
+  "здравствуйте": hello
+  "доброе утро": good morning
+  "спокойной ночи": good night
+  "пока": bye
+  "спасибо": thanks
+  "спасибо большое": thank you so much
+  "я тебя люблю": i love you
+  "люблю": love
+  "извини": sorry
+  "прости": sorry
+  "с днем рождения": happy birthday
+  "с новым годом": happy new year
+  "поздравляю": congrats
+  "удачи": good luck
+  "ахаха": haha
+  "хаха": haha
+  "кот": cat
+  "медведь": bear
+  "лиса": fox
+  # ---------------------------------------------------------------- Japanese (romaji and script)
+  konnichiwa: hello
+  ohayo: good morning
+  ohayou: good morning
+  ohayo gozaimasu: good morning
+  oyasumi: good night
+  oyasuminasai: good night
+  sayonara: goodbye
+  mata ne: see you later
+  arigato: thanks
+  arigatou: thanks
+  arigatou gozaimasu: thank you very much
+  arigato gozaimasu: thank you so much
+  daisuki: love you
+  aishiteru: i love you
+  gomen: sorry
+  gomennasai: sorry
+  sumimasen: sorry
+  otanjoubi omedetou: happy birthday
+  omedetou: congrats
+  akemashite omedetou: happy new year
+  ganbatte: you got this
+  ganbare: you got this
+  sugoi: wow
+  kawaii desu: so cute
+  ureshii: happy
+  kanashii: sad
+  tsukareta: tired
+  onaka suita: hungry
+  neko: cat
+  kuma: bear
+  "こんにちは": hello
+  "おはよう": good morning
+  "おやすみ": good night
+  "ありがとう": thanks
+  "ありがとうございます": thank you so much
+  "大好き": love you
+  "愛してる": i love you
+  "ごめん": sorry
+  "ごめんなさい": sorry
+  "誕生日おめでとう": happy birthday
+  "おめでとう": congrats
+  "がんばって": you got this
+  "すごい": wow
+  "かわいい": so cute
+  "嬉しい": happy
+  "悲しい": sad
+  "眠い": sleepy
+  "猫": cat
+  "熊": bear
+  "狐": fox
+  "www": haha
+  "笑": haha
+  # ---------------------------------------------------------------- Korean (romanized and script)
+  annyeong: hi
+  annyeonghaseyo: hello
+  gamsahamnida: thank you
+  gomawo: thanks
+  saranghae: i love you
+  saranghaeyo: i love you
+  mianhae: sorry
+  saengil chukha: happy birthday
+  saengil chukahae: happy birthday
+  fighting: you got this
+  hwaiting: you got this
+  jalja: good night
+  "안녕": hi
+  "안녕하세요": hello
+  "감사합니다": thank you
+  "고마워": thanks
+  "사랑해": i love you
+  "사랑해요": i love you
+  "미안해": sorry
+  "생일 축하해": happy birthday
+  "화이팅": you got this
+  "잘자": good night
+  "ㅋㅋㅋ": haha
+  "ㅋㅋㅋㅋ": haha
+  "ㅎㅎ": haha
+  "ㅠㅠ": crying
+  "ㅜㅜ": crying
+  # ---------------------------------------------------------------- Chinese (pinyin and script)
+  ni hao: hello
+  nihao: hello
+  zao an: good morning
+  wan an: good night
+  xie xie: thanks
+  xiexie: thanks
+  wo ai ni: i love you
+  dui bu qi: sorry
+  duibuqi: sorry
+  sheng ri kuai le: happy birthday
+  xin nian kuai le: happy new year
+  gong xi fa cai: lunar new year
+  jia you: you got this
+  jiayou: you got this
+  "你好": hello
+  "早安": good morning
+  "晚安": good night
+  "谢谢": thanks
+  "我爱你": i love you
+  "对不起": sorry
+  "生日快乐": happy birthday
+  "新年快乐": happy new year
+  "恭喜发财": lunar new year
+  "加油": you got this
+  "哈哈": haha
+  "哈哈哈": haha
+  "开心": happy
+  "难过": sad
+  "猫": cat
+  # ---------------------------------------------------------------- Vietnamese and Thai
+  xin chao: hello
+  cam on: thanks
+  anh yeu em: i love you
+  em yeu anh: i love you
+  chuc mung sinh nhat: happy birthday
+  chuc mung nam moi: happy new year
+  sawasdee: hello
+  khob khun: thanks
+  khop khun: thanks
+  "555": haha
+  "5555": haha
+  "55555": haha

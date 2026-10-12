@@ -4,7 +4,7 @@
     python3 -m mascot.build --char biscuit [--only idle,wave] [--out dist]
 
 Every clip in mascot/clips is character independent, so a new mascot only needs a new file in
-mascot/characters/ and an entry in CHARACTERS below.
+mascot/characters/ and its name in MASCOTS below.
 """
 from __future__ import annotations
 
@@ -17,11 +17,13 @@ from . import lottie
 from .clip import Clip
 
 
+MASCOTS = ("biscuit", "mochi", "bruno", "pip", "clover", "bao", "tora", "kiko", "rocco", "truffle", "fern", "pebble", "nib", "leo")
+
+
 def characters():
-    from .characters.biscuit import Biscuit
-    from .characters.bruno import Bruno
-    from .characters.mochi import Mochi
-    return {"biscuit": Biscuit, "mochi": Mochi, "bruno": Bruno}
+    """name -> Character class, for every mascot (each lives in mascot/characters/<name>.py as its capitalised name)."""
+    import importlib
+    return {name: getattr(importlib.import_module(f".characters.{name}", __package__), name.capitalize()) for name in MASCOTS}
 
 
 def registry():
