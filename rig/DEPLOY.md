@@ -10,9 +10,13 @@ visitor ─► stickers.liveintently.app ─► Cloudflare Worker pawse-stickers
 | App | Cloud Run service `pawse-studio`, region `us-central1` | 2 vCPU / 2 GiB, scales to zero, at most 2 instances, 8 requests per instance |
 | Image | `us-central1-docker.pkg.dev/think-fast-62678/pawse/studio:<tag>` | Built by Cloud Build from `rig/` (the `Dockerfile`; `.gcloudignore` decides what is uploaded) |
 | Database | Cloudflare D1 `d6c84803-8d51-4c8d-b986-ac46e13b5455`, over the REST API | `STUDIO_D1=rest:<account>/<db>`; Cloud Run has no lasting disk, so SQLite files would vanish |
-| Secrets | Secret Manager: `cloudflare-d1-token`, `studio-origin-key` | Read only by the service account `pawse-studio@think-fast-62678.iam.gserviceaccount.com` |
+| Secrets | Secret Manager: `cloudflare-d1-token`, `studio-origin-key`, `google-client-secret` | Read only by the service account `pawse-studio@think-fast-62678.iam.gserviceaccount.com` |
 | Front door | Worker `pawse-stickers-front` (`cloudflare/wrangler.jsonc`) | Adds the visitor's IP (`X-Client-IP`) and the shared `X-Origin-Key`; the app answers 404 without that key |
 | Cost guard | Billing budget "Pawse Studio guard", $5 a month | Emails at 50%, 90% and 100% |
+
+Google sign-in: OAuth client "Pawse Studio web" in the same Google project (Google Auth Platform → Clients), with the
+redirect URI `https://stickers.liveintently.app/auth/google/callback`. Its id is the `GOOGLE_CLIENT_ID` env var; its
+secret is `google-client-secret`.
 
 Settings on the service: `STUDIO_INVITE_ONLY=1`, `STUDIO_BASE_URL=https://stickers.liveintently.app`,
 `STUDIO_BEHIND_CLOUDFLARE=1`, and `STUDIO_D1` plus the two secrets. Stripe and SMTP are not set yet: payments stay off

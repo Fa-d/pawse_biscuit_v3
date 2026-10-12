@@ -35,6 +35,9 @@ class Settings:
     # can skip Cloudflare by calling the Cloud Run address directly (and fake the client address the limits rely on)
     origin_key: str = field(default_factory=lambda: os.environ.get("STUDIO_ORIGIN_KEY", ""))
     invite_only: bool = field(default_factory=lambda: _flag("STUDIO_INVITE_ONLY"))   # beta: signup needs an invite code
+    # Sign in with Google: an OAuth "Web application" client; its redirect URI is <base_url>/auth/google/callback
+    google_client_id: str = field(default_factory=lambda: os.environ.get("GOOGLE_CLIENT_ID", ""))
+    google_client_secret: str = field(default_factory=lambda: os.environ.get("GOOGLE_CLIENT_SECRET", ""))
     # email: plain SMTP.  No SMTP_HOST = messages go to the outbox folder next to the database (for development)
     smtp_host: str = field(default_factory=lambda: os.environ.get("SMTP_HOST", ""))
     smtp_port: int = field(default_factory=lambda: int(os.environ.get("SMTP_PORT", "587")))
@@ -55,6 +58,10 @@ class Settings:
     @property
     def billing_ready(self):
         return bool(self.stripe_key and self.stripe_webhook_secret and self.price_pro and self.price_pack)
+
+    @property
+    def google_ready(self):
+        return bool(self.google_client_id and self.google_client_secret)
 
 
 settings = Settings()

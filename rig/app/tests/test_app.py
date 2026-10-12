@@ -14,6 +14,7 @@ import tempfile
 import time
 import unittest
 import zipfile
+from urllib.parse import parse_qs, urlparse
 
 _tmp = tempfile.mkdtemp()
 os.environ.update({
@@ -24,7 +25,7 @@ os.environ.update({
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from app import billing, db  # noqa: E402
+from app import billing, db, google  # noqa: E402
 from app.main import app  # noqa: E402
 
 SPEC = {"face": "joy", "motion": "bounce"}
@@ -276,6 +277,12 @@ class Pages(unittest.TestCase):
         for path in ("/", "/studio", "/privacy", "/favicon.ico"):
             with self.subTest(path=path):
                 self.assertEqual(c.get(path).status_code, 200)
+        from app.main import ASSET_V
+        html = c.get("/studio").text                    # scripts and styles are stamped, so no cache serves old ones
+        self.assertIn(f'src="/static/app.js?v={ASSET_V}"', html)
+        self.assertNotRegex(html, r'(?:href|src)="/static/[^"?]+"')
+        self.assertIn("immutable", c.get(f"/static/app.js?v={ASSET_V}").headers["cache-control"])
+        self.assertEqual(c.get("/static/app.js").headers["cache-control"], "public, max-age=300")
         ex = c.get("/api/examples").json()
         self.assertGreaterEqual(len(ex), 4)
         self.assertNotIn("watermark", layer_names(ex[0]["lottie"]))
@@ -292,6 +299,130 @@ class Pages(unittest.TestCase):
             self.assertEqual(c.get("/", headers={"X-Origin-Key": "from-the-worker"}).status_code, 200)
         finally:
             object.__setattr__(settings, "origin_key", "")
+
+
+class GoogleSignIn(unittest.TestCase):
+    """Google is never called: google.exchange is replaced by one that returns the claims a real ID token would carry."""
+    CID = "test-client.apps.googleusercontent.com"
+
+    def setUp(self):
+        from app.config import settings
+        self.settings = settings
+        object.__setattr__(settings, "google_client_id", self.CID)
+        object.__setattr__(settings, "google_client_secret", "test-secret")
+        self.real_exchange = google.exchange
+
+    def tearDown(self):
+        google.exchange = self.real_exchange
+        for k, v in (("google_client_id", ""), ("google_client_secret", ""), ("invite_only", False)):
+            object.__setattr__(self.settings, k, v)
+
+    def sign_in(self, c, sub, email, invite="", verified=True, nonce=None, state=None):
+        r = c.get("/auth/google/start", params={"invite": invite} if invite else None, follow_redirects=False)
+        self.assertEqual(r.status_code, 302)
+        at = urlparse(r.headers["location"])
+        q = {k: v[0] for k, v in parse_qs(at.query).items()}
+        self.assertEqual((at.netloc, q["scope"], q["code_challenge_method"]), ("accounts.google.com", "openid email", "S256"))
+        self.assertEqual(q["redirect_uri"], "http://localhost:8000/auth/google/callback")
+        claims = {"iss": "https://accounts.google.com", "aud": self.CID, "exp": time.time() + 300, "sub": sub,
+                  "email": email, "email_verified": verified, "nonce": nonce or q["nonce"]}
+
+        def exchange(code, verifier):
+            self.assertEqual(google.challenge(verifier), q["code_challenge"])      # the verifier came back intact
+            return claims
+        google.exchange = exchange
+        return c.get("/auth/google/callback", params={"code": "one-time", "state": state or q["state"]}, follow_redirects=False)
+
+    def user(self, **where):
+        (k, v), = where.items()
+        with db.connect() as conn:
+            return conn.execute(f"SELECT * FROM users WHERE {k}=?", (v,)).fetchone()
+
+    def test_new_account_then_return(self):
+        c = TestClient(app)
+        r = self.sign_in(c, "g-100", "Gina@Example.com")
+        self.assertEqual(r.headers["location"], "/studio?signed=new")
+        me = c.get("/api/me").json()["user"]
+        self.assertEqual((me["email"], me["google"]), ("gina@example.com", True))
+        self.assertEqual(self.user(google_sub="g-100")["pw_hash"], "")
+        c2 = TestClient(app)                                     # Google keeps the id when the address changes
+        self.assertEqual(self.sign_in(c2, "g-100", "gina.new@example.com").headers["location"], "/studio?signed=in")
+        self.assertEqual(c2.get("/api/me").json()["user"]["email"], "gina@example.com")
+        self.assertEqual(c.post("/api/login", json={"email": "gina@example.com", "password": "any password"}).status_code, 401)   # no password matches a Google-only account
+
+    def test_links_password_account(self):
+        new_client("both@example.com")
+        c = TestClient(app)
+        self.assertEqual(self.sign_in(c, "g-200", "both@example.com").headers["location"], "/studio?signed=in")
+        self.assertEqual(self.user(email="both@example.com")["google_sub"], "g-200")
+        self.assertEqual(TestClient(app).post("/api/login", json={"email": "both@example.com", "password": "correct horse"}).status_code, 200)
+        r = self.sign_in(TestClient(app), "g-other", "both@example.com")           # a second Google account, same email
+        self.assertEqual(r.headers["location"], "/studio?auth=taken")
+
+    def test_invite_link(self):
+        object.__setattr__(self.settings, "invite_only", True)
+        with db.connect() as conn:
+            conn.execute("INSERT INTO invites (code, max_uses, created) VALUES ('PAWS-GOOG01', 1, 0)")
+        c = TestClient(app)
+        self.assertEqual(self.sign_in(c, "g-300", "inv@example.com", invite="paws-goog01").headers["location"], "/studio?signed=new")
+        self.assertEqual(c.get("/api/me").json()["user"]["email"], "inv@example.com")
+        with db.connect() as conn:
+            self.assertEqual(conn.execute("SELECT uses FROM invites WHERE code='PAWS-GOOG01'").fetchone()["uses"], 1)
+
+    def test_invite_step(self):
+        object.__setattr__(self.settings, "invite_only", True)
+        with db.connect() as conn:
+            conn.execute("INSERT INTO invites (code, max_uses, created) VALUES ('PAWS-GOOG02', 1, 0)")
+        c = TestClient(app)
+        self.assertEqual(self.sign_in(c, "g-400", "step@example.com").headers["location"], "/studio?google=invite")
+        me = c.get("/api/me").json()
+        self.assertEqual((me["user"], me["pending_google"]), (None, "step@example.com"))
+        self.assertEqual(c.post("/api/google/finish", json={"invite": "WRONG"}).status_code, 403)
+        self.assertEqual(c.post("/api/google/finish", json={"invite": "paws-goog02"}).status_code, 200)
+        me = c.get("/api/me").json()
+        self.assertEqual((me["user"]["email"], me["pending_google"]), ("step@example.com", None))
+        self.assertEqual(self.user(email="step@example.com")["google_sub"], "g-400")
+        self.assertEqual(c.post("/api/google/finish", json={"invite": "paws-goog02"}).status_code, 400)
+        self.assertEqual(TestClient(app).post("/api/google/finish", json={"invite": "x"}).status_code, 400)  # no cookie
+
+    def test_waitlist_step(self):
+        object.__setattr__(self.settings, "invite_only", True)
+        c = TestClient(app)
+        self.sign_in(c, "g-500", "later@example.com")
+        r = c.post("/api/google/waitlist", json={})
+        self.assertEqual(r.json(), {"ok": True, "email": "later@example.com"})
+        with db.connect() as conn:
+            self.assertEqual(conn.execute("SELECT source FROM waitlist WHERE email='later@example.com'").fetchone()["source"], "google")
+        self.assertIsNone(c.get("/api/me").json()["pending_google"])
+        self.assertIsNone(self.user(email="later@example.com"))
+
+    def test_refusals(self):
+        c = TestClient(app)
+        self.assertEqual(self.sign_in(c, "g-600", "a@example.com", state="forged").headers["location"], "/studio?auth=state")
+        self.assertEqual(self.sign_in(c, "g-600", "a@example.com", nonce="replayed").headers["location"], "/studio?auth=state")
+        self.assertEqual(self.sign_in(c, "g-600", "a@example.com", verified=False).headers["location"], "/studio?auth=unverified")
+        r = c.get("/auth/google/callback", params={"error": "access_denied"}, follow_redirects=False)
+        self.assertEqual(r.headers["location"], "/studio?auth=cancelled")
+        r = TestClient(app).get("/auth/google/callback", params={"code": "x", "state": "y"}, follow_redirects=False)
+        self.assertEqual(r.headers["location"], "/studio?auth=state")              # never started here
+        self.assertIsNone(self.user(google_sub="g-600"))
+        self.assertIsNone(c.get("/api/me").json()["user"])
+
+    def test_claims_are_checked(self):
+        good = {"iss": "accounts.google.com", "aud": self.CID, "exp": time.time() + 60, "nonce": "n", "sub": "1",
+                "email": "X@example.com", "email_verified": True}
+        self.assertEqual(google.check(good, "n"), {"sub": "1", "email": "x@example.com"})
+        for bad, key in ((dict(good, aud="someone-else"), "failed"), (dict(good, iss="https://evil.example"), "failed"),
+                         (dict(good, exp=time.time() - 1), "failed"), (dict(good, email_verified="true"), "unverified")):
+            with self.assertRaises(google.GoogleError) as e:
+                google.check(bad, "n")
+            self.assertEqual(str(e.exception), key)
+
+    def test_off_when_not_set_up(self):
+        object.__setattr__(self.settings, "google_client_secret", "")
+        c = TestClient(app)
+        self.assertEqual(c.get("/auth/google/start", follow_redirects=False).status_code, 404)
+        self.assertFalse(c.get("/api/me").json()["google"])
 
 
 def signed(payload: bytes, secret="whsec_test_dummy"):

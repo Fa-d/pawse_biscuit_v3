@@ -35,6 +35,7 @@ repository.
 | `STRIPE_PRICE_PACK` | none | One-time Price id for a credit pack |
 | `PRICE_PRO_LABEL`, `PRICE_PACK_LABEL` | `$4.99 a month`, `$2.99` | What the pricing panel says; keep in step with the Stripe prices |
 | `STUDIO_ORIGIN_KEY` | none | When set, requests without a matching `X-Origin-Key` header get 404, so only the Cloudflare Worker can reach the app |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | none | Sign in with Google (an OAuth "Web application" client). Without both, the studio shows only the email form |
 | `STUDIO_INVITE_ONLY` | off | Beta: signing up needs an invite code, and the landing page shows a waitlist |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` | none, 587 | Your email provider's SMTP server. Without `SMTP_HOST`, emails are written to `outbox/` next to the database instead of being sent |
 | `SMTP_SECURITY` | `starttls` | `starttls`, `ssl` (port 465) or `none` |
@@ -61,6 +62,22 @@ Payments stay switched off, and the buy buttons explain that, until all four Str
    before launch. It only collects once you have an active registration, so turning it on alone isn't enough.
 
 Plans and credits change only from these signed webhook events, never from the page Stripe sends people back to.
+
+## Sign in with Google
+
+Google is the main way in; email and password stay behind "Use email instead". The flow is OpenID Connect with PKCE,
+run on the server (`app/google.py`), so no Google script loads on our pages.
+
+1. Google Cloud console → Google Auth Platform → Branding: app name, support email, home page, privacy page
+   (`/privacy`), and your domain under authorized domains. Leave the logo empty to skip brand verification.
+2. Audience: External, then **Publish app** (in Testing, only listed test users can sign in). The `openid` and
+   `email` scopes need no review.
+3. Clients → Create client → Web application. Redirect URI: `<STUDIO_BASE_URL>/auth/google/callback` (add
+   `http://localhost:8000/auth/google/callback` for local runs).
+4. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
+
+A Google sign-in whose email already has an account links to it. In an invite-only beta, someone new without an
+invite link is asked for a code, or can join the waitlist with one click.
 
 ## Running the beta
 

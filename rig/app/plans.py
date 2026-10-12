@@ -61,4 +61,5 @@ def summary(c, user):
     if user["plan"] != "pro" and user["credits"] <= 0:
         left = max(0, settings.free_daily_exports - db.usage_today(c, user["id"], "export"))
     return dict(email=user["email"], plan=user["plan"], credits=user["credits"], free_left_today=left,
+                google=bool(user["google_sub"]),
                 formats=[f for f in FORMATS if decide(c, user, f).allowed or f in FREE_FORMATS])

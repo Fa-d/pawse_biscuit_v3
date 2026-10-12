@@ -85,13 +85,23 @@ CREATE TABLE IF NOT EXISTS misses (
     unknown  TEXT NOT NULL DEFAULT '[]',              -- words the rules didn't know, as JSON
     created  INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS pending_google (            -- signed in with Google, still needs an invite code
+    token    TEXT PRIMARY KEY,                       -- sha256 of the cookie value
+    sub      TEXT NOT NULL,
+    email    TEXT NOT NULL,
+    expires  INTEGER NOT NULL
+);
 CREATE INDEX IF NOT EXISTS stickers_user ON stickers(user_id, created);
 """
 
 # columns added after a database was first created: (table, column, definition)
 MIGRATIONS = [
     ("users", "invite", "TEXT"),
+    ("users", "google_sub", "TEXT"),                 # Google's account id, for people who sign in with Google
 ]
+# indexes on migrated columns: run after MIGRATIONS, since an older database only has the column from then on
+AFTER = "CREATE UNIQUE INDEX IF NOT EXISTS users_google_sub ON users(google_sub)"
+
 
 _path = None
 _d1 = None          # "proxy:http://d1.internal" or "rest:<account>/<database>" (see d1.py); None = local SQLite file
@@ -108,6 +118,7 @@ def init(path, d1=None):
             have = {r["name"] for r in c.execute(f"PRAGMA table_info({table})")}
             if col not in have:
                 c.execute(f"ALTER TABLE {table} ADD COLUMN {col} {decl}")
+        c.execute(AFTER)
 
 
 @contextmanager

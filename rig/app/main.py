@@ -7,14 +7,16 @@ server only composes; files are rasterised on download.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
+import re
 import secrets
 import threading
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -22,7 +24,7 @@ from studio.packs import PackError, telegram_zip, whatsapp_zip
 from studio.parse.fallback import default_parser, parse
 from studio.spec import StickerSpec
 
-from . import auth, billing, db, mailer, plans, render
+from . import auth, billing, db, google, mailer, plans, render
 from .config import settings
 from .vocab import vocab
 
@@ -49,6 +51,10 @@ async def guard(request: Request, call_next):
         if not request.headers.get("content-type", "").startswith("application/json"):
             return JSONResponse({"detail": "Send JSON."}, status_code=415)
     resp = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        # stamped links (see page()) change whenever the file does, so they may be kept for good; anything else briefly
+        resp.headers["Cache-Control"] = "public, max-age=31536000, immutable" if request.query_params.get("v") == ASSET_V \
+            else "public, max-age=300"
     resp.headers["X-Content-Type-Options"] = "nosniff"
     resp.headers["Referrer-Policy"] = "same-origin"
     resp.headers["X-Frame-Options"] = "DENY"
@@ -81,19 +87,42 @@ def spec_from(d: dict) -> StickerSpec:
 
 
 # ---------------------------------------------------------------- page and vocabulary
+def _asset_version():
+    h = hashlib.sha256()
+    for name in sorted(os.listdir(STATIC)):
+        if not name.endswith(".html"):
+            with open(os.path.join(STATIC, name), "rb") as f:
+                h.update(name.encode() + b"\0" + f.read())
+    return h.hexdigest()[:10]
+
+
+ASSET_V = _asset_version()
+_pages: dict[str, bytes] = {}
+
+
+def page(name):
+    """An HTML page whose /static links carry the assets' version (?v=...).  Cloudflare and browsers keep scripts and
+    stylesheets for a day; without the stamp a new page could run with yesterday's script."""
+    if name not in _pages:
+        with open(os.path.join(STATIC, name)) as f:
+            html = f.read()
+        _pages[name] = re.sub(r'((?:href|src)="/static/[^"?#]+)"', rf'\1?v={ASSET_V}"', html).encode()
+    return HTMLResponse(_pages[name], headers={"Cache-Control": "no-cache"})
+
+
 @app.get("/", include_in_schema=False)
 def landing():
-    return FileResponse(os.path.join(STATIC, "landing.html"))
+    return page("landing.html")
 
 
 @app.get("/studio", include_in_schema=False)
 def studio():
-    return FileResponse(os.path.join(STATIC, "index.html"))
+    return page("index.html")
 
 
 @app.get("/privacy", include_in_schema=False)
 def privacy():
-    return FileResponse(os.path.join(STATIC, "privacy.html"))
+    return page("privacy.html")
 
 
 EXAMPLES = ["kitten waving hi with a bow", "grumpy cat saying 'no.'", "sleepy bear with coffee saying 'monday...'",
@@ -162,11 +191,13 @@ def get_vocab():
 @app.get("/api/me")
 def me(request: Request):
     user = auth.current_user(request)
+    pending = _pending_email(request) if user is None else None
     with db.connect() as c:
         return {"user": plans.summary(c, user), "billing": settings.billing_ready, "dev": settings.dev,
                 "free_daily": settings.free_daily_exports, "pack_credits": settings.pack_credits,
                 "price_pro": settings.price_pro_label, "price_pack": settings.price_pack_label,
-                "invite_only": settings.invite_only, "contact": settings.contact_email}
+                "invite_only": settings.invite_only, "contact": settings.contact_email,
+                "google": settings.google_ready, "pending_google": pending}
 
 
 # ---------------------------------------------------------------- accounts
@@ -179,22 +210,27 @@ class Signup(Credentials):
     invite: str = Field(default="", max_length=64)
 
 
+def create_user(c, email, pw_hash, code, google_sub=None):
+    """The signup rules, shared by email signup and Google: one account per email, and an invite code in the beta.
+    pw_hash is '' for someone who signed up with Google (no password matches it).  Returns the new user's id."""
+    if c.execute("SELECT 1 FROM users WHERE email=?", (email,)).fetchone():
+        raise HTTPException(409, "That email already has an account. Sign in instead.")
+    if settings.invite_only:
+        if not code:
+            raise HTTPException(403, "The studio is invite-only for now. Enter your invite code, or join the waitlist.")
+        got = c.execute("UPDATE invites SET uses = uses + 1 WHERE code=? AND uses < max_uses", (code,)).rowcount
+        if not got:
+            raise HTTPException(403, "That invite code isn't valid or has been used up.")
+    cur = c.execute("INSERT INTO users (email, pw_hash, created, invite, google_sub) VALUES (?, ?, ?, ?, ?)",
+                    (email, pw_hash, db.now(), code or None, google_sub))
+    return cur.lastrowid
+
+
 @app.post("/api/signup")
 def signup(body: Signup, request: Request, response: Response):
     email = auth.validate_signup(body.email, body.password)
-    code = body.invite.strip().upper()
     with db.connect() as c:
-        if c.execute("SELECT 1 FROM users WHERE email=?", (email,)).fetchone():
-            raise HTTPException(409, "That email already has an account. Sign in instead.")
-        if settings.invite_only:
-            if not code:
-                raise HTTPException(403, "The studio is invite-only for now. Enter your invite code, or join the waitlist.")
-            got = c.execute("UPDATE invites SET uses = uses + 1 WHERE code=? AND uses < max_uses", (code,)).rowcount
-            if not got:
-                raise HTTPException(403, "That invite code isn't valid or has been used up.")
-        cur = c.execute("INSERT INTO users (email, pw_hash, created, invite) VALUES (?, ?, ?, ?)",
-                        (email, auth.hash_password(body.password), db.now(), code or None))
-        uid = cur.lastrowid
+        uid = create_user(c, email, auth.hash_password(body.password), body.invite.strip().upper())
     auth.start_session(response, uid)
     db.bump("signup")
     return {"ok": True}
@@ -212,6 +248,133 @@ def login(body: Credentials, request: Request, response: Response):
         raise HTTPException(401, "That email and password don't match.")
     auth.start_session(response, u["id"])
     return {"ok": True}
+
+
+# ---------------------------------------------------------------- sign in with Google (see google.py)
+G_OAUTH = "g_oauth"          # state, nonce, PKCE verifier and invite code, for the 10 minutes at Google
+G_PENDING = "g_pending"      # someone new who signed in with Google but still needs an invite code
+PENDING_MINUTES = 30
+
+
+def _cookie(resp, name, value, minutes):
+    resp.set_cookie(name, value, max_age=minutes * 60, httponly=True, samesite="lax", secure=settings.secure_cookies)
+
+
+def _pending(request: Request):
+    token = request.cookies.get(G_PENDING)
+    if not token:
+        return None
+    with db.connect() as c:
+        return c.execute("SELECT * FROM pending_google WHERE token=? AND expires>?", (auth.digest(token), db.now())).fetchone()
+
+
+def _pending_email(request: Request):
+    p = _pending(request) if settings.google_ready else None
+    return p["email"] if p else None
+
+
+@app.get("/auth/google/start", include_in_schema=False)
+def google_start(invite: str = ""):
+    if not settings.google_ready:
+        raise HTTPException(404, "Google sign-in isn't set up.")
+    state, nonce, verifier = (secrets.token_urlsafe(n) for n in (24, 24, 48))
+    code = "".join(ch for ch in invite.strip().upper() if ch.isalnum() or ch == "-")[:64]
+    resp = RedirectResponse(google.start_url(state, nonce, verifier), status_code=302)
+    _cookie(resp, G_OAUTH, ".".join((state, nonce, verifier, code)), 10)   # url-safe parts, so "." can join them
+    return resp
+
+
+@app.get("/auth/google/callback", include_in_schema=False)
+def google_callback(request: Request, code: str = "", state: str = "", error: str = ""):
+    if not settings.google_ready:
+        raise HTTPException(404, "Google sign-in isn't set up.")
+
+    def back(query, uid=None):
+        resp = RedirectResponse(f"/studio?{query}", status_code=302)
+        resp.delete_cookie(G_OAUTH)
+        if uid is not None:
+            auth.start_session(resp, uid)
+        return resp
+
+    parts = request.cookies.get(G_OAUTH, "").split(".")
+    if error:
+        return back("auth=cancelled")                          # they pressed cancel at Google
+    if len(parts) != 4 or not code or not state or not secrets.compare_digest(parts[0], state):
+        return back("auth=state")
+    _, nonce, verifier, invite = parts
+    try:
+        who = google.check(google.exchange(code, verifier), nonce)
+    except google.GoogleError as e:
+        return back(f"auth={e}")
+
+    new = False
+    with db.connect() as c:
+        u = c.execute("SELECT id FROM users WHERE google_sub=?", (who["sub"],)).fetchone()
+        if u is None:                                           # first Google sign-in: link an account with this email
+            u = c.execute("SELECT id, google_sub FROM users WHERE email=?", (who["email"],)).fetchone()
+            if u is not None:
+                if u["google_sub"]:                             # already linked to a different Google account
+                    return back("auth=taken")
+                c.execute("UPDATE users SET google_sub=? WHERE id=?", (who["sub"], u["id"]))
+        uid = u["id"] if u is not None else None
+        if uid is None and (invite or not settings.invite_only):
+            try:
+                uid, new = create_user(c, who["email"], "", invite, who["sub"]), True
+            except HTTPException:
+                pass                                            # the code didn't work: ask for one below
+        if uid is None:
+            token = secrets.token_urlsafe(32)
+            c.execute("INSERT INTO pending_google (token, sub, email, expires) VALUES (?, ?, ?, ?)",
+                      (auth.digest(token), who["sub"], who["email"], db.now() + PENDING_MINUTES * 60))
+    if uid is None:
+        resp = back("google=invite")
+        _cookie(resp, G_PENDING, token, PENDING_MINUTES)
+        return resp
+    if new:
+        db.bump("signup")
+    return back("signed=new" if new else "signed=in", uid)
+
+
+class GoogleFinish(BaseModel):
+    invite: str = Field(default="", max_length=64)
+
+
+@app.post("/api/google/finish")
+def google_finish(body: GoogleFinish, request: Request, response: Response):
+    """The invite-code step after a new person signs in with Google during the beta."""
+    ip = client_ip(request)
+    auth.throttle(f"i:{ip}")
+    p = _pending(request)
+    if p is None:
+        raise HTTPException(400, "That Google sign-in has expired. Continue with Google again.")
+    try:
+        with db.connect() as c:
+            uid = create_user(c, p["email"], "", body.invite.strip().upper(), p["sub"])
+            c.execute("DELETE FROM pending_google WHERE token=?", (p["token"],))
+    except HTTPException as e:
+        if e.status_code == 403:
+            auth.failed(f"i:{ip}")                              # guessing codes counts like guessing passwords
+        raise
+    response.delete_cookie(G_PENDING)
+    auth.start_session(response, uid)
+    db.bump("signup")
+    return {"ok": True}
+
+
+@app.post("/api/google/waitlist")
+def google_waitlist(request: Request, response: Response):
+    """No invite code: put the Google email on the waitlist instead."""
+    p = _pending(request)
+    if p is None:
+        raise HTTPException(400, "That Google sign-in has expired. Continue with Google again.")
+    with db.connect() as c:
+        added = c.execute("INSERT OR IGNORE INTO waitlist (email, source, created) VALUES (?, 'google', ?)",
+                          (p["email"], db.now())).rowcount
+        c.execute("DELETE FROM pending_google WHERE token=?", (p["token"],))
+    if added:
+        db.bump("waitlist")
+    response.delete_cookie(G_PENDING)
+    return {"ok": True, "email": p["email"]}
 
 
 @app.post("/api/logout")

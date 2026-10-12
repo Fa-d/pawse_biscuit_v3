@@ -31,6 +31,7 @@ body {
 .defs { position: absolute; }
 button, input { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+[hidden] { display: none !important; }   /* layout rules such as .stack label must not undo hidden */
 
 /* ---------------------------------------------------------------- header */
 .top {
@@ -53,6 +54,13 @@ button { cursor: pointer; }
 .pill { background: #fff; color: var(--ink); padding: 6px 16px; }
 .link { background: none; border: 0; padding: 6px 8px; text-decoration: underline; text-underline-offset: 3px; }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
+/* Google's sign-in button, as its branding rules ask: white, the four-colour G, Roboto Medium */
+.google-button {
+  display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 10px 16px;
+  background: #fff; color: #1f1f1f; border: 1px solid #747775; border-radius: 999px;
+  font: 500 0.9375rem/1.2 "Roboto", var(--body); text-decoration: none;
+}
+.google-button:hover { background: #f8faff; }
 
 /* ---------------------------------------------------------------- layout */
 .studio {

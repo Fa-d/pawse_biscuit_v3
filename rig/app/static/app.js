@@ -21,7 +21,7 @@ const FORMATS = [
 ];
 
 const state = { vocab: null, me: null, spec: null, prompt: "", anim: null, seq: 0, captionOpts: { style: "outline", pos: "bottom" },
-  invite: "", resetToken: "" };
+  invite: "", resetToken: "", emailOpen: false };
 
 // ---------------------------------------------------------------- server
 async function api(method, path, body) {
@@ -66,13 +66,20 @@ async function start() {
   const q = new URLSearchParams(location.search);
   if (q.get("invite")) state.invite = q.get("invite");
   if (q.get("reset")) state.resetToken = q.get("reset");
-  if (q.get("invite") || q.get("reset")) history.replaceState(null, "", "/studio");
+  const authErr = q.get("auth"), signed = q.get("signed");
+  if (q.get("invite") || q.get("reset") || authErr || signed || q.get("google")) history.replaceState(null, "", "/studio");
   if (state.resetToken) {
     showAccountView("reset");
     $("#account-dialog").showModal();
+  } else if (!me.user && me.pending_google) {
+    openAccount();                                         // signed in with Google, still needs an invite code
+  } else if (authErr && !me.user) {
+    openAccount("signin");
+    $("#google-error").textContent = GOOGLE_ERRORS[authErr] || GOOGLE_ERRORS.failed;
   } else if (state.invite && !me.user) {
     openAccount("signup", "Welcome to the beta. Create your account to start.");
   }
+  if (signed && me.user) toast(signed === "new" ? "Account created. You're signed in." : "Signed in.");
   if (q.get("paid")) {
     toast(q.get("paid") === "pro" ? "Payment received. Pro switches on in a few seconds." : "Payment received. Your credits arrive in a few seconds.");
     history.replaceState(null, "", "/studio");
@@ -334,19 +341,45 @@ function saveBlob(blob, name) {
 
 // ---------------------------------------------------------------- account
 let authMode = "signin";
+const GOOGLE_ERRORS = {
+  cancelled: "Google sign-in was cancelled.",
+  state: "That sign-in took too long or started in another tab. Try again.",
+  unverified: "Your Google account's email isn't verified, so it can't be used here.",
+  taken: "That email is linked to a different Google account. Use that account, or sign in with your password.",
+  failed: "Something went wrong signing in with Google. Try again.",
+};
+
 function showAccountView(view) {
-  for (const v of ["out", "in", "forgot", "reset"]) $(`#account-${v}`).hidden = v !== view;
+  for (const v of ["out", "in", "forgot", "reset", "google"]) $(`#account-${v}`).hidden = v !== view;
 }
 
 function openAccount(mode, lead) {
   const user = state.me.user;
-  showAccountView(user ? "in" : "out");
-  if (!user) {
-    setAuthMode(mode || "signin");
-    if (lead) $("#account-lead").textContent = lead;
-    $("#auth-error").textContent = "";
+  if (!user && state.me.pending_google) {
+    $("#google-pending-email").textContent = state.me.pending_google;
+    $('#google-invite-form [name="invite"]').value = state.invite;
+    $("#google-invite-error").textContent = "";
+    showAccountView("google");
+  } else {
+    showAccountView(user ? "in" : "out");
+    if (!user) {
+      setAuthMode(mode || "signin");
+      if (lead) $("#account-lead").textContent = lead;
+      $("#auth-error").textContent = "";
+      $("#google-error").textContent = "";
+      renderAuthChoices();
+    }
   }
   if (!$("#account-dialog").open) $("#account-dialog").showModal();
+}
+
+// Google first when it is set up; the email form waits behind "Use email instead"
+function renderAuthChoices() {
+  const google = Boolean(state.me.google);
+  $("#google-start").hidden = !google;
+  $("#google-start").href = "/auth/google/start" + (state.invite ? `?invite=${encodeURIComponent(state.invite)}` : "");
+  $("#email-toggle-line").hidden = !google || state.emailOpen;
+  $("#email-auth").hidden = google && !state.emailOpen;
 }
 
 function setAuthMode(mode) {
@@ -370,7 +403,7 @@ function renderAccount() {
   $("#open-collection").hidden = !user;
   if (user) {
     const plan = user.plan === "pro" ? "Pro" : user.credits > 0 ? `Free, with ${user.credits} credits` : "Free";
-    $("#account-summary").textContent = `${user.email}. Plan: ${plan}.`;
+    $("#account-summary").textContent = `${user.google ? "Signed in with Google as " : ""}${user.email}. Plan: ${plan}.`;
     $("#manage-billing").hidden = user.plan !== "pro";
   }
   $("#free-daily").textContent = state.me.free_daily;
@@ -493,6 +526,34 @@ function bindUI() {
       toast(authMode === "signup" ? "Account created. You're signed in." : "Signed in.");
     } catch (err) {
       $("#auth-error").textContent = err.message;
+    }
+  });
+  $("#email-toggle").addEventListener("click", () => {
+    state.emailOpen = true;
+    renderAuthChoices();
+    $('#auth-form [name="email"]').focus();
+  });
+  $("#google-invite-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    $("#google-invite-error").textContent = "";
+    try {
+      await postJSON("/api/google/finish", { invite: new FormData(e.target).get("invite") });
+      $("#account-dialog").close();
+      e.target.reset();
+      await refreshMe();
+      toast("Account created. You're signed in.");
+    } catch (err) {
+      $("#google-invite-error").textContent = err.message;
+    }
+  });
+  $("#google-waitlist").addEventListener("click", async () => {
+    try {
+      const r = await postJSON("/api/google/waitlist", {});
+      $("#account-dialog").close();
+      await refreshMe();
+      toast(`You're on the waitlist as ${r.email}. Your invite will come by email.`);
+    } catch (err) {
+      $("#google-invite-error").textContent = err.message;
     }
   });
   $("#forgot-open").addEventListener("click", () => { $("#forgot-error").textContent = ""; showAccountView("forgot"); });
