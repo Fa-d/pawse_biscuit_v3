@@ -3,8 +3,8 @@
     SceneSpec(actors=[ActorSpec(base="mochi", motion="wave"), ActorSpec(base="pip", motion="dance")],
               caption=Caption("besties"), seconds=2.0)
 
-An ActorSpec holds everything a v4 StickerSpec says about its one mascot (base, colours, face, arms, stance, tail,
-gaze, props, effects, worn things, motion, intensity, tints, sides).  The scene holds what the mascots share: the
+An ActorSpec holds everything a StickerSpec says about its one mascot (base, colours, face, arms, stance, tail,
+gaze, props, effects, worn things, motion, intensity, tints, sides and, from v5, the yaw it is turned by).  The scene holds what the mascots share: the
 caption, the loop length, the tempo, scene-wide effects and, from phase 3 on, the duet they play.
 
 Old specs keep working: a v3 or v4 StickerSpec loads as a scene of one mascot, and a scene of one mascot writes back
@@ -44,6 +44,7 @@ class ActorSpec:
     intensity: float = 1.0
     tints: dict = field(default_factory=dict)
     sides: dict = field(default_factory=dict)
+    yaw: float = 0.0
 
     def sticker(self, caption=None, seconds=2.0, tempo=1.0) -> StickerSpec:
         """This mascot as a v4 StickerSpec, with the scene's shared values."""
@@ -126,7 +127,8 @@ class SceneSpec:
     def to_dict(self):
         if self.solo:
             return self.sticker().to_dict()
-        return dict(actors=[asdict(a) for a in self.actors], duet=self.duet, effects=list(self.effects),
+        actors = [{k: v for k, v in asdict(a).items() if k != "yaw" or v} for a in self.actors]    # yaw only when turned
+        return dict(actors=actors, duet=self.duet, effects=list(self.effects),
                     caption=asdict(self.caption) if self.caption is not None else None, seconds=self.seconds, tempo=self.tempo)
 
     def to_json(self, **kw):

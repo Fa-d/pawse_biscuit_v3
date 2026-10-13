@@ -84,6 +84,8 @@ def build_clip(spec: StickerSpec, char=None, plan=None):
     act = Act(c=c, L=L, k=spec.intensity, tempo=plan.tempo, hands=list(plan.hands), stance=plan.stance, char=char, spec=spec,
               data=dict(props=list(plan.props), acts=list(plan.acts), face=plan.face))
     still = mv.fn(act)
+    if spec.yaw:                                    # v5: turned away from the viewer, on top of any turn the motion makes
+        c.add("body.yaw", lambda t, y=float(spec.yaw): y)
     if plan.gift_act:
         # the lid pops at 31 % of the loop: paws on the lid, to the cheeks, up in a cheer, back on the lid as it lands
         f = lambda u: int(round(u * L))
@@ -120,10 +122,24 @@ def build_clip(spec: StickerSpec, char=None, plan=None):
         spec_fn.roll = None if e.follows else _peak_roll(e.peak, L)
         c.prop(spec_fn)
     for name in plan.wear:
-        c.prop(REG.wear[name].factory(_make(plan, L, name)))
+        c.prop(_zoned(REG.wear[name].factory(_make(plan, L, name)), REG.wear[name].zone))
     info = dict(still=still, notes=list(plan.notes), tint=dict(plan.tints), motion=plan.motion, stance=plan.stance, tail=plan.tail,
                 arms=dict(plan.arms), plan=plan)
     return c, char, info
+
+
+def _zoned(spec_fn, zone):
+    """A worn item's layers carry its zone, so a mascot turned to a drawn view (side, back) can leave out what is
+    only drawn for the front (glasses, an apron); nothing is written for it."""
+    def spec(char, T, n):
+        out = spec_fn(char, T, n)
+        for _, L in out:
+            if hasattr(L, "nm"):
+                L.view_zone = zone
+        return out
+    for k, v in vars(spec_fn).items():
+        setattr(spec, k, v)
+    return spec
 
 
 # ------------------------------------------------------------------ staging

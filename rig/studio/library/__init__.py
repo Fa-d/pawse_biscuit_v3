@@ -8,6 +8,7 @@ from . import motions_core  # noqa: F401
 from . import motions_gesture  # noqa: F401
 from . import motions_body  # noqa: F401
 from . import motions_act  # noqa: F401
+from . import motions_turn  # noqa: F401  v5: turning away from the viewer (after every v4 motion, so their order stays)
 from . import props_core  # noqa: F401
 from . import props_food  # noqa: F401
 from . import props_things  # noqa: F401

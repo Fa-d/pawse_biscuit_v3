@@ -41,6 +41,10 @@ GUARANTEES = [
     ("L12", "Every pair of mascots builds as a scene of two that loops, stays off the canvas edge and fits 64 KB "
             "(python -m studio.qa_scene; duets join the check in phase 3)."),
     ("L13", "A paw held on another mascot stays within 4 px of its target (studio/tests/test_v5.py)."),
+    ("L15", "A turned mascot builds, loops and fits on every mascot (front drawing turned, or its drawn side and back views), "
+            "and a drawn view keeps the front's proportions: crown within 4 px, eye line within 3 px, the near foot on the "
+            "ground (python -m studio.qa --kind views)."),
+    ("L16", "Turned mascots look the same in lottie-web as in rlottie (python3 tools/cross_render.py on turned stickers)."),
     ("L17", "One-mascot stickers, the app's clips and the small effects stay byte-identical to v4 (python -m studio.snapshots --check)."),
 ]
 
@@ -124,6 +128,35 @@ def cases(kind, bases=None):
         for name in REG.motions:
             for secs in (1.0, 1.5, 3.0):
                 yield f"{name} {secs}s", dict(motion=name, seconds=secs)
+    elif kind == "views":
+        for b in bases:
+            for yaw in VIEW_YAWS:
+                yield f"yaw {yaw:+.0f} on {b}", dict(base=b, yaw=yaw, motion="wave")
+
+
+VIEW_YAWS = (20.0, 45.0, 90.0, 180.0, -90.0)
+
+
+def view_proportions(base):
+    """L15 for one mascot's drawn views: problems (sentences) where a view leaves the front's guide lines."""
+    from mascot.views import view_proxy
+    ch = REG.bases[base].load()()
+    out = []
+    for view in ("side", "back"):
+        if ch.view_data(view) is None:
+            continue
+        p = view_proxy(ch, view)
+        top = min(y for _, y in p.head_outline().v)
+        if abs(top - ch.crown[1]) > 4.0:
+            out.append(f"{view} view: the head's top is at {top:.0f}, the front's crown at {ch.crown[1]:.0f} (more than 4 px)")
+        for s in p.view_sides:
+            ey, fy = p.side(p.eye, s)[1], ch.side(ch.eye, s)[1]
+            if abs(ey - fy) > 3.0:
+                out.append(f"{view} view: the eye line is at {ey:.0f}, the front's at {fy:.0f} (more than 3 px)")
+        near = p.view_sides[0] if p.view_sides else "R"
+        if p.leg is not None and abs(p.side(p.foot, near)[1] - ch.side(ch.foot, "R")[1]) > 1e-6:
+            out.append(f"{view} view: the near foot is not on the ground the front stands on")
+    return out
 
 
 def sheet(specs, out, cols=6, size=170):
@@ -152,13 +185,13 @@ def sheet(specs, out, cols=6, size=170):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--kind", default="all", help="motions, props, effects, wear, faces, seconds or all")
+    ap.add_argument("--kind", default="all", help="motions, props, effects, wear, faces, views, seconds or all")
     ap.add_argument("--bases", default="", help="comma-separated mascots (default: all)")
     ap.add_argument("--only", default="", help="comma-separated item names")
     ap.add_argument("--sheet", default="", help="write a contact sheet instead of checking")
     ap.add_argument("--json", default="", help="write the results as JSON")
     a = ap.parse_args(argv)
-    kinds = ["motions", "props", "effects", "wear", "faces"] if a.kind == "all" else a.kind.split(",")
+    kinds = ["motions", "props", "effects", "wear", "faces", "views"] if a.kind == "all" else a.kind.split(",")
     bases = [b for b in a.bases.split(",") if b] or None
     only = {x for x in a.only.split(",") if x}
     todo = [(lab, d) for k in kinds for lab, d in cases(k, bases) if not only or lab.split(" ")[0] in only]
@@ -167,17 +200,23 @@ def main(argv=None):
         return 0
     bad, results = 0, {}
     t0 = time.time()
+    drawn = 0
+    if "views" in kinds:                               # L15: the drawn views keep the front's guide lines
+        for b in bases or list(REG.bases):
+            for problem in view_proportions(b):
+                drawn += 1
+                print(f"PROBLEM {b}: {problem}", flush=True)
     for label, d in todo:
         problems, stats = check(StickerSpec.from_dict(d))
         results[label] = dict(problems=problems, **stats)
         if problems:
             bad += 1
             print(f"PROBLEM {label}: {'; '.join(problems)}", flush=True)
-    print(f"{len(todo) - bad}/{len(todo)} fine in {time.time() - t0:.0f} s")
+    print(f"{len(todo) - bad}/{len(todo)} fine in {time.time() - t0:.0f} s" + (f"; {drawn} drawn-view proportion problems" if drawn else ""))
     if a.json:
         with open(a.json, "w") as f:
             json.dump(results, f, indent=1)
-    return 1 if bad else 0
+    return 1 if bad or drawn else 0
 
 
 if __name__ == "__main__":

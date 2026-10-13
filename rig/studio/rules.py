@@ -210,6 +210,27 @@ def sitting_swaps(p):
         p.motion = alt
 
 
+@rule("R24", "A turned mascot (a yaw, or a motion that turns) shows the drawn side and back views it has; without them it turns "
+             "as far as three-quarter and shows its front past that, and looking back over its shoulder (which needs a back "
+             "view) becomes looking around.")
+def views(p):
+    s = p.spec
+    mv = REG.motions[p.motion]
+    if not s.yaw and "turn" not in mv.tags:
+        return
+    ch = REG.bases[s.base].load()()
+    side, back = ch.view_data("side") is not None, ch.view_data("back") is not None
+    animal = REG.bases[s.base].animal
+    if p.motion == "look_back" and not back:
+        p.note(f"the {animal} has no back view drawn yet, so it looks around instead of looking back over its shoulder")
+        p.motion = "look_around"
+        return
+    if not side:
+        p.note(f"the {animal} has no side or back view drawn yet, so it turns as far as three-quarter")
+    elif not back and (abs(s.yaw) >= 135.0 or "turn" in mv.tags):
+        p.note(f"the {animal} has no back view drawn yet, so it shows its side instead")
+
+
 @rule("R08", "A held prop the motion acts with is given to the motion: its paw follows the motion and the prop moves with it "
              "(a snack goes to the mouth, a mug is sipped).")
 def acts_with(p):

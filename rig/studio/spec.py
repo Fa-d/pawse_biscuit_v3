@@ -8,6 +8,8 @@ v4 added three optional fields, all with defaults, so every saved v3 spec still 
   tints   {item: '#rrggbb'}   the colour of one prop, effect or worn item ("a red scarf")
   sides   {prop: 'L' | 'R'}   which paw holds a prop ("coffee in the left paw")
   tempo   0.5 .. 2.0          how fast the motion goes (1 = normal)
+v5 added one, written only when it is not 0 (so every other spec keeps its key):
+  yaw     -180 .. 180         degrees the mascot is turned away from the viewer (45 three-quarter, 90 side, 180 back)
 """
 from __future__ import annotations
 
@@ -89,6 +91,8 @@ class StickerSpec:
     tints: dict = field(default_factory=dict)         # v4: item -> '#rrggbb'
     sides: dict = field(default_factory=dict)         # v4: prop -> 'L' or 'R'
     tempo: float = 1.0                                # v4: 0.5 slow .. 2 fast
+    yaw: float = 0.0                                  # v5: turned away from the viewer, degrees: 45 three-quarter, 90 the side,
+    #                                                   180 the back; negative turns the other way.  Written only when not 0
 
     def validate(self):
         """Raise ValueError on any name the rig does not know or any value it cannot draw.  Returns self."""
@@ -157,6 +161,7 @@ class StickerSpec:
         number("intensity", self.intensity, 0.2, 2.0)
         number("seconds", self.seconds, 1.0, 3.0)
         number("tempo", self.tempo, 0.5, 2.0)
+        number("yaw", self.yaw, -180.0, 180.0)
         return self
 
     def normalized(self):
@@ -170,11 +175,14 @@ class StickerSpec:
         return replace(self, props=dedupe(self.props), effects=dedupe(self.effects), accessories=dedupe(self.accessories),
                        palette={k: hex6(v).lower() for k, v in self.palette.items()},
                        tints={k: hex6(v).lower() for k, v in self.tints.items()}, sides=dict(self.sides),
-                       look=(float(self.look[0]), float(self.look[1])), caption=cap)
+                       look=(float(self.look[0]), float(self.look[1])), caption=cap, yaw=float(self.yaw))
 
     # ---- (de)serialisation
     def to_dict(self):
-        return asdict(self)
+        d = asdict(self)
+        if not d.get("yaw"):                          # v5: a spec that does not turn writes what v4 wrote (same key)
+            d.pop("yaw", None)
+        return d
 
     def to_json(self, **kw):
         return json.dumps(self.to_dict(), **kw)
