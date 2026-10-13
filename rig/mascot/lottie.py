@@ -16,6 +16,7 @@ Two switches change how samples become keyframes (both are off unless a caller t
 """
 from __future__ import annotations
 
+import contextvars
 import hashlib
 import math
 
@@ -110,7 +111,9 @@ def is_anim(x):
 
 
 # --------------------------------------------------------------------------- loop rotation
-_ROLL = 0
+# Per build, not per process: the app builds stickers on several threads at once, and a shared number let one
+# build's roll leak into another's keyframes.
+_ROLL = contextvars.ContextVar("roll", default=0)
 
 
 class rolled:
@@ -128,18 +131,16 @@ class rolled:
         self.k = int(k)
 
     def __enter__(self):
-        global _ROLL
-        self.prev, _ROLL = _ROLL, self.k
+        self.token = _ROLL.set(self.k)
         return self
 
     def __exit__(self, *exc):
-        global _ROLL
-        _ROLL = self.prev
+        _ROLL.reset(self.token)
         return False
 
 
 def current_roll():
-    return _ROLL
+    return _ROLL.get()
 
 
 def _same(a, b):
@@ -492,9 +493,10 @@ def prop(value, kind="pos", nd=None, tol=None, wrap=None):
         return {"a": 0, "k": fmt(value)}
 
     samples, cut = value.s, None
-    if _ROLL and len(samples) > 2:
+    roll = _ROLL.get()
+    if roll and len(samples) > 2:
         n_ = len(samples) - 1
-        k_ = _ROLL % n_
+        k_ = roll % n_
         if k_:
             if not _same(samples[0], samples[-1]):
                 # this property jumps at the loop point (a ray that turns by exactly one ray per loop).  Once the loop
@@ -627,7 +629,7 @@ class Layer:
         self.parent = parent
         self.p, self.a, self.s, self.r, self.o = p, a, s, r, o
         self.null = null
-        self.roll = _ROLL            # see rolled(): the layer's own transform keys use the roll it was made under
+        self.roll = _ROLL.get()      # see rolled(): the layer's own transform keys use the roll it was made under
 
     def json(self, ind, index_of, op, fade_safe=False):
         with rolled(self.roll):
