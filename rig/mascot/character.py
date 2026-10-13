@@ -356,8 +356,13 @@ class Character:
 
     def apply_pins(self, clip):
         """Planted paws: replace the keyed arm pose by an IK solve towards a fixed scene point."""
+        self.apply_pin_list(clip.pins)
+
+    def apply_pin_list(self, pins):
+        """The pins of a clip (or of a scene: a paw on another mascot) solved into the arm channels, in order.  Each pin is
+        dict(side, t0, t1, at, hand, bend, blend) with `at` a canvas point of this mascot, or fn(frame) -> point."""
         T = self.T
-        for pin in clip.pins:
+        for pin in pins:
             s = pin["side"]
             for f in range(self.n):
                 b = max(pin["blend"], 1)
@@ -925,13 +930,36 @@ class Character:
             return self._build(clip, roll)
 
     def _build(self, clip, roll):
+        self.prepare(clip)
+        self.finish()
+        layers = [L for _, L in self.bake(clip, roll)]
+        return document(clip.name, layers, op=clip.frames, fade_safe=bool(clip.opts.get("fade_safe")))
+
+    # The build in three stages, so a scene can solve paws that reach another mascot between them
+    # (mascot/scene.py): prepare() every mascot, pin paws across mascots, then finish() and bake() each.
+    # DEPTH lists the bands bake() files layers under, top-most first, in the order a single mascot draws them.
+    DEPTH = ("paws_over", "top", "arms_front", "front", "head", "arms", "mid", "tail_front", "feet", "tail_lap", "body",
+             "arms_back", "legs", "tail", "nulls", "back", "shadow")
+
+    def prepare(self, clip):
+        """Stage 1: every channel of the clip sampled (with the automatic follow-through) and the clip's own pins solved."""
         self.clip = clip
         self.n = clip.frames + 1
         self.T = T = rig.evaluate(clip, self)
         self.height = np.clip(-T["root.y"], 0, None) / np.maximum(T["root.scale"] * T["root.sy"], 0.2)
         self.apply_pins(clip)
+        return self
+
+    def finish(self):
+        """Stage 2: the legs, solved once every channel is final."""
         if self.leg is not None:
             self.solve_legs()
+        return self
+
+    def bake(self, clip, roll=0):
+        """Stage 3: props, effects and every layer, top-most first, as (band, Layer) pairs (bands: DEPTH).  Call it inside
+        rolled(roll), as build() does."""
+        T = self.T
         fx = {k: [] for k in self.SLOTS}
         for spec in clip.props:
             own = getattr(spec, "roll", None)
@@ -950,33 +978,33 @@ class Character:
                     out.append(self.arm_layer(s, front, held_under=fx[f"hand.{s}"], held_over=fx[f"hand.{s}.over"]))
             return out
 
-        layers = []
+        out = []
+
+        def add(band, layers):
+            out.extend((band, L) for L in layers)
+
         if clip.opts.get("hands_over_top"):                    # paws that must sit above a foreground prop
-            for s in "RL":
-                if np.any(T[f"arm.{s}.front"] > 0.5):
-                    layers.append(self.arm_layer(s, True, only_hand=True, name=("right" if s == "R" else "left") + " paw"))
-        layers += fx["top"]
-        layers += arms(True)
-        layers += fx["front"]
-        layers += self.head_layers()
-        layers += arms(False)
-        layers += fx["mid"]
+            add("paws_over", [self.arm_layer(s, True, only_hand=True, name=("right" if s == "R" else "left") + " paw")
+                              for s in "RL" if np.any(T[f"arm.{s}.front"] > 0.5)])
+        add("top", fx["top"])
+        add("arms_front", arms(True))
+        add("front", fx["front"])
+        add("head", self.head_layers())
+        add("arms", arms(False))
+        add("mid", fx["mid"])
         slots = {self.tail_slot(f) for f in range(self.n)} if self.tail is not None else set()
         if 2 in slots:
-            layers.append(self.tail_layer(2))
-        layers += self.foot_layers()
+            add("tail_front", [self.tail_layer(2)])
+        add("feet", self.foot_layers())
         if 1 in slots:
-            layers.append(self.tail_layer(1))
-        layers.append(self.body_layer())
-        for s in "RL":
-            if back[s]:
-                layers.append(self.arm_layer(s, False, held_under=fx[f"hand.{s}"], held_over=fx[f"hand.{s}.over"]))
+            add("tail_lap", [self.tail_layer(1)])
+        add("body", [self.body_layer()])
+        add("arms_back", [self.arm_layer(s, False, held_under=fx[f"hand.{s}"], held_over=fx[f"hand.{s}.over"]) for s in "RL" if back[s]])
         if self.leg is not None:
-            layers += self.leg_layers()
+            add("legs", self.leg_layers())
         if 0 in slots:
-            layers.append(self.tail_layer(0))
-        layers.append(self.hips_layer())
-        layers.append(self.root_layer())
-        layers += fx["back"]
-        layers.append(self.shadow_layer())
-        return document(clip.name, layers, op=clip.frames, fade_safe=bool(clip.opts.get("fade_safe")))
+            add("tail", [self.tail_layer(0)])
+        add("nulls", [self.hips_layer(), self.root_layer()])
+        add("back", fx["back"])
+        add("shadow", [self.shadow_layer()])
+        return out
