@@ -26,6 +26,7 @@ import numpy as np
 from . import rig
 from .geom import heading, heart_path, pchip, rot as rot_pt, smooth, spiral_points, star_path
 from .lottie import Anim, Layer, Path, document, el, fl, gr, rc, rgb, rolled, sh, st
+from .views import ViewState
 
 HEART_RED = rgb("#FF4D6D")
 STAR_GOLD, STAR_EDGE = rgb("#FFC93C"), rgb("#E8A317")
@@ -34,6 +35,17 @@ WATER = rgb("#8FD3FF")
 
 def mirror_pt(p, cx):
     return (2 * cx - p[0], p[1])
+
+
+def _outline_of(items, name):
+    """The first path inside the group called `name` of a drawing, as a Path."""
+    for it in items:
+        if it.get("ty") == "gr" and it.get("nm") == name:
+            for sub in it["it"]:
+                if sub.get("ty") == "sh":
+                    k = sub["ks"]["k"] if sub["ks"].get("a", 0) == 0 else sub["ks"]["k"][0]["s"][0]
+                    return Path([tuple(v) for v in k["v"]], [tuple(v) for v in k["i"]], [tuple(v) for v in k["o"]], k["c"])
+    raise ValueError(f"no {name!r} group with a path to turn")
 
 
 class Character:
@@ -72,10 +84,48 @@ class Character:
     shadow = dict(c=(256.0, 474.0), size=(250.0, 24.0), o=14)
     # tail: dict(base, length, bones, profile [(u, width)], tip_from, tip_r, poses {name: (base heading, bends...)}) or None
     tail = None
+    # turning away from the viewer (body.yaw, head.yaw; see views.py).  Optional: the defaults suit a round chibi.
+    view_warp_max = 45.0             # degrees the front drawing turns by itself (the smooth part of a turn)
+    view_head: dict = {}             # depth=dome depth / half width (0.85), snout=(extra depth, radius) of the muzzle
+    view_body: dict = {}             # depth (0.8)
+    view_tail: dict = {}             # angle (60: the tail points out and back), depth of its root (0.8), x scale min / after the flip
+    view = None                      # the ViewState of the clip being built, while one of the yaw channels moves
+    # which way each side's limbs reach out on screen (+1 right), and which eyes, brows and cheeks are drawn.  A drawn
+    # view (seen from the side or from behind, views.py) changes these; the front view never does.
+    dirs = {"R": 1.0, "L": -1.0}
+    view_sides = ("R", "L")
+    view_options: dict = {}
+
+    def dir(self, s):
+        """+1 when side s reaches out towards screen-right, -1 towards screen-left."""
+        return self.dirs[s]
+
+    def view_data(self, name):
+        """A drawn view: 'side' (seen from its left, facing screen-right) or 'back' (from behind), as a dict of what
+        differs from the front view, or None when the mascot has no such drawing (the rig then falls back: no side view
+        holds the three-quarter turn, no back view shows the side or the front again).  Keys:
+          drawings (names of methods, or functions): head_shapes, tuft_shapes, ear_shapes, eye_shapes, nose_shapes,
+            blush_shapes, face_static, body_shapes, foot_shapes, hand_shapes
+          anchors, in the same coordinates as the front's: eye, eye_size, lid, brow, mouth, nose, cheek, ear_pivot,
+            tuft_pivot, shoulder, hip, foot ({'R': .., 'L': ..} for both sides: nothing is mirrored), tail (the dict)
+          dirs ({'R': +1 or -1, 'L': ..}: which way each side's limbs reach out on screen) and view_sides (the eyes,
+            brows and cheeks drawn: the near one from the side, none from behind)
+          options: squash {layer: x scale} (features seen edge on), face (False: no mouth or nose), tail_slot (0 behind
+            the body, 2 in front of the feet), tail_flip (the tail points the other way), arms_behind ('far' or 'both')
+        See characters/biscuit.py."""
+        return None
 
     # part drawings (static shape items, top-most first, in canvas coordinates of the rest pose)
     def body_shapes(self): return []
     def head_shapes(self): return []
+
+    def head_outline(self):
+        """The head's outline Path (the turn needs it): by default the first path of the 'head' group of head_shapes()."""
+        return _outline_of(self.head_shapes(), "head")
+
+    def body_outline(self):
+        """The body's outline Path: by default the first path of the 'body' group of body_shapes()."""
+        return _outline_of(self.body_shapes(), "body")
     def tuft_shapes(self): return []
     def ear_shapes(self, side): return []
     def eye_shapes(self, side): return []
@@ -258,6 +308,8 @@ class Character:
             vv = v["v"] if isinstance(v, dict) else v
             if len(vv) != 4 or not all(math.isfinite(float(x)) for x in vv):
                 out.append(f"arm pose {k!r} must be 4 finite numbers (shoulder, elbow, wrist, length)")
+        from .views import view_problems
+        out += view_problems(self)
         return out
 
     def check(self):
@@ -273,11 +325,24 @@ class Character:
         return math.hypot(a[0] - h[0], a[1] - h[1])
 
     # ------------------------------------------------------------------ rig solves (rest-pose "body space")
+    def shoulder_pt(self, s, f):
+        """Where the shoulder is in body space at frame f (it rides the body round when the mascot turns)."""
+        return self.view.shoulder(s, f) if self.view is not None else self.side(self.shoulder, s)
+
+    def hip_pt(self, s, f):
+        """Where the hip joint is in body space at frame f."""
+        return self.view.hip(s, f) if self.view is not None else self.side(self.hip, s)
+
+    def body_pt(self, f, p):
+        """A point on the front of the body (rest-pose body space) where it is at frame f: it rides the body round
+        when the mascot turns (pass the result to body_to_world)."""
+        return self.view.body_point(p, f) if self.view is not None else p
+
     def arm_solve(self, s, f):
         """Shoulder, elbow, wrist positions and the paw's heading, in body space."""
         T = self.T
-        sgn = 1.0 if s == "R" else -1.0
-        S = self.side(self.shoulder, s)
+        sgn = self.dir(s)
+        S = self.shoulder_pt(s, f)
         shd, elb, wr = T[f"arm.{s}.sh"][f], T[f"arm.{s}.el"][f], T[f"arm.{s}.wr"][f]
         ln = max(0.3, T[f"arm.{s}.len"][f])
         L1, L2 = self.arm["L1"] * ln, self.arm["L2"] * ln
@@ -289,7 +354,7 @@ class Character:
     def hand_rot(self, s, f):
         """Total rotation (Lottie degrees) of the paw relative to the body."""
         ang = self.arm_solve(s, f)[3]
-        return -ang if s == "R" else ang
+        return -ang * self.dir(s)
 
     def root_pos(self, f):
         T, cx, gy = self.T, self.CX, self.GROUND
@@ -338,6 +403,8 @@ class Character:
         return (self.CX, (top + self.GROUND) / 2.0 - 6.0)
 
     def head_to_world(self, f, p):
+        if self.view is not None:                     # a point of the face slides with the turn
+            p = self.view.head_point(p, f)
         T, nk, at, k = self.T, self.neck, self.neck_at or self.neck, self.head_scale
         q = ((p[0] - nk[0]) * k * T["head.sx"][f] / T["body.sx"][f], (p[1] - nk[1]) * k * T["head.sy"][f] / T["body.sy"][f])
         q = rot_pt(q, T["head.rot"][f])
@@ -373,7 +440,10 @@ class Character:
                 at = pin["at"](f) if callable(pin["at"]) else pin["at"]
                 hand = pin["hand"](f) if callable(pin["hand"]) else pin["hand"]
                 bp = self.world_to_body(f, at)
-                if s == "L":
+                if self.view is not None:             # the IK works from the rest shoulder: move the target as the shoulder moved
+                    s0, s1 = self.side(self.shoulder, s), self.view.shoulder(s, f)
+                    bp = (bp[0] - (s1[0] - s0[0]), bp[1] - (s1[1] - s0[1]))
+                if self.dir(s) < 0:
                     bp = mirror_pt(bp, self.CX)
                 new = self.ik(bp, bend=pin["bend"], hand=hand)
                 for key, val in zip(("sh", "el", "wr", "len"), new):
@@ -521,7 +591,7 @@ class Character:
         wet = self.active("eye.wet")
         spin = self.active("eye.spin")
         styles = sorted({self.eye_style(f) for f in range(self.n)}) if styled else [0]
-        for s in ("R", "L"):
+        for s in self.view_sides:
             c = self.side(self.eye, s)
             sgn = 1.0 if s == "R" else -1.0
             is_open = lambda f, s=s: self.eye_open(s, f) >= self.EYE_SWAP
@@ -607,6 +677,8 @@ class Character:
         groups = []
         own = self.active("brow.L.y", "brow.R.y", "brow.L.tilt", "brow.R.tilt")
         for s, sgn in (("R", 1.0), ("L", -1.0)):
+            if s not in self.view_sides:
+                continue
             c = self.side(self.eye, s)
             c = (c[0], c[1] + b["dy"])
             h = b["half"]
@@ -691,6 +763,8 @@ class Character:
         cr = getattr(self, "cheek", None) or {"R": (self.eye["R"][0] + 38.0, self.eye["R"][1] + 40.0)}
         marks = []
         for s in "RL":
+            if s not in self.view_sides:
+                continue
             cx, cy = self.side(cr, s)
             for q in (-1, 0, 1):
                 marks.append(sh(Path([(cx + q * 9 + 3, cy - 6), (cx + q * 9 - 3, cy + 6)], closed=False)))
@@ -738,7 +812,7 @@ class Character:
     # ---- limbs: real bone chains (nested groups), so every joint is a plain rotation
     def arm_layer(self, s, front, held_under=(), held_over=(), only_hand=False, name=None):
         T, pal, arm = self.T, self.pal, self.arm
-        sgn = 1.0 if s == "R" else -1.0
+        sgn = self.dir(s)
         side_nm = "right" if s == "R" else "left"
         both = not self.const(f"arm.{s}.front")
         o = self.A(lambda f: 100 if (T[f"arm.{s}.front"][f] > 0.5) == front else 0, hold=True) if both else 100
@@ -782,11 +856,13 @@ class Character:
         full = L0 / (1.0 - lg.get("slack", 0.04))             # a relaxed standing leg is not quite straight
         self.legs = {}
         for s in "RL":
-            sgn = 1.0 if s == "R" else -1.0
+            sgn = self.dir(s)
             J, F0 = self.side(self.hip, s), self.side(self.foot, s)
             H, K, A = np.zeros((self.n, 2)), np.zeros((self.n, 2)), np.zeros((self.n, 2))
             phi, Ln = np.zeros(self.n), np.zeros(self.n)
             for f in range(self.n):
+                if self.view is not None:                     # turned: the hip joint rides the body, the foot turns on the ground
+                    J, F0 = self.view.hip(s, f), self.view.foot(s, f)
                 h = self.hips_to_root(f, J)
                 a = (F0[0] + sgn * T[f"foot.{s}.x"][f], F0[1] + T[f"foot.{s}.y"][f])
                 dx, dy = a[0] - h[0], a[1] - h[1]
@@ -819,7 +895,8 @@ class Character:
         T, pal = self.T, self.pal
         out = []
         if self.leg is None:                                    # feet only: they hang from the root
-            for s, sgn, nm in (("R", 1.0, "right foot"), ("L", -1.0, "left foot")):
+            for s, nm in (("R", "right foot"), ("L", "left foot")):
+                sgn = self.dir(s)
                 c = self.side(self.foot, s)
                 out.append(Layer(
                     nm, self.foot_shapes(s), parent="root", a=c,
@@ -829,7 +906,8 @@ class Character:
             return out
         mix = lambda a, b, t: (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
         follow = self.leg.get("foot_follow", 0.8)
-        for s, sgn, nm in (("R", 1.0, "right foot"), ("L", -1.0, "left foot")):
+        for s, nm in (("R", "right foot"), ("L", "left foot")):
+            sgn = self.dir(s)
             fs, G = self.foot_shapes(s), self.legs[s]
             sole = lambda f, s=s: float(np.clip(T[f"foot.{s}.sole"][f], 0, 1))
             (fc, fz), (sc, sz) = fs["flat"], fs["sole"]
@@ -947,6 +1025,9 @@ class Character:
         self.n = clip.frames + 1
         self.T = T = rig.evaluate(clip, self)
         self.height = np.clip(-T["root.y"], 0, None) / np.maximum(T["root.scale"] * T["root.sy"], 0.2)
+        self.view = ViewState(self) if self.active("body.yaw", "head.yaw") else None
+        if self.view is not None:
+            self.view.smear(T, loop=clip.loop)
         self.apply_pins(clip)
         return self
 
@@ -969,6 +1050,7 @@ class Character:
                 fx[slot].append(payload)
 
         back = {s: bool(T[f"arm.{s}.back"][0] > 0.5) for s in "RL"}     # paws behind the back (held for the whole clip)
+        self._fx = fx                                                   # held props, for the arms of drawn views (views.py)
 
         def arms(front):
             out = []
@@ -1007,4 +1089,6 @@ class Character:
         add("nulls", [self.hips_layer(), self.root_layer()])
         add("back", fx["back"])
         add("shadow", [self.shadow_layer()])
+        if self.view is not None:                              # turned away from the viewer (views.py)
+            out = self.view.apply(out)
         return out

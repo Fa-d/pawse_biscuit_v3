@@ -283,6 +283,9 @@ class Biscuit(Character):
         dots = [el((x, y), (5, 5)) for x, y in ((289, 278), (298, 287), (223, 278), (214, 287))]
         return [gr("whisker dots", dots + [fl(pal["dark"], 32)])]
 
+    def body_outline(self):
+        return smooth(mirror_half(self.BODY_R), closed=True, tension=0.36)
+
     def body_shapes(self):
         pal = self.pal
         body = smooth(mirror_half(self.BODY_R), closed=True, tension=0.36)
@@ -290,6 +293,202 @@ class Biscuit(Character):
             gr("belly", [el((256, 362), (96, 90)), fl(pal["cream"])]),
             gr("body", [sh(body), fl(pal["orange"])]),
         ]
+
+    # ------------------------------------------------------------------ drawn views (v5): seen from the side and from behind
+    # The side view faces screen-right and is seen from the fox's left: 'L' is the near side (its eye, brow, cheek, ear,
+    # arm and leg are in front), 'R' the far side.  The back view is seen from behind, so the fox's right side ('R') is on
+    # screen-left.  Every point is in the same coordinates as the front drawing (head drawing for the head, canvas for the
+    # body), so crown, eye line, shoulders and ground stay where the turnaround sheet's guides are.
+    HEAD_SIDE = [(252, 104), (304, 108), (342, 128), (364, 160), (370, 196), (366, 222), (382, 232), (402, 236), (418, 243), (425, 254),
+                 (416, 268), (392, 277), (362, 286), (330, 300), (290, 312), (252, 315), (206, 310), (170, 294), (146, 266), (138, 226),
+                 (144, 182), (164, 144), (196, 116), (224, 106)]
+    BODY_SIDE = [(254, 284), (290, 288), (314, 308), (326, 340), (330, 376), (318, 402), (288, 414), (250, 416), (214, 410), (196, 390),
+                 (192, 356), (198, 320), (218, 294)]
+    EAR_SIDE = [(-28, 12), (-31, -30), (-23, -70), (-13, -98), (-4, -110), (7, -100), (17, -64), (26, -22), (30, 8)]    # around the pivot
+
+    def view_data(self, name):
+        if self.name != "biscuit":                    # the fox's drawings: a mascot built on Biscuit draws its own views
+            return super().view_data(name)
+        if name == "side":
+            return dict(
+                head_shapes="side_head_shapes", tuft_shapes="side_tuft_shapes", ear_shapes="side_ear_shapes", nose_shapes="side_nose_shapes",
+                blush_shapes="side_blush_shapes", face_static="side_face_static", body_shapes="side_body_shapes", foot_shapes="side_foot_shapes",
+                head_outline="side_head_outline", body_outline="side_body_outline",
+                eye={"L": (324.0, 225.0), "R": (392.0, 219.0)}, mouth=(398.0, 268.0), nose=(414.0, 251.0), cheek={"L": (300.0, 262.0), "R": (300.0, 262.0)},
+                ear_pivot={"L": (232.0, 138.0), "R": (268.0, 126.0)}, tuft_pivot=(266.0, 110.0),
+                shoulder={"L": (258.0, 326.0), "R": (268.0, 322.0)}, hip={"L": (252.0, 400.0), "R": (264.0, 398.0)},
+                foot={"L": (246.0, 446.0), "R": (268.0, 442.0)},
+                tail=dict(self.tail, base=(206.0, 392.0)),
+                dirs={"R": 1.0, "L": 1.0}, view_sides=("L",),
+                squash={"eyes": 0.74, "brows": 0.8, "face": 0.6}, tail_slot=0, tail_flip=True, arms_behind="far", arm_turn=-16.0,
+            )
+        if name == "back":
+            m = lambda p: (2 * CX - p[0], p[1])
+            return dict(
+                head_shapes="back_head_shapes", tuft_shapes="back_tuft_shapes", ear_shapes="back_ear_shapes", body_shapes="back_body_shapes",
+                foot_shapes="back_foot_shapes",
+                ear_pivot={"R": m(self.ear_pivot["R"]), "L": self.ear_pivot["R"]}, tuft_pivot=m(self.tuft_pivot),
+                shoulder={"R": m(self.shoulder["R"]), "L": self.shoulder["R"]}, hip={"R": m(self.hip["R"]), "L": self.hip["R"]},
+                foot={"R": m(self.foot["R"]), "L": self.foot["R"]},
+                tail=dict(self.tail, base=(262.0, 400.0)),
+                dirs={"R": -1.0, "L": 1.0}, view_sides=(),
+                face=False, tail_slot=1, tail_flip=True, tail_rot=22.0, arms_behind="both",
+            )
+        return None
+
+    def side_head_outline(self):
+        return smooth(self.HEAD_SIDE, closed=True, tension=0.34, sharp={5: 0.45, 8: 0.6, 9: 0.6, 11: 0.5})
+
+    def side_head_shapes(self):
+        pal = self.pal
+        head = self.side_head_outline()
+        # the cream of the muzzle and the lower cheek: the outline from just behind the nose round the snout and the jaw
+        # (pushed out a hair, keeping the outline's own curve), the fluff sticking out behind the cheek, and a line under
+        # the eye back to the nose
+        idx = list(range(8, 17))
+        rim = [pushed(head.v[k], (300.0, 240.0)) for k in idx]
+        # the white cheek reaches up behind the eye, with the fluff sticking out at its back edge
+        fluff = [(176, 314), (192, 300), (152, 292), (180, 282), (148, 266), (182, 260), (166, 244), (204, 236)]
+        inner = [(240, 236), (270, 250), (302, 262), (338, 262), (370, 252), (396, 243)]
+        pts = rim + fluff + inner
+        n_rim = len(rim)
+        sharp = {0: 0.3, n_rim - 1: 0.4, len(pts) - 1: 0.5}
+        sharp.update({n_rim + q: (0.0 if q % 2 == 0 else 0.4) for q in range(0, 7)})
+        mask = smooth(pts, closed=True, tension=0.34, sharp=sharp)
+        for q, k in enumerate(idx):
+            if 0 < q < n_rim - 1:
+                mask.i[q], mask.o[q] = head.i[k], head.o[k]
+        line = lambda a_, b_: sh(Path([a_, b_], closed=False))
+        stripes = [line((300, 112), (296, 134)), line((322, 118), (314, 140)), line((278, 110), (278, 132)),
+                   line((228, 192), (206, 188)), line((230, 209), (208, 207))]
+        return [
+            gr("stripes", stripes + [st(pal["stripe"], 9)]),
+            gr("head shine", [el((0, 0), (80, 28)), fl(pal["white"], 20)], p=(268, 136), r=-6),
+            gr("muzzle", [el((404, 262), (30, 18)), fl(pal["white"], 55)]),
+            gr("cream mask", [sh(mask), fl(pal["cream"])]),
+            gr("head", [sh(head), fl(pal["orange"])]),
+        ]
+
+    def side_tuft_shapes(self):
+        """The tuft, swept back."""
+        pal = self.pal
+        pts = [(2 * 262 - x, y) for x, y in [(236, 118), (238, 96), (254, 80), (280, 72), (272, 90), (290, 96), (278, 118)]]
+        return [sh(smooth(pts, closed=True, tension=0.36, sharp={3: 0.55, 5: 0.55, 0: 0.4, 6: 0.4})), fl(pal["orange"])]
+
+    def side_ear_shapes(self, side):
+        """Ears seen from the side: narrow, standing on top of the head; the near ear shows the cream of its front
+        edge, the far one peeks out behind it, a shade darker."""
+        pal = self.pal
+        pv = self.side({"L": (232.0, 138.0), "R": (268.0, 126.0)}, side)
+        k = 1.0 if side == "L" else 0.9
+        pts = [(pv[0] + x * k, pv[1] + y * k) for x, y in self.EAR_SIDE]
+        ear = smooth(pts, closed=True, tension=0.33, sharp={4: 0.6, 0: 0.0, 8: 0.0})
+        tip = [pushed(ear.v[q], (pv[0], pv[1] - 60.0)) for q in (2, 3, 4, 5, 6)] + [(pv[0] - 4.0, pv[1] - 70.0)]
+        cap = smooth(tip, closed=True, tension=0.3, sharp={0: 0.0, 4: 0.0, 5: 0.5})
+        for q in (1, 2, 3):
+            cap.i[q], cap.o[q] = ear.i[q + 2], ear.o[q + 2]
+        out = [gr("ear tip", [sh(cap), fl(pal["dark"])])]
+        if side == "L":
+            inner = smooth([(pv[0] + x, pv[1] + y) for x, y in [(4, -78), (14, -54), (21, -20), (23, 4), (11, 2), (7, -36)]], closed=True,
+                           tension=0.35, sharp={0: 0.2, 3: 0.2})
+            out.append(gr("inner ear", [sh(inner), fl(pal["cream"])]))
+        out.append(gr("ear", [sh(ear), fl(pal["orange"] if side == "L" else pal["arm"])]))
+        return out
+
+    def side_nose_shapes(self):
+        pal = self.pal
+        x, y = (414.0, 251.0)
+        nose = smooth([(x - 8, y - 6), (x + 5, y - 7), (x + 11, y - 1), (x + 6, y + 6), (x - 5, y + 5)], closed=True, tension=0.38)
+        return [
+            gr("nose shine", [el((x + 1, y - 3), (6, 3)), fl(pal["white"], 55)]),
+            gr("nose", [sh(nose), fl(pal["dark"])]),
+        ]
+
+    def side_blush_shapes(self):
+        pal = self.pal
+        return [el((300, 264), (44, 24)), fl(pal["pink"])]
+
+    def side_face_static(self):
+        pal = self.pal
+        dots = [el((x, y), (5, 5)) for x, y in ((376, 270), (384, 279), (368, 281))]
+        return [gr("whisker dots", dots + [fl(pal["dark"], 32)])]
+
+    def side_body_outline(self):
+        return smooth(self.BODY_SIDE, closed=True, tension=0.36)
+
+    def side_body_shapes(self):
+        pal = self.pal
+        return [
+            gr("belly", [el((298, 362), (58, 86)), fl(pal["cream"])]),
+            gr("body", [sh(self.side_body_outline()), fl(pal["orange"])]),
+        ]
+
+    def side_foot_shapes(self, side):
+        """A foot seen from the side: long, toes pointing the way the fox faces; tipping up shows the sole."""
+        pal = self.pal
+        beans = [el((-4, -10), (8, 10)), el((-4, 2), (8, 10)), el((-2, 14), (10, 16)), fl(pal["pink"])]
+        line = lambda x: sh(Path([(x, 14.0), (x + 2, 21.0)], closed=False))
+        return dict(
+            pads=beans,
+            toes=[line(26.0), line(16.0), st(pal["iris"], 3.2, 70)],
+            flat=((12.0, 10.0), (76.0, 28.0)),
+            sole=((4.0, 2.0), (30.0, 50.0)),
+            color=pal["dark"],
+        )
+
+    def back_head_shapes(self):
+        """The back of the head: the same outline, the cheek fluff showing at the sides, no face."""
+        pal = self.pal
+        head = self.head_outline()
+        n = len(head.v)
+        fluff = []
+        for k0 in (4, n - 8):                           # the fluff points of each cheek, pushed out, closed under them
+            ks = list(range(k0, k0 + 5))
+            v = [pushed(head.v[k], (256.0, 212.0)) for k in ks]
+            c = (sum(p[0] for p in v) / len(v), sum(p[1] for p in v) / len(v))
+            inner = (c[0] + (256.0 - c[0]) * 0.28, c[1] + 4.0)
+            fluff.append(smooth(v + [inner], closed=True, tension=0.3, sharp={0: 0.2, len(v) - 1: 0.2, 2: 0.6}))
+        line = lambda a_, b_: sh(Path([a_, b_], closed=False))
+        marks = [line((256, 124), (256, 150)), line((232, 128), (238, 150)), line((280, 128), (274, 150))]
+        return [
+            gr("stripes", marks + [st(pal["stripe"], 9)]),
+            gr("head shine", [el((0, 0), (90, 30)), fl(pal["white"], 16)], p=(296, 142), r=16),
+            gr("cheek fluff", [sh(f) for f in fluff] + [fl(pal["cream"])]),
+            gr("head", [sh(head), fl(pal["orange"])]),
+        ]
+
+    def back_tuft_shapes(self):
+        pts = [(2 * CX - x, y) for x, y in [(236, 118), (238, 96), (254, 80), (280, 72), (272, 90), (290, 96), (278, 118)]]
+        return [sh(smooth(pts, closed=True, tension=0.36, sharp={3: 0.55, 5: 0.55, 0: 0.4, 6: 0.4})), fl(self.pal["orange"])]
+
+    def back_ear_shapes(self, side):
+        """Ears from behind: the back of the ear, orange with the dark tip, no cream inside."""
+        pal = self.pal
+        ear = smooth(self.EAR_R, closed=True, tension=0.33, sharp={3: 0.8, 4: 0.8, 0: 0.0, 7: 0.0})
+        cap_v = [pushed(ear.v[q], (350.0, 110.0)) for q in (2, 3, 4, 5)] + [(366, 64)]
+        cap = Path(cap_v, [(0, 0), ear.i[3], ear.i[4], ear.i[5], (6, 4)], [ear.o[2], ear.o[3], ear.o[4], (0, 0), (-6, -4)], True)
+        if side == "R":                                 # the right ear is on screen-left from behind
+            ear, cap = ear.mirrored(CX), cap.mirrored(CX)
+        return [
+            gr("ear tip", [sh(cap), fl(pal["dark"])]),
+            gr("ear", [sh(ear), fl(pal["orange"])]),
+        ]
+
+    def back_body_shapes(self):
+        pal = self.pal
+        return [gr("body", [sh(smooth(mirror_half(self.BODY_R), closed=True, tension=0.36)), fl(pal["orange"])])]
+
+    def back_foot_shapes(self, side):
+        """Feet from behind: the heel; tipping up shows the sole and its pads."""
+        pal = self.pal
+        beans = [el((-15, -8), (10, 11)), el((0, -14), (10, 11)), el((15, -8), (10, 11)), el((0, 7), (28, 19)), fl(pal["pink"])]
+        return dict(
+            pads=beans,
+            toes=[],
+            flat=((0.0, 9.0), (56.0, 28.0)),
+            sole=((0.0, 2.0), (62.0, 46.0)),
+            color=pal["dark"],
+        )
 
     def hand_shapes(self, side):
         """Paw drawn with the wrist at (0, 0) and the fingertips towards +y.

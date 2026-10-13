@@ -74,6 +74,9 @@ CHANNELS = {
     # paws, held: 0 open paw, 1 fist, 2 thumb up, 3 pointing finger, 4 peace sign
     "hand.L.shape": 0.0, "hand.R.shape": 0.0,
     "arm.L.back": 0.0, "arm.R.back": 0.0,   # 1 = the arm is drawn behind the body (paws behind the back)
+    # ---- added in v5: turning away from the viewer (mascot/views.py).  Degrees; 0 faces the viewer, + turns the face
+    # towards screen-right.  body.yaw turns the whole mascot, head.yaw turns the head further on top of it.
+    "body.yaw": 0.0, "head.yaw": 0.0,
 }
 
 # channels added in v4 that expressions may set; a face that does not mention one puts it back to rest, so going

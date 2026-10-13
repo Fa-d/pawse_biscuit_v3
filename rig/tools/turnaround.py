@@ -7,8 +7,10 @@
 
 Guide lines, measured on the front view in canvas pixels (512 x 512) and drawn across the mascot's whole row:
   ground (solid), crown (the top of the skull), eye line (the centre of the eyes), shoulders.
-A view the mascot does not have yet is drawn as a faint onion skin of the front view, the space its art will fill.
-v1 (phase 0) draws the front view only; the rig's views arrive in phase 2 and appear here by themselves.
+Every view is what the rig draws at that turn (body.yaw): front 0, 20 deg and three-quarter 45 are the front drawing
+turned by the view rig; side 90 and back 180 are the mascot's drawn views (Character.view_data).  A mascot without a
+drawn view shows the rig's fallback there, marked "fallback" (no side view: the three-quarter turn held; no back
+view: the side, or the front again).
 """
 from __future__ import annotations
 
@@ -22,6 +24,7 @@ sys.path.insert(0, ROOT)
 from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 
 VIEWS = {"front": "front", "y20": "20 deg", "q": "three-quarter", "side": "side", "back": "back"}
+YAW = {"front": 0.0, "y20": 20.0, "q": 45.0, "side": 90.0, "back": 180.0}
 INK, QUIET, BG, CELL = (40, 36, 44), (120, 116, 124), (246, 244, 240), (255, 255, 255)
 # guide line: (colour, dash length, gap); dash 0 = solid
 GUIDES = {"crown": ((232, 112, 42), 6, 4), "eyes": ((74, 144, 226), 6, 4), "shoulders": ((76, 175, 80), 2, 3),
@@ -37,18 +40,30 @@ def font(size):
 
 
 def rest_pose(name, view="front"):
-    """(document, character) of the mascot standing at rest, smiling, frame 0.  Only the front view exists in v1."""
+    """(document, character) of the mascot standing at rest, smiling, frame 0, turned to `view`."""
     from mascot.build import characters
     from mascot.clip import Clip
 
-    if view != "front":
-        return None, None
     ch = characters()[name]()
     c = Clip(f"turnaround_{name}_{view}", 2, loop=True, char=ch)
     c.face(0, "smiley", dur=0)
     c.arm("LR", (0, "rest"))
     c.tailpose((0, "rest"))
+    if YAW[view]:
+        c.set("body.yaw", YAW[view])
     return ch.build(c), ch
+
+
+def fallback(ch, view):
+    """None when the mascot has the view, else what the rig shows instead (in words)."""
+    if view not in ("side", "back"):
+        return None
+    side, back = ch.view_data("side") is not None, ch.view_data("back") is not None
+    if view == "side":
+        return None if side else "fallback: three-quarter"
+    if back:
+        return None
+    return "fallback: side" if side else "fallback: front"
 
 
 def guides(ch):
@@ -116,17 +131,16 @@ def main(argv=None):
             front_doc, ch = rest_pose(name, "front")
             measured[name] = (front_doc, guides(ch))
         front_doc, g = measured[name]
-        doc, _ = rest_pose(name, view)
+        doc, ch = rest_pose(name, view)
         top = y0 + label_h
         d.rectangle([x0 + 2, top, x0 + S - 2, top + S - 4], fill=CELL)
-        if doc is not None:
-            img = frame(doc, 0, size=S)
-        else:                                                # not drawn yet: an onion skin of the front view
-            img = frame(front_doc, 0, size=S)
-            img.putalpha(img.getchannel("A").point(lambda v: v * 22 // 100))
+        img = frame(doc, 0, size=S)
+        fb = fallback(ch, view)
+        if fb:                                               # the rig's stand-in: shown faded, so drawn views stand out
+            img.putalpha(img.getchannel("A").point(lambda v: v * 45 // 100))
         sheet.paste(img, (x0, top), img)
-        if doc is None:
-            d.text((x0 + 10, top + 8), "not drawn yet", fill=QUIET, font=f_small)
+        if fb:
+            d.text((x0 + 10, top + 8), fb, fill=QUIET, font=f_small)
         d.text((x0 + 8, y0 + 4), f"{name}  {VIEWS[view]}" if grid or c == 0 else VIEWS[view], fill=INK, font=f_label)
         if view == "front":                                  # the measured heights, under the name, two to a line
             keys = list(GUIDES)

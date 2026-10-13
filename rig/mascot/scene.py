@@ -159,19 +159,19 @@ class Scene:
         neck = ch.neck_at or ch.neck
         chest_y = (getattr(ch, "body_anchors", {}) or {}).get("chest", (cx, neck[1] + 40.0))[1]
         if part == "collar":
-            return ch.body_to_world(f, ch.collar or (neck[0], neck[1] + 14.0))
+            return ch.body_to_world(f, ch.body_pt(f, ch.collar or (neck[0], neck[1] + 14.0)))
         if part == "chest":
-            return ch.body_to_world(f, (cx, chest_y))
+            return ch.body_to_world(f, ch.body_pt(f, (cx, chest_y)))
         if part == "belly":
             belly_y = (getattr(ch, "body_anchors", {}) or {}).get("belly", (cx, ch.pelvis[1] - 30.0))[1]
-            return ch.body_to_world(f, (cx, belly_y))
+            return ch.body_to_world(f, ch.body_pt(f, (cx, belly_y)))
         if part == "back":                              # the edge of the body at chest height (where a hug's paws go)
             half = max((dx for dx, _ in getattr(ch, "BODY_R", ())), default=70.0)
-            return ch.body_to_world(f, (cx + sgn * half * 0.9, chest_y + 10.0))
+            return ch.body_to_world(f, ch.body_pt(f, (cx + sgn * half * 0.9, chest_y + 10.0)))
         if part == "shoulder":
-            return ch.body_to_world(f, ch.side(ch.shoulder, side))
+            return ch.body_to_world(f, ch.shoulder_pt(side, f))
         if part == "hip":
-            return ch.root_to_world(f, ch.hips_to_root(f, ch.side(ch.hip, side)))
+            return ch.root_to_world(f, ch.hips_to_root(f, ch.hip_pt(side, f)))
         if part == "paw":
             return ch.hand_to_world(side, f, tuple(ch.paw["c"]))
         if part == "wrist":
@@ -227,12 +227,10 @@ class Scene:
         ch, s = a.char, pin["side"]
         tg = self.target(pin)
         rest = ch.arm["L1"] + ch.arm["L2"]
-        sh = ch.shoulder["R"]
         worst = 0.0
         for f in frames if frames is not None else range(pin["t0"], pin["t1"] + 1):
             bp = ch.world_to_body(f, self.to_local(a.id, tg(f)))
-            if s == "L":
-                bp = (2 * ch.CX - bp[0], bp[1])
+            sh = ch.shoulder_pt(s, f)
             worst = max(worst, math.hypot(bp[0] - sh[0], bp[1] - sh[1]) / rest)
         return worst
 

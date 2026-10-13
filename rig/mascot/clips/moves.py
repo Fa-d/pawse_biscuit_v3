@@ -255,3 +255,25 @@ def happy_squint(c, t0, t1, dur=6):
     """Eyes close into happy arches for a moment, then pop open again."""
     c.k("eye.open", (t0 - dur, 1.0, "hold"), (t0, 0.0, "io"), (t1, 0.0, "hold"), (t1 + dur, 1.0, "back"))
     c.k("eye.arc", (t0 - dur, -0.45, "hold"), (t0 - 2, 0.2, "io"), (t0 + 4, 1.0, "back"), (t1, 1.0, "hold"), (t1 + dur, -0.45, "io"))
+
+
+# ---------------------------------------------------------------- turning (v5: body.yaw / head.yaw, see mascot/views.py)
+def turn(c, t, to, dur=24, e="io", lead=0.3, head_lead=5):
+    """Turn the whole mascot to `to` degrees (0 faces the viewer, 90 its side, 180 its back; + turns the face towards
+    screen-right), arriving at frame t + dur.  The head leads: it starts head_lead frames early and runs ahead of the
+    body by up to `lead` of the turn, then settles as the body arrives.  Passing 67.5 and 135 degrees snaps to the
+    drawn side and back views (a mascot without them holds its three-quarter view)."""
+    tr = c.tracks.get("body.yaw")
+    start = float(tr.at(t)) if tr and tr.keys else 0.0
+    c.k("body.yaw", (t, start, "hold"), (t + dur, float(to), e))
+    if lead:
+        d = (float(to) - start) * lead
+        addkeys(c, "head.yaw", (t - head_lead, 0.0), (t + dur * 0.45, d, "out"), (t + dur + 6, 0.0, "io"))
+    return t + dur
+
+
+def look_back(c, t0, t1, at=-110.0, dur=14, e="back"):
+    """Look back over the shoulder: the head turns `at` degrees against the body's turn from t0 (arriving dur frames
+    later) and turns away again at t1 (gone by t1 + dur).  With the body turned away (body.yaw ~ 150-170) the face comes
+    back round towards the viewer."""
+    addkeys(c, "head.yaw", (t0, 0.0), (t0 + dur, float(at), e), (t1, float(at), "hold"), (t1 + dur, 0.0, "io"))
