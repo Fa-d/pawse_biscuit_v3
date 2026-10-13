@@ -95,6 +95,9 @@ class Wear:
     tags: tuple = ()
     also: tuple = ()                  # other zones it covers (a hood covers hat and ear)
     covers: tuple = ()                # face parts it hides: "eyes" (sunglasses, a sleep mask), "mouth" (a face mask)
+    views: tuple = ()                 # drawn views it draws itself ("side", "back"): its items get the view's copy of the
+                                      # mascot (char.view_name says which); else a hat is worn as drawn for the front
+                                      # and anything else is left out of drawn views
 
 
 @dataclass(frozen=True)

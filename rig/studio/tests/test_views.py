@@ -261,11 +261,46 @@ class Studio(unittest.TestCase):
         _, info = compose(StickerSpec(base="pip", yaw=60.0))
         self.assertIn("as far as three-quarter", " ".join(info["notes"]))
 
-    def test_front_only_wear_is_left_out_of_drawn_views(self):
-        doc, _ = compose(StickerSpec(base="biscuit", yaw=90.0, accessories=["glasses", "crown"]))
-        ly = {L["nm"]: L for L in doc["layers"]}
-        self.assertNotIn("wear glasses", ly)
-        self.assertIn("wear crown", ly)
+    def test_worn_things_have_their_own_side_and_back_drawings(self):
+        side = names(compose(StickerSpec(base="biscuit", yaw=90.0, accessories=["glasses", "crown"]))[0])
+        self.assertIn("wear glasses [side]", side)
+        self.assertNotIn("wear glasses", side, "the front's glasses are not written when the front never shows")
+        self.assertIn("wear crown", side, "a hat without drawn views is worn as drawn for the front")
+        back = names(compose(StickerSpec(base="biscuit", yaw=180.0, accessories=["glasses"]))[0])
+        self.assertFalse(any("glasses" in n for n in back), "glasses are not seen from behind")
+        back = names(compose(StickerSpec(base="biscuit", yaw=180.0, accessories=["goggles"]))[0])
+        self.assertIn("wear goggles [back]", back, "... but a goggles strap is")
+        turning = names(compose(StickerSpec(base="biscuit", motion="turn_around", accessories=["backpack"]))[0])
+        for v in ("", " [side]", " [back]"):
+            self.assertIn(f"wear backpack{v}", turning)
+        pirate = names(compose(StickerSpec(base="biscuit", yaw=90.0, accessories=["pirate_hat"]))[0])
+        self.assertIn("wear pirate hat", pirate, "a hat drawn only from behind is worn as drawn for the front from the side")
+        self.assertNotIn("wear pirate hat [side]", pirate)
+
+    def test_every_worn_thing_builds_in_every_drawn_view(self):
+        for name, w in REG.wear.items():
+            for yaw in (90.0, -90.0, 180.0):
+                with self.subTest(item=name, yaw=yaw):
+                    doc, _ = compose(StickerSpec(base="biscuit", yaw=yaw, accessories=[name], seconds=1.0), frame=False)
+                    self.assertLess(len(tgs_bytes(doc)), TGS_MAX)
+                    view = {90.0: "side", -90.0: "side-", 180.0: "back"}[yaw]
+                    drawn = [n for n in names(doc) if n.startswith("wear ") and n.endswith(f"[{view}]")]
+                    if ("side" if yaw != 180.0 else "back") in w.views:
+                        continue                                    # (an item may have nothing to show from there)
+                    self.assertEqual(drawn, [], "an item without that view is not drawn again")
+
+    def test_a_tear_moves_to_the_eye_the_side_view_shows(self):
+        for yaw in (90.0, -90.0):
+            with self.subTest(yaw=yaw):
+                spec = StickerSpec(base="biscuit", effects=["tear"], yaw=yaw)
+                doc, _ = compose(spec, frame=False)
+                L = next(x for x in doc["layers"] if x["nm"].startswith("tear"))
+                ch = characters()["biscuit"]()
+                p = ch.view_data("side")["eye"]["L"]
+                eye = (2.0 * ch.CX - p[0], p[1]) if yaw < 0 else p
+                f = next(t for t in range(int(doc["op"])) if float(np.ravel(prop_at(L["ks"]["o"], t))[0]) > 50.0)
+                at = prop_at(L["ks"]["p"], f)
+                self.assertLess(math.dist(at[:2], eye), 40.0, f"the tear is at the near eye ({at[:2]} vs {eye})")
 
 
 if __name__ == "__main__":

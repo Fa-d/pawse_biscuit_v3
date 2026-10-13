@@ -2,11 +2,13 @@
 
 Head items hang from the 'neck' null and are drawn in the head drawing's own coordinates, placed from the
 mascot's data (crown, eyes, ear pivots), so they sit right on every mascot and follow every head turn, squash and
-stance.  Neck items ride on the body.
+stance.  Neck items ride on the body.  Seen from the side or from behind (v5), an item with `views` is drawn by
+wear_views.py instead (the drawing function is handed the view's copy of the mascot: V.view_of(char) says which).
 """
 from __future__ import annotations
 
 from ..registry import wear
+from . import wear_views as V
 from .common import C, Layer, Path, col, el, fl, gr, math, rc, sh, smooth, st, star5
 
 
@@ -64,11 +66,13 @@ def crown(x):
     return on_head("crown", items)
 
 
-@wear("glasses", "Glasses", "👓", zone="eyes", noun="glasses")
+@wear("glasses", "Glasses", "👓", zone="eyes", noun="glasses", views=("side", "back"))
 def glasses(x):
     frame = col(x.color or "dark")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.glasses(ch, frame)
         l, r, w, h = eyes_of(ch)
         d = max(w, h) * 1.25
         bridge = sh(Path([(l[0] + d / 2, l[1] - 4), (r[0] - d / 2, r[1] - 4)], i=[(0, 0), (-8, -8)], o=[(8, -8), (0, 0)], closed=False))
@@ -79,9 +83,11 @@ def glasses(x):
     return on_head("glasses", items)
 
 
-@wear("sunglasses", "Sunglasses", "😎", zone="eyes", noun="sunglasses", covers=("eyes",))
+@wear("sunglasses", "Sunglasses", "😎", zone="eyes", noun="sunglasses", covers=("eyes",), views=("side", "back"))
 def sunglasses(x):
     def items(ch):
+        if V.view_of(ch):
+            return V.sunglasses(ch)
         l, r, w, h = eyes_of(ch)
         gw, gh = w * 1.5, h * 1.0
         lens = lambda c: rc((c[0], c[1] + 2), (gw, gh), gh * 0.42)
@@ -94,11 +100,13 @@ def sunglasses(x):
     return on_head("sunglasses", items)
 
 
-@wear("bow", "Bow", "🎀", zone="ear", noun="a bow", tint=("pink", "coral", "lilac", "teal", "yellow"))
+@wear("bow", "Bow", "🎀", zone="ear", noun="a bow", tint=("pink", "coral", "lilac", "teal", "yellow"), views=("side", "back"))
 def bow(x):
     color = col(x.color or "pink")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.bow(ch, color)
         ex, ey = ch.ear_pivot["R"]
         bx, by = (ex + ch.crown[0]) / 2 + 22, ch.crown[1] + 12
         wing = lambda k: smooth([(bx, by), (bx + k * 30, by - 20), (bx + k * 36, by + 2), (bx + k * 28, by + 20)], closed=True, tension=0.35,
@@ -110,11 +118,13 @@ def bow(x):
     return on_head("bow", items)
 
 
-@wear("flower", "Flower", "🌼", zone="head_side", noun="a flower")
+@wear("flower", "Flower", "🌼", zone="head_side", noun="a flower", views=("side", "back"))
 def flower(x):
     petal_c = col(x.color or "white")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.flower(ch, petal_c)
         ex, ey = ch.ear_pivot["R"]
         fx, fy = 2 * ch.CX - ((ex + ch.crown[0]) / 2 + 28), ch.crown[1] + 16
         petals = [el((fx + 15 * math.cos(a), fy + 15 * math.sin(a)), (20, 20)) for a in (k * 2 * math.pi / 5 - math.pi / 2 for k in range(5))]
@@ -122,11 +132,13 @@ def flower(x):
     return on_head("flower", items)
 
 
-@wear("headphones", "Headphones", "🎧", zone="ears", noun="headphones", tint=("teal", "coral", "lilac", "yellow"))
+@wear("headphones", "Headphones", "🎧", zone="ears", noun="headphones", tint=("teal", "coral", "lilac", "yellow"), views=("side", "back"))
 def headphones(x):
     color = col(x.color or "teal")
 
     def items(ch):
+        if V.view_of(ch) == "side":                 # (from behind the front drawing serves: cups both sides, the band over)
+            return V.headphones(ch, color)
         l, r, w, h = eyes_of(ch)
         cy = l[1] + 6
         half = (r[0] - l[0]) / 2 + 96
@@ -143,11 +155,13 @@ def headphones(x):
     return on_head("headphones", items)
 
 
-@wear("scarf", "Scarf", "🧣", zone="neck", noun="a scarf", tint=("coral", "teal", "lilac", "blue"))
+@wear("scarf", "Scarf", "🧣", zone="neck", noun="a scarf", tint=("coral", "teal", "lilac", "blue"), views=("side", "back"))
 def scarf(x):
     color, stripe = col(x.color or "coral"), C["cream"]
 
     def items(ch):
+        if V.view_of(ch):
+            return V.scarf(ch, color, stripe)
         if ch.collar:                      # a mane hides the neck: wrap it lower
             sx, sy = ch.collar[0], ch.collar[1] - 2
         else:
@@ -163,11 +177,13 @@ def scarf(x):
     return on_body("scarf", items)
 
 
-@wear("star_clip", "Star clip", "⭐", zone="ear", noun="a star clip")
+@wear("star_clip", "Star clip", "⭐", zone="ear", noun="a star clip", views=("side", "back"))
 def star_clip(x):
     color = col(x.color or "yellow")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.star_clip(ch, color)
         ex, _ = ch.ear_pivot["R"]
         sx, sy = (ex + ch.crown[0]) / 2 + 24, ch.crown[1] + 16
         return [gr("star clip", [sh(star5((sx, sy), 17)), fl(color)])]

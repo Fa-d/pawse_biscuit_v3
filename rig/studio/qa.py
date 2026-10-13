@@ -46,6 +46,10 @@ GUARANTEES = [
             "ground (python -m studio.qa --kind views)."),
     ("L16", "Turned mascots look the same in lottie-web as in rlottie (python3 tools/cross_render.py on turned stickers)."),
     ("L17", "One-mascot stickers, the app's clips and the small effects stay byte-identical to v4 (python -m studio.snapshots --check)."),
+    ("L18", "Seen from the side or from behind, a mascot with drawn views plays every motion, wears every worn thing (each "
+            "drawn for that view, or left out where it cannot be seen) and shows the effects on its face where that view has "
+            "its face; each builds, loops and fits (python -m studio.qa --kind turned).  A paw pinned in a drawn view lands "
+            "within 1 px of its target in the written file (studio/tests/test_views.py)."),
 ]
 
 SEAM_MAX = 0.08          # mean absolute difference (0..255) allowed between the first and the last frame
@@ -132,9 +136,22 @@ def cases(kind, bases=None):
         for b in bases:
             for yaw in VIEW_YAWS:
                 yield f"yaw {yaw:+.0f} on {b}", dict(base=b, yaw=yaw, motion="wave")
+    elif kind == "turned":                          # L18: everything again in the drawn views of the mascots that have them
+        for b in bases:
+            if REG.bases[b].load()().view_data("side") is None:
+                continue
+            for yaw in TURNED_YAWS:
+                for name, m in REG.motions.items():
+                    yield f"{name} at yaw {yaw:+.0f} on {b}", dict(base=b, motion=name, yaw=yaw, stance="sit" if m.sit == "only" else "stand")
+                for name in REG.wear:
+                    yield f"{name} worn at yaw {yaw:+.0f} on {b}", dict(base=b, accessories=[name], motion="jump", yaw=yaw)
+                for name, e in REG.effects.items():
+                    if e.zone == "face":
+                        yield f"{name} at yaw {yaw:+.0f} on {b}", dict(base=b, effects=[name], motion="idle", yaw=yaw)
 
 
 VIEW_YAWS = (20.0, 45.0, 90.0, 180.0, -90.0)
+TURNED_YAWS = (90.0, -90.0, 180.0)
 
 
 def view_proportions(base):
@@ -185,13 +202,13 @@ def sheet(specs, out, cols=6, size=170):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--kind", default="all", help="motions, props, effects, wear, faces, views, seconds or all")
+    ap.add_argument("--kind", default="all", help="motions, props, effects, wear, faces, views, turned, seconds or all")
     ap.add_argument("--bases", default="", help="comma-separated mascots (default: all)")
     ap.add_argument("--only", default="", help="comma-separated item names")
     ap.add_argument("--sheet", default="", help="write a contact sheet instead of checking")
     ap.add_argument("--json", default="", help="write the results as JSON")
     a = ap.parse_args(argv)
-    kinds = ["motions", "props", "effects", "wear", "faces", "views"] if a.kind == "all" else a.kind.split(",")
+    kinds = ["motions", "props", "effects", "wear", "faces", "views", "turned"] if a.kind == "all" else a.kind.split(",")
     bases = [b for b in a.bases.split(",") if b] or None
     only = {x for x in a.only.split(",") if x}
     todo = [(lab, d) for k in kinds for lab, d in cases(k, bases) if not only or lab.split(" ")[0] in only]

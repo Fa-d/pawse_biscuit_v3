@@ -108,9 +108,12 @@ class Character:
           drawings (names of methods, or functions): head_shapes, tuft_shapes, ear_shapes, eye_shapes, nose_shapes,
             blush_shapes, face_static, body_shapes, foot_shapes, hand_shapes
           anchors, in the same coordinates as the front's: eye, eye_size, lid, brow, mouth, nose, cheek, ear_pivot,
-            tuft_pivot, shoulder, hip, foot ({'R': .., 'L': ..} for both sides: nothing is mirrored), tail (the dict)
+            tuft_pivot, crown, top, shoulder, hip, foot ({'R': .., 'L': ..} for both sides: nothing is mirrored), tail
+            (the dict).  The named places among them (views.HEAD_PLACES, BODY_PLACES) also tell pins, scene points,
+            worn things and face effects where the front's places are in this view
           dirs ({'R': +1 or -1, 'L': ..}: which way each side's limbs reach out on screen) and view_sides (the eyes,
-            brows and cheeks drawn: the near one from the side, none from behind)
+            brows and cheeks drawn: the near one from the side, none from behind).  Seen from the side the near side
+            ('L' facing right) moves with the right side's channels, so the paw a motion acts with is in sight
           options: squash {layer: x scale} (features seen edge on), face (False: no mouth or nose), tail_slot (0 behind
             the body, 2 in front of the feet), tail_flip (the tail points the other way), arms_behind ('far' or 'both')
         See characters/biscuit.py."""

@@ -3,11 +3,13 @@ wings and backpacks, aprons, sweaters and a tutu.
 
 Head items are drawn in the head drawing's coordinates from the mascot's own data (crown, eyes, ears, nose,
 mouth), so they sit right on every mascot and follow every head turn.  Body items ride on the body.  Animated
-items (a propeller, a halo, a cape) loop with periods that divide the loop.
+items (a propeller, a halo, a cape) loop with periods that divide the loop.  Seen from the side or from behind (v5),
+an item with `views` is drawn by wear_views.py (or, from behind, by its front drawing where that serves).
 """
 from __future__ import annotations
 
 from ..registry import wear
+from . import wear_views as V
 from .common import C, F, Layer, Path, col, el, fl, gr, heart_path, math, rc, sh, smooth, st, star4, star5
 from .wear_core import eyes_of, on_body, on_head
 
@@ -54,13 +56,21 @@ def santa_hat(x):
     return on_head("santa hat", items)
 
 
-@wear("witch_hat", "Witch hat", "🧙‍♀️", zone="hat", noun="a witch hat", tags=("halloween", "magic"), tint=("violet", "night", "black"))
+@wear("witch_hat", "Witch hat", "🧙‍♀️", zone="hat", noun="a witch hat", tags=("halloween", "magic"), tint=("violet", "night", "black"),
+      views=("back",))
 def witch_hat(x):
     c = col(x.color or "violet")
 
     def items(ch):
         cx, y = ch.crown
         y += 12
+        if V.view_of(ch) == "back":                 # the buckle is on the front of the band
+            return [gr("witch hat", [
+                gr("band", [rc((cx, y - 14), (92, 16), 4), fl(C["lime"])]),
+                gr("cone", [sh(cone(cx, y - 6, 96, 150, tip_dx=34, droop=24)), fl(c)]),
+                gr("brim", [el((cx, y - 4), (196, 34)), fl(c)]),
+                gr("brim shade", [el((cx, y), (196, 34)), fl(C["black"], 35)]),
+            ], a=(cx, y), p=(cx, y), r=-8)]
         return [gr("witch hat", [
             gr("buckle", [rc((cx, y - 14), (20, 16), 3), st(C["gold"], 4)]),
             gr("band", [rc((cx, y - 14), (92, 16), 4), fl(C["lime"])]),
@@ -119,11 +129,14 @@ def top_hat(x):
     return on_head("top hat", items)
 
 
-@wear("cap", "Cap", "🧢", zone="hat", noun="a cap", tags=("sport", "casual", "cool"), tint=("blue", "red", "teal", "black"))
+@wear("cap", "Cap", "🧢", zone="hat", noun="a cap", tags=("sport", "casual", "cool"), tint=("blue", "red", "teal", "black"),
+      views=("side", "back"))
 def cap(x):
     c = col(x.color or "blue")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.cap(ch, c)
         cx, y = ch.crown
         y += 22
         dome = smooth([(cx - 78, y), (cx - 70, y - 40), (cx, y - 66), (cx + 70, y - 40), (cx + 78, y)], closed=True, tension=0.38, sharp={0: 0.5, 4: 0.5})
@@ -195,13 +208,15 @@ def grad_cap(x):
     return on_head_anim("grad cap", items)
 
 
-@wear("pirate_hat", "Pirate hat", "🏴‍☠️", zone="hat", noun="a pirate hat", tags=("pirate", "adventure"))
+@wear("pirate_hat", "Pirate hat", "🏴‍☠️", zone="hat", noun="a pirate hat", tags=("pirate", "adventure"), views=("back",))
 def pirate_hat(x):
     def items(ch):
         cx, y = ch.crown
         y += 16
         hat = smooth([(cx - 110, y - 20), (cx - 60, y - 40), (cx - 30, y - 80), (cx, y - 70), (cx + 30, y - 80), (cx + 60, y - 40), (cx + 110, y - 20),
                       (cx + 40, y), (cx - 40, y)], closed=True, tension=0.34, sharp={0: 0.8, 6: 0.8})
+        if V.view_of(ch) == "back":                 # the skull is on the front
+            return [gr("pirate hat", [gr("trim", [sh(hat), st(C["gold"], 5)]), gr("hat", [sh(hat), fl(C["black"])])])]
         return [gr("pirate hat", [
             gr("bones", [sh(Path([(cx - 14, y - 20), (cx + 14, y - 40)], closed=False)), sh(Path([(cx - 14, y - 40), (cx + 14, y - 20)], closed=False)),
                          st(C["white"], 5)]),
@@ -320,11 +335,14 @@ def sun_hat(x):
     return on_head("sun hat", items)
 
 
-@wear("headband", "Sweatband", "🏃", zone="hat", noun="a sweatband", tags=("gym", "sport", "workout"), tint=("red", "teal", "yellow"))
+@wear("headband", "Sweatband", "🏃", zone="hat", noun="a sweatband", tags=("gym", "sport", "workout"), tint=("red", "teal", "yellow"),
+      views=("side",))
 def headband(x):
     c = col(x.color or "red")
 
     def items(ch):
+        if V.view_of(ch) == "side":
+            return V.headband(ch, c)
         cx, y = ch.crown
         l, r, w, h = eyes_of(ch)
         by, half = (y + l[1]) / 2.0 - 6, 120
@@ -388,23 +406,28 @@ def viking_helmet(x):
     return on_head("viking helmet", items)
 
 
-@wear("tiara", "Tiara", "👸", zone="hat", noun="a tiara", tags=("princess", "pretty", "queen"))
+@wear("tiara", "Tiara", "👸", zone="hat", noun="a tiara", tags=("princess", "pretty", "queen"), views=("back",))
 def tiara(x):
     def items(ch):
         cx, y = ch.crown
         y += 18
         pts = [(cx - 60, y), (cx - 40, y - 18), (cx - 20, y - 12), (cx, y - 38), (cx + 20, y - 12), (cx + 40, y - 18), (cx + 60, y), (cx, y - 6)]
+        if V.view_of(ch) == "back":                 # the gems face the front: from behind, the band
+            return [gr("tiara", [gr("band", [sh(Path(pts, closed=True)), fl(C["silver"])]), gr("edge", [sh(Path(pts, closed=True)), st(C["steel"], 3)])])]
         return [gr("tiara", [gr("gems", [el((cx, y - 26), (12, 12)), el((cx - 40, y - 12), (8, 8)), el((cx + 40, y - 12), (8, 8)), fl(C["rose"])]),
                              gr("band", [sh(Path(pts, closed=True)), fl(C["silver"])]), gr("edge", [sh(Path(pts, closed=True)), st(C["steel"], 3)])])]
     return on_head("tiara", items)
 
 
 # ------------------------------------------------------------------ ears
-@wear("earmuffs", "Earmuffs", "🎧", zone="ears", noun="earmuffs", tags=("winter", "cold"), tint=("gum", "teal", "lilac", "white"))
+@wear("earmuffs", "Earmuffs", "🎧", zone="ears", noun="earmuffs", tags=("winter", "cold"), tint=("gum", "teal", "lilac", "white"),
+      views=("side", "back"))
 def earmuffs(x):
     c = col(x.color or "gum")
 
     def items(ch):
+        if V.view_of(ch) == "side":                 # (from behind the front drawing serves)
+            return V.earmuffs(ch, c)
         l, r, w, h = eyes_of(ch)
         cy = l[1] - 10
         half = (r[0] - l[0]) / 2 + 92
@@ -429,24 +452,29 @@ def _lenses(ch, shape_fn, fill, edge, glare=True):
 
 
 @wear("heart_glasses", "Heart glasses", "😍", zone="eyes", noun="heart-shaped glasses", covers=("eyes",), tags=("love", "party", "fun"),
-      tint=("gum", "red", "lilac"))
+      tint=("gum", "red", "lilac"), views=("side", "back"))
 def heart_glasses(x):
     c = col(x.color or "gum")
-    return on_head("heart glasses", lambda ch: _lenses(ch, lambda e, w: heart_path(w * 0.78, e[0], e[1] + 4), c, C["red"]))
+    shape = lambda e, w: heart_path(w * 0.78, e[0], e[1] + 4)        # noqa: E731
+    return on_head("heart glasses", lambda ch: V.lenses(ch, shape, c, C["red"]) if V.view_of(ch) else _lenses(ch, shape, c, C["red"]))
 
 
 @wear("star_glasses", "Star glasses", "🤩", zone="eyes", noun="star-shaped glasses", covers=("eyes",), tags=("party", "fun", "star"),
-      tint=("yellow", "teal", "gum"))
+      tint=("yellow", "teal", "gum"), views=("side", "back"))
 def star_glasses(x):
     c = col(x.color or "yellow")
-    return on_head("star glasses", lambda ch: _lenses(ch, lambda e, w: star5((e[0], e[1] + 2), w * 0.8, k=0.55), c, C["gold2"]))
+    shape = lambda e, w: star5((e[0], e[1] + 2), w * 0.8, k=0.55)       # noqa: E731
+    return on_head("star glasses", lambda ch: V.lenses(ch, shape, c, C["gold2"]) if V.view_of(ch) else _lenses(ch, shape, c, C["gold2"]))
 
 
-@wear("goggles", "Goggles", "🥽", zone="eyes", noun="goggles", covers=("eyes",), tags=("swim", "ski", "science"), tint=("teal", "orange", "lilac"))
+@wear("goggles", "Goggles", "🥽", zone="eyes", noun="goggles", covers=("eyes",), tags=("swim", "ski", "science"), tint=("teal", "orange", "lilac"),
+      views=("side", "back"))
 def goggles(x):
     c = col(x.color or "teal")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.goggles(ch, c)
         l, r, w, h = eyes_of(ch)
         cy = l[1]
         strap = smooth([(ch.CX - 150, cy - 2), (ch.CX, cy - 10), (ch.CX + 150, cy - 2)], closed=False, tension=0.4)
@@ -460,9 +488,11 @@ def goggles(x):
     return on_head("goggles", items)
 
 
-@wear("glasses_3d", "3D glasses", "🎬", zone="eyes", noun="3D glasses", covers=("eyes",), tags=("movie", "cinema", "fun"))
+@wear("glasses_3d", "3D glasses", "🎬", zone="eyes", noun="3D glasses", covers=("eyes",), tags=("movie", "cinema", "fun"), views=("side", "back"))
 def glasses_3d(x):
     def items(ch):
+        if V.view_of(ch):
+            return V.glasses_3d(ch)
         l, r, w, h = eyes_of(ch)
         lens = lambda e: rc((e[0], e[1] + 2), (w * 1.4, h * 0.9), 6)
         return [
@@ -473,9 +503,11 @@ def glasses_3d(x):
     return on_head("glasses 3d", items)
 
 
-@wear("monocle", "Monocle", "🧐", zone="eyes", noun="a monocle", tags=("fancy", "classy", "detective"))
+@wear("monocle", "Monocle", "🧐", zone="eyes", noun="a monocle", tags=("fancy", "classy", "detective"), views=("side", "back"))
 def monocle(x):
     def items(ch):
+        if V.view_of(ch):
+            return V.monocle(ch)
         l, r, w, h = eyes_of(ch)
         d = max(w, h) * 1.25
         chain = smooth([(r[0] + d / 2, r[1] + 6), (r[0] + d / 2 + 20, r[1] + 60), (r[0] + 30, r[1] + 120)], closed=False, tension=0.4)
@@ -483,9 +515,11 @@ def monocle(x):
     return on_head("monocle", items)
 
 
-@wear("eye_patch", "Eye patch", "🏴‍☠️", zone="eyes", noun="an eye patch", tags=("pirate",))
+@wear("eye_patch", "Eye patch", "🏴‍☠️", zone="eyes", noun="an eye patch", tags=("pirate",), views=("side", "back"))
 def eye_patch(x):
     def items(ch):
+        if V.view_of(ch):
+            return V.eye_patch(ch)
         l, r, w, h = eyes_of(ch)
         return [gr("patch", [el(l, (w * 1.3, h * 1.15)), fl(C["black"])]),
                 gr("strap", [sh(Path([(ch.CX - 140, l[1] - 70), (l[0], l[1]), (ch.CX + 140, l[1] + 60)], closed=False)), st(C["black"], 5)])]
@@ -493,11 +527,13 @@ def eye_patch(x):
 
 
 @wear("sleep_mask", "Sleep mask", "😴", zone="eyes", noun="a sleep mask", covers=("eyes",), tags=("sleep", "bedtime", "night"),
-      tint=("lilac", "gum", "sky2"))
+      tint=("lilac", "gum", "sky2"), views=("side", "back"))
 def sleep_mask(x):
     c = col(x.color or "lilac")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.sleep_mask(ch, c)
         l, r, w, h = eyes_of(ch)
         mask = smooth([(l[0] - w, l[1] - 4), (l[0], l[1] - h * 0.62), (ch.CX, l[1] - h * 0.4), (r[0], r[1] - h * 0.62), (r[0] + w, r[1] - 4), (r[0], r[1] + h * 0.6),
                        (ch.CX, r[1] + h * 0.32), (l[0], l[1] + h * 0.6)], closed=True, tension=0.38)
@@ -508,11 +544,14 @@ def sleep_mask(x):
 
 
 # ------------------------------------------------------------------ nose and mouth
-@wear("mustache", "Mustache", "🥸", zone="mouth", noun="a mustache", tags=("fancy", "disguise", "funny"), tint=("dark", "brown", "darkbrown"))
+@wear("mustache", "Mustache", "🥸", zone="mouth", noun="a mustache", tags=("fancy", "disguise", "funny"), tint=("dark", "brown", "darkbrown"),
+      views=("side", "back"))
 def mustache(x):
     c = col(x.color or "dark")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.mustache(ch, c)
         nx, ny = ch.nose
         half = lambda k: smooth([(nx, ny + 10), (nx + k * 22, ny + 6), (nx + k * 40, ny + 12), (nx + k * 50, ny + 2), (nx + k * 46, ny + 18),
                                  (nx + k * 26, ny + 24), (nx + k * 6, ny + 18)], closed=True, tension=0.36, sharp={3: 0.8})
@@ -520,11 +559,14 @@ def mustache(x):
     return on_head("mustache", items)
 
 
-@wear("face_mask", "Face mask", "😷", zone="mouth", noun="a face mask", covers=("mouth",), tags=("sick", "doctor", "flu"), tint=("sky2", "white", "mint"))
+@wear("face_mask", "Face mask", "😷", zone="mouth", noun="a face mask", covers=("mouth",), tags=("sick", "doctor", "flu"), tint=("sky2", "white", "mint"),
+      views=("side", "back"))
 def face_mask(x):
     c = col(x.color or "sky2")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.face_mask(ch, c)
         nx, ny = ch.nose
         mx, my = ch.mouth
         top, bot = ny - 12, my + 34
@@ -537,9 +579,11 @@ def face_mask(x):
     return on_head("face mask", items)
 
 
-@wear("clown_nose", "Clown nose", "🤡", zone="nose", noun="a clown nose", tags=("silly", "funny", "circus"))
+@wear("clown_nose", "Clown nose", "🤡", zone="nose", noun="a clown nose", tags=("silly", "funny", "circus"), views=("side", "back"))
 def clown_nose(x):
     def items(ch):
+        if V.view_of(ch):
+            return V.clown_nose(ch)
         nx, ny = ch.nose
         return [gr("shine", [el((nx - 6, ny - 6), (8, 6)), fl(C["white"], 80)]), gr("nose", [el((nx, ny), (34, 32)), fl(C["red"])])]
     return on_head("clown nose", items)
@@ -554,11 +598,14 @@ def _neck(ch):
     return sx, sy + 14
 
 
-@wear("bow_tie", "Bow tie", "🎀", zone="neck", noun="a bow tie", tags=("fancy", "classy", "party"), tint=("red", "navy", "black", "teal"))
+@wear("bow_tie", "Bow tie", "🎀", zone="neck", noun="a bow tie", tags=("fancy", "classy", "party"), tint=("red", "navy", "black", "teal"),
+      views=("side", "back"))
 def bow_tie(x):
     c = col(x.color or "red")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.bow_tie(ch, c)
         sx, sy = _neck(ch)
         wing = lambda k: Path([(sx, sy), (sx + k * 30, sy - 16), (sx + k * 30, sy + 16)], closed=True)
         return [gr("bow tie", [gr("knot", [rc((sx, sy), (14, 16), 4), fl(c)]), gr("wings", [sh(wing(1)), sh(wing(-1)), fl(c)]),
@@ -566,11 +613,13 @@ def bow_tie(x):
     return on_body("bow tie", items)
 
 
-@wear("necktie", "Tie", "👔", zone="neck", noun="a tie", tags=("work", "office", "business"), tint=("navy", "red", "teal"))
+@wear("necktie", "Tie", "👔", zone="neck", noun="a tie", tags=("work", "office", "business"), tint=("navy", "red", "teal"), views=("side", "back"))
 def necktie(x):
     c = col(x.color or "navy")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.necktie(ch, c)
         sx, sy = _neck(ch)
         tie = Path([(sx - 8, sy + 10), (sx + 8, sy + 10), (sx + 16, sy + 70), (sx, sy + 86), (sx - 16, sy + 70)], closed=True)
         return [gr("tie", [gr("stripes", [sh(Path([(sx - 10, sy + 34), (sx + 12, sy + 26)], closed=False)), sh(Path([(sx - 13, sy + 54), (sx + 14, sy + 46)], closed=False)),
@@ -581,9 +630,11 @@ def necktie(x):
     return on_body("necktie", items)
 
 
-@wear("lei", "Flower lei", "🌺", zone="neck", noun="a flower lei", tags=("hawaii", "summer", "beach", "party"))
+@wear("lei", "Flower lei", "🌺", zone="neck", noun="a flower lei", tags=("hawaii", "summer", "beach", "party"), views=("side", "back"))
 def lei(x):
     def items(ch):
+        if V.view_of(ch):
+            return V.lei(ch)
         sx, sy = _neck(ch)
         out = []
         for q in range(9):                 # a garland hanging from the shoulders down onto the chest
@@ -596,11 +647,14 @@ def lei(x):
     return on_body("lei", items)
 
 
-@wear("bell_collar", "Bell collar", "🔔", zone="neck", noun="a collar with a bell", tags=("cat", "cute", "christmas"), tint=("red", "teal", "gum"))
+@wear("bell_collar", "Bell collar", "🔔", zone="neck", noun="a collar with a bell", tags=("cat", "cute", "christmas"), tint=("red", "teal", "gum"),
+      views=("side", "back"))
 def bell_collar(x):
     c = col(x.color or "red")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.bell_collar(ch, c)
         sx, sy = _neck(ch)
         band = smooth([(sx - 60, sy - 8), (sx, sy + 6), (sx + 60, sy - 8)], closed=False, tension=0.4)
         return [gr("bell collar", [
@@ -611,11 +665,14 @@ def bell_collar(x):
     return on_body("bell collar", items)
 
 
-@wear("bib", "Bib", "🍼", zone="neck", also=("body",), noun="a bib", tags=("eat", "baby", "food"), tint=("white", "sky2", "gum"))
+@wear("bib", "Bib", "🍼", zone="neck", also=("body",), noun="a bib", tags=("eat", "baby", "food"), tint=("white", "sky2", "gum"),
+      views=("side", "back"))
 def bib(x):
     c = col(x.color or "white")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.bib(ch, c)
         sx, sy = _neck(ch)
         shape = smooth([(sx - 40, sy - 4), (sx + 40, sy - 4), (sx + 46, sy + 40), (sx, sy + 70), (sx - 46, sy + 40)], closed=True, tension=0.36,
                        sharp={0: 0.4, 1: 0.4})
@@ -625,7 +682,8 @@ def bib(x):
 
 
 # ------------------------------------------------------------------ back
-@wear("hero_cape", "Hero cape", "🦸", zone="back", noun="a hero cape", tags=("hero", "brave", "costume"), tint=("red", "navy", "violet", "teal"))
+@wear("hero_cape", "Hero cape", "🦸", zone="back", noun="a hero cape", tags=("hero", "brave", "costume"), tint=("red", "navy", "violet", "teal"),
+      views=("side", "back"))
 def hero_cape(x):
     c = col(x.color or "red")
     L = x.L
@@ -642,6 +700,9 @@ def hero_cape(x):
         return [gr("lining", [el((sx, sy + 116), (170, 110)), fl(C["black"], 16)]), gr("cape", [sh(F(n, cape, tol=0.6)), fl(c)])]
 
     def spec(char, T, n):
+        if V.view_of(char):
+            per = L / max(1, round(L / 40.0))
+            return V.hero_cape(char, c, lambda f, ph: math.sin(2 * math.pi * f / per + ph), n)
         sx, sy = char.neck_at or char.neck
         clasp = Layer("wear hero cape clasp", [gr("clasp", [el((sx - 40, sy + 8), (16, 16)), el((sx + 40, sy + 8), (16, 16)), fl(C["gold"])]),
                                                gr("cape top", [rc((sx, sy + 8), (92, 14), 7), fl(c)])], parent="body")
@@ -649,27 +710,45 @@ def hero_cape(x):
     return spec
 
 
-@wear("angel_wings", "Angel wings", "👼", zone="back", noun="angel wings", tags=("angel", "innocent", "heaven"))
+def _angel_wing(sx, sy, k):
+    """One angel wing (k = 1 the right one) measured from the neck (sx, sy); it leaves the body at (sx + 20 k, sy + 40)."""
+    feathers = smooth([(sx + k * 20, sy + 40), (sx + k * 90, sy - 20), (sx + k * 150, sy - 30), (sx + k * 140, sy + 10), (sx + k * 150, sy + 30),
+                       (sx + k * 120, sy + 50), (sx + k * 128, sy + 76), (sx + k * 70, sy + 80)], closed=True, tension=0.36)
+    quills = [sh(smooth([(sx + k * 40, sy + 40), (sx + k * (80 + 18 * q), sy + 6 + 18 * q)], closed=False)) for q in range(3)]
+    return [gr("quills", quills + [st(C["sky2"], 4)]), gr("wing", [sh(feathers), fl(C["white"])]), gr("edge", [sh(feathers), st(C["sky2"], 5)])]
+
+
+@wear("angel_wings", "Angel wings", "👼", zone="back", noun="angel wings", tags=("angel", "innocent", "heaven"), views=("side", "back"))
 def angel_wings(x):
     L = x.L
 
     def spec(char, T, n):
         sx, sy = char.neck_at or char.neck
         per = L / max(1, round(L / 60.0))
+        if V.view_of(char):                         # from behind over the body, from the side spread back (wear_views)
+            return [(slot, Layer("wear angel wings" if q == 0 else f"wear angel wings ({q})", _angel_wing(wx, wy, k), parent="body",
+                                 a=(wx + k * 20, wy + 40), p=(wx + k * 20, wy + 40),
+                                 r=F(n, lambda f, k=k, turn=turn: -k * 10 * math.sin(2 * math.pi * f / per) + turn, tol=1.0)))
+                    for q, (k, (wx, wy), turn, slot) in enumerate(V.wing_spots(char))]
         out = []
         for k in (1, -1):
-            feathers = smooth([(sx + k * 20, sy + 40), (sx + k * 90, sy - 20), (sx + k * 150, sy - 30), (sx + k * 140, sy + 10), (sx + k * 150, sy + 30),
-                               (sx + k * 120, sy + 50), (sx + k * 128, sy + 76), (sx + k * 70, sy + 80)], closed=True, tension=0.36)
-            quills = [sh(smooth([(sx + k * 40, sy + 40), (sx + k * (80 + 18 * q), sy + 6 + 18 * q)], closed=False)) for q in range(3)]
-            out.append(("back", Layer("wear angel wings" if k == 1 else "wear angel wings (left)", [gr("quills", quills + [st(C["sky2"], 4)]), gr("wing", [sh(feathers), fl(C["white"])]),
-                                                               gr("edge", [sh(feathers), st(C["sky2"], 5)])],
+            out.append(("back", Layer("wear angel wings" if k == 1 else "wear angel wings (left)", _angel_wing(sx, sy, k),
                                       parent="body", a=(sx + k * 20, sy + 40), p=(sx + k * 20, sy + 40),
                                       r=F(n, lambda f, k=k: -k * 10 * math.sin(2 * math.pi * f / per), tol=1.0))))
         return out
     return spec
 
 
-@wear("fairy_wings", "Fairy wings", "🧚", zone="back", noun="fairy wings", tags=("fairy", "magic", "cute"), tint=("lilac", "mint", "sky2", "gum"))
+def _fairy_wing(sx, sy, k, c):
+    """One fairy wing (k = 1 the right one) measured from the neck (sx, sy); it leaves the body at (sx + 10 k, sy + 45)."""
+    up = smooth([(sx + k * 10, sy + 40), (sx + k * 80, sy - 40), (sx + k * 140, sy - 30), (sx + k * 120, sy + 30)], closed=True, tension=0.4)
+    low = smooth([(sx + k * 10, sy + 50), (sx + k * 100, sy + 70), (sx + k * 90, sy + 120), (sx + k * 40, sy + 100)], closed=True, tension=0.4)
+    return [gr("sparkle", [sh(star4((sx + k * 100, sy - 10), 10)), fl(C["white"])]), gr("wings", [sh(up), sh(low), fl(c, 70)]),
+            gr("edge", [sh(up), sh(low), st(C["white"], 3)])]
+
+
+@wear("fairy_wings", "Fairy wings", "🧚", zone="back", noun="fairy wings", tags=("fairy", "magic", "cute"), tint=("lilac", "mint", "sky2", "gum"),
+      views=("side", "back"))
 def fairy_wings(x):
     c = col(x.color or "lilac")
     L = x.L
@@ -677,23 +756,28 @@ def fairy_wings(x):
     def spec(char, T, n):
         sx, sy = char.neck_at or char.neck
         per = L / max(1, round(L / 20.0))
+        flutter = lambda f: (100 * (0.8 + 0.2 * math.cos(2 * math.pi * f / per)), 100)      # noqa: E731
+        if V.view_of(char):                         # from behind over the body, from the side spread back (wear_views)
+            return [(slot, Layer("wear fairy wings" if q == 0 else f"wear fairy wings ({q})", _fairy_wing(wx, wy, k, c), parent="body",
+                                 a=(wx + k * 10, wy + 45), p=(wx + k * 10, wy + 45), r=turn, s=F(n, flutter, tol=2.0)))
+                    for q, (k, (wx, wy), turn, slot) in enumerate(V.wing_spots(char))]
         out = []
         for k in (1, -1):
-            up = smooth([(sx + k * 10, sy + 40), (sx + k * 80, sy - 40), (sx + k * 140, sy - 30), (sx + k * 120, sy + 30)], closed=True, tension=0.4)
-            low = smooth([(sx + k * 10, sy + 50), (sx + k * 100, sy + 70), (sx + k * 90, sy + 120), (sx + k * 40, sy + 100)], closed=True, tension=0.4)
-            out.append(("back", Layer("wear fairy wings" if k == 1 else "wear fairy wings (left)", [gr("sparkle", [sh(star4((sx + k * 100, sy - 10), 10)), fl(C["white"])]),
-                                                               gr("wings", [sh(up), sh(low), fl(c, 70)]), gr("edge", [sh(up), sh(low), st(C["white"], 3)])],
+            out.append(("back", Layer("wear fairy wings" if k == 1 else "wear fairy wings (left)", _fairy_wing(sx, sy, k, c),
                                       parent="body", a=(sx + k * 10, sy + 45), p=(sx + k * 10, sy + 45),
                                       s=F(n, lambda f: (100 * (0.8 + 0.2 * math.cos(2 * math.pi * f / per)), 100), tol=2.0))))
         return out
     return spec
 
 
-@wear("backpack", "Backpack", "🎒", zone="back", noun="a backpack", tags=("school", "travel", "hike"), tint=("coral", "teal", "yellow", "lilac"))
+@wear("backpack", "Backpack", "🎒", zone="back", noun="a backpack", tags=("school", "travel", "hike"), tint=("coral", "teal", "yellow", "lilac"),
+      views=("side", "back"))
 def backpack(x):
     c = col(x.color or "coral")
 
     def spec(char, T, n):
+        if V.view_of(char):
+            return V.backpack(char, c)
         sx, sy = char.neck_at or char.neck
         straps = Layer("wear backpack straps", [gr("straps", [sh(Path([(sx - 44, sy + 10), (sx - 54, sy + 90)], closed=False)),
                                                               sh(Path([(sx + 44, sy + 10), (sx + 54, sy + 90)], closed=False)), st(c, 10)])], parent="body")
@@ -704,11 +788,13 @@ def backpack(x):
 
 
 # ------------------------------------------------------------------ body
-@wear("apron", "Apron", "👩‍🍳", zone="body", noun="an apron", tags=("cooking", "baking", "chef"), tint=("white", "coral", "teal"))
+@wear("apron", "Apron", "👩‍🍳", zone="body", noun="an apron", tags=("cooking", "baking", "chef"), tint=("white", "coral", "teal"), views=("side", "back"))
 def apron(x):
     c = col(x.color or "white")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.apron(ch, c)
         sx, sy = ch.neck_at or ch.neck
         bib_ = smooth([(sx - 36, sy + 28), (sx + 36, sy + 28), (sx + 40, sy + 64), (sx + 66, sy + 74), (sx + 62, sy + 112), (sx, sy + 118), (sx - 62, sy + 112),
                        (sx - 66, sy + 74), (sx - 40, sy + 64)], closed=True, tension=0.3, sharp={0: 0.5, 1: 0.5})
@@ -718,11 +804,14 @@ def apron(x):
     return on_body("apron", items)
 
 
-@wear("xmas_sweater", "Christmas sweater", "🎄", zone="body", noun="a Christmas sweater", tags=("christmas", "winter", "cozy"), tint=("red", "darkgreen", "navy"))
+@wear("xmas_sweater", "Christmas sweater", "🎄", zone="body", noun="a Christmas sweater", tags=("christmas", "winter", "cozy"), tint=("red", "darkgreen", "navy"),
+      views=("side", "back"))
 def xmas_sweater(x):
     c = col(x.color or "red")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.xmas_sweater(ch, c)
         sx, sy = ch.neck_at or ch.neck
         body = smooth([(sx - 64, sy + 10), (sx + 64, sy + 10), (sx + 76, sy + 60), (sx + 78, sy + 104), (sx, sy + 112), (sx - 78, sy + 104), (sx - 76, sy + 60)],
                       closed=True, tension=0.34)
@@ -735,11 +824,14 @@ def xmas_sweater(x):
     return on_body("xmas sweater", items)
 
 
-@wear("tshirt", "T-shirt", "👕", zone="body", noun="a T-shirt", tags=("casual", "summer"), tint=("teal", "coral", "yellow", "lilac", "white"))
+@wear("tshirt", "T-shirt", "👕", zone="body", noun="a T-shirt", tags=("casual", "summer"), tint=("teal", "coral", "yellow", "lilac", "white"),
+      views=("side", "back"))
 def tshirt(x):
     c = col(x.color or "teal")
 
     def items(ch):
+        if V.view_of(ch):
+            return V.tshirt(ch, c)
         sx, sy = ch.neck_at or ch.neck
         body = smooth([(sx - 62, sy + 8), (sx - 20, sy + 6), (sx, sy + 18), (sx + 20, sy + 6), (sx + 62, sy + 8), (sx + 74, sy + 52), (sx + 76, sy + 98),
                        (sx, sy + 104), (sx - 76, sy + 98), (sx - 74, sy + 52)], closed=True, tension=0.34)
@@ -747,11 +839,13 @@ def tshirt(x):
     return on_body("tshirt", items)
 
 
-@wear("tutu", "Tutu", "🩰", zone="waist", noun="a tutu", tags=("ballet", "dance", "pretty"), tint=("gum", "lilac", "mint", "sky2"))
+@wear("tutu", "Tutu", "🩰", zone="waist", noun="a tutu", tags=("ballet", "dance", "pretty"), tint=("gum", "lilac", "mint", "sky2"), views=("side", "back"))
 def tutu(x):
     c = col(x.color or "gum")
 
     def items(ch):
+        if V.view_of(ch) == "side":                 # (from behind the front drawing serves)
+            return V.tutu(ch, c)
         px, py = ch.pelvis
         frill = smooth([(px - 74, py - 20)] + [(px - 74 + 148 * q / 8, py + (14 if q % 2 else 2)) for q in range(9)] + [(px + 74, py - 20)], closed=True,
                        tension=0.34)

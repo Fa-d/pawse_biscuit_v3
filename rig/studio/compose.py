@@ -120,22 +120,38 @@ def build_clip(spec: StickerSpec, char=None, plan=None):
         e = REG.effects[name]
         spec_fn = e.factory(_make(plan, L, name))
         spec_fn.roll = None if e.follows else _peak_roll(e.peak, L)
-        c.prop(spec_fn)
+        c.prop(_on_face(spec_fn) if e.zone == "face" else spec_fn)
     for name in plan.wear:
-        c.prop(_zoned(REG.wear[name].factory(_make(plan, L, name)), REG.wear[name].zone))
+        w = REG.wear[name]
+        c.prop(_zoned(w.factory(_make(plan, L, name)), w.zone, w.views))
     info = dict(still=still, notes=list(plan.notes), tint=dict(plan.tints), motion=plan.motion, stance=plan.stance, tail=plan.tail,
                 arms=dict(plan.arms), plan=plan)
     return c, char, info
 
 
-def _zoned(spec_fn, zone):
-    """A worn item's layers carry its zone, so a mascot turned to a drawn view (side, back) can leave out what is
-    only drawn for the front (glasses, an apron); nothing is written for it."""
+def _zoned(spec_fn, zone, views=()):
+    """A worn item's layers carry its zone, the drawn views it draws itself (Wear.views) and the spec that drew them,
+    so a mascot turned to a drawn view (side, back) draws it again from there (mascot/views.py); a hat drawn for the
+    front only is worn as it is, anything else drawn for the front only is left out.  Nothing is written for it."""
     def spec(char, T, n):
         out = spec_fn(char, T, n)
         for _, L in out:
             if hasattr(L, "nm"):
-                L.view_zone = zone
+                L.view_zone, L.view_draws, L.view_spec = zone, tuple(views), spec
+        return out
+    for k, v in vars(spec_fn).items():
+        setattr(spec, k, v)
+    return spec
+
+
+def _on_face(spec_fn):
+    """An effect on the face (a tear, steam from the ears): its layers are marked, so a mascot turned to a drawn view
+    moves them to the same place on the drawn head (mascot/views.py).  Nothing is written for it."""
+    def spec(char, T, n):
+        out = spec_fn(char, T, n)
+        for _, L in out:
+            if hasattr(L, "nm"):
+                L.view_place, L.view_spec = "face", spec
         return out
     for k, v in vars(spec_fn).items():
         setattr(spec, k, v)

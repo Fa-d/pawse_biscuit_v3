@@ -32,7 +32,7 @@ from functools import lru_cache
 import numpy as np
 
 from .geom import rot as rot_pt
-from .lottie import Anim, Layer, Path, gr, prop
+from .lottie import Anim, Layer, Path, current_roll, gr, prop, rolled
 
 WARP_MAX = 45.0           # degrees the front drawing turns at most (Character.view_warp_max)
 FAR_ARM_BEHIND = 12.0     # degrees of body turn past which the arm on the far side is drawn behind the body
@@ -49,6 +49,8 @@ SMEAR = {-1: 0.06, 0: 0.14, 1: 0.06}     # how much a part squashes in x on the 
 VIEW_ANGLE = {"side": 90.0, "back": 180.0}  # the turn a drawn view shows (a point of the front drawing goes round this far)
 HEAD_PLACES = ("eye", "cheek", "ear_pivot", "nose", "mouth", "tuft_pivot", "crown", "top")   # places of the head a drawn view may give
 BODY_PLACES = ("shoulder", "hip")                                          # ... and of the body
+FACE_SEEN = 0.3           # a point of the face counts as in sight while it is no deeper than this share of the head's radius
+FACE_PIECE = 45.0         # px: the parts of a face effect closer than this move as one (a bubble and its pop marks)
 PLACE_REACH = 40.0        # px (in 3D, depth included): how far a drawn view's named place pulls the points around it
 HEAD_SET = ("brows", "eyes", "face", "head", "right ear", "left ear")
 WEAR_EVERY_VIEW = ("hat",)                 # worn things that look right from every side (the crown is in the same place)
@@ -696,6 +698,8 @@ class ViewState:
                 self._ear(L)
                 res.append((band, L))
             elif L.parent == "neck":
+                if getattr(L, "view_place", None) == "face":            # (a drawn view places it again from the front's)
+                    L.unturned = (L.p, L.s, L.o)
                 self._layer(L, "head", outline="head" if L.nm == "head" else None)
                 res.append((band, L))
             elif L.nm == "body" or L.parent == "body":
@@ -743,13 +747,25 @@ class ViewState:
         head_on = {v: np.array([b == v for b in self.head_bucket]) for v in set(self.head_bucket)}
         body_on = {v: np.array([b == v for b in self.body_bucket]) for v in set(self.body_bucket)}
         out = []
+        worn = {}            # worn things that draw their own side and back views: id(spec) -> (spec, part, views)
+        face = []            # small things on the face, moved onto the drawn head
         for band, L in res:
             kind = self._kind(band, L)
             zone = getattr(L, "view_zone", None)
-            if kind is None and zone is not None and zone not in WEAR_EVERY_VIEW:
-                kind = "head" if L.parent == "neck" else "body"         # worn things drawn for the front only
+            draws = tuple(getattr(L, "view_draws", ()) or ())
+            if kind is None and zone is not None and (draws or zone not in WEAR_EVERY_VIEW):
+                kind = "head" if L.parent == "neck" else "body"         # worn things drawn for the front
+                spec = getattr(L, "view_spec", None)
+                if draws and spec is not None:
+                    worn.setdefault(id(spec), (spec, kind, draws))
+            if kind is None and getattr(L, "view_place", None) == "face" and L.parent == "neck":
+                face.append(L)
             on = head_on if kind == "head" else (body_on if kind == "body" else None)
             front = on.get("front", np.zeros(self.n, bool)) if on is not None else None
+            if front is not None and draws and zone in WEAR_EVERY_VIEW:    # a hat drawn for some views: the front's
+                for v, m in on.items():                                     # drawing serves the others
+                    if v != "front" and ("side" if v.startswith("side") else v) not in draws:
+                        front = front | m
             if front is not None and not front.any():           # never seen from the front: not written at all...
                 if kind == "body" and L.nm == "body":           # ... but the body still carries the neck and the arms
                     L.null, L.shapes = True, []
@@ -758,6 +774,12 @@ class ViewState:
             if front is not None and not front.all():
                 L.o = _mask(L.o, front, self.n)
             out.append((band, L))
+        self._on_drawn_faces(face)
+        for spec, part, draws in worn.values():
+            on = head_on if part == "head" else body_on
+            for v in sorted(on):
+                if v != "front" and ("side" if v.startswith("side") else v) in draws:
+                    out.extend(self._worn(spec, v, on[v]))
         for v in sorted(head_on):
             if v != "front":
                 out.extend(self._head_set(v, head_on[v]))
@@ -765,6 +787,114 @@ class ViewState:
             if v != "front":
                 out.extend(self._body_set(v, body_on[v]))
         return out
+
+    def _drawn_parent(self, parent, v):
+        """Where a layer hung from the front's nulls hangs in drawn view v."""
+        if parent == "neck":
+            return "neck mirror [side-]" if v == "side-" else "neck"
+        if parent == "body":
+            return f"body [{v}]"
+        if parent in ("hips", "root") and v == "side-":
+            return f"{parent} mirror [side-]"
+        return parent
+
+    def _worn(self, spec, v, on):
+        """A worn thing drawn again for drawn view v by its own spec, given the view's copy of the mascot (its anchors,
+        its view_name): its layers hang from the view's nulls and show on the frames the view shows."""
+        p = self.proxy(v)
+        own = getattr(spec, "roll", None)
+        if own is None:
+            got = spec(p, p.T, self.n)
+        else:
+            with rolled(own):
+                got = spec(p, p.T, self.n)
+        out = []
+        for band, L in got:
+            if not hasattr(L, "nm") or (not L.null and not L.shapes):          # (nothing to see from there)
+                continue
+            L.nm = f"{L.nm} [{v}]"
+            L.parent = self._drawn_parent(L.parent, v)
+            L.o = _mask(L.o, [on[self._shown_with(L, f)] for f in range(self.n)], self.n)
+            out.append((band, L))
+        return out
+
+    def _shown_with(self, L, f):
+        """The clip frame the mascot shows while layer L shows its clip frame f: a layer made under a loop roll of its
+        own (a decoration timed for the still, lottie.rolled) runs that many frames apart from the mascot."""
+        d = int(getattr(L, "roll", 0) or 0) - int(current_roll())
+        L_ = self.n - 1
+        return (f - d) % L_ if (d and L_ > 0) else f
+
+    def _on_drawn_faces(self, layers):
+        """Small things on the face (a tear, a sweat drop, a snot bubble, steam from the ears: effects drawn in the front
+        head's coordinates) moved, frame by frame, to the same place on the drawn view showing the head.  The pieces of
+        one effect that sit together (a bubble and its pop marks) move as one; a piece on the far side of the head is
+        hidden, unless all of the effect is (a single tear by the far eye): then it goes to the near side instead."""
+        if not layers or all(b == "front" for b in self.head_bucket):
+            return
+        groups = {}
+        for L in layers:
+            groups.setdefault(id(getattr(L, "view_spec", L)), []).append(L)
+        cx, n = self.ch.CX, self.n
+        for Ls in groups.values():
+            refs = [self._where(L) for L in Ls]
+            vs = [self.head_bucket[self._shown_with(Ls[0], f)] for f in range(n)]     # (one spec: one loop roll)
+            if all(b == "front" for b in vs):
+                continue
+            pieces = _clusters([R.mean(axis=0) for R in refs], FACE_PIECE)
+            where = [np.mean([refs[q] for q in idx], axis=0) for idx in pieces]
+            flip = {}
+            for v in {b for b in vs if b != "front"}:
+                at = [tuple(W[f]) for W in where for f in range(n) if vs[f] == v]
+                seen = any(self._faces_viewer(v, r) for r in at)
+                flip[v] = not seen and any(self._faces_viewer(v, (2.0 * cx - r[0], r[1])) for r in at)
+            for idx, W in zip(pieces, where):
+                move, show = np.zeros((n, 2)), np.ones(n, dtype=bool)
+                for f in range(n):
+                    v = vs[f]
+                    if v == "front":
+                        continue
+                    r = (2.0 * cx - W[f][0], W[f][1]) if flip[v] else (float(W[f][0]), float(W[f][1]))
+                    if not self._faces_viewer(v, r):
+                        show[f] = False
+                        continue
+                    q = self.drawn_point("head", v, r)
+                    move[f] = (q[0] - W[f][0], q[1] - W[f][1])
+                drawn = [b != "front" for b in vs]
+                for q in idx:
+                    L = Ls[q]
+                    p0, s0, o0 = getattr(L, "unturned", (L.p, L.s, L.o))       # as drawn for the front, not turned
+                    P0, P1 = _samples(p0, n), _samples(L.p, n)
+                    S0, S1 = _samples(s0, n), _samples(L.s, n)
+                    O0, O1 = _samples(o0, n), _samples(L.o, n)
+                    L.p = Anim([(float(a[0]) + float(d[0]), float(a[1]) + float(d[1])) if dr else tuple(b)[:2]
+                                for a, b, d, dr in zip(P0, P1, move, drawn)], tol=getattr(p0, "tol", None) or 0.4)
+                    if isinstance(s0, Anim) or isinstance(L.s, Anim):
+                        L.s = Anim([a if dr else b for a, b, dr in zip(S0, S1, drawn)], tol=getattr(L.s, "tol", None) or 0.4)
+                    hold = all(getattr(o, "hold", True) for o in (o0, L.o))
+                    L.o = Anim([(float(a) if sh_ else 0.0) if dr else float(b) for a, b, sh_, dr in zip(O0, O1, show, drawn)],
+                               tol=getattr(o0, "tol", None) or getattr(L.o, "tol", None), hold=hold)
+
+    def _where(self, L):
+        """Where a layer of the head is drawn for the front, frame by frame ((n, 2)): its position, or the middle of
+        what it draws."""
+        n = self.n
+        p0 = getattr(L, "unturned", (L.p,))[0]
+        P = np.array([tuple(map(float, q))[:2] for q in _samples(p0, n)])
+        still_a = not isinstance(L.a, Anim) and tuple(L.a)[:2] == (0, 0)
+        if still_a and not isinstance(p0, Anim) and tuple(p0)[:2] == (0, 0):
+            Q = tree_points(L.shapes)
+            if len(Q):
+                c = ((Q[:, 0].min() + Q[:, 0].max()) / 2.0, (Q[:, 1].min() + Q[:, 1].max()) / 2.0)
+                P = np.tile(np.array(c), (n, 1))
+        return P
+
+    def _faces_viewer(self, v, p):
+        """Is a point of the front head drawing on the side of the head drawn view v shows (or on its edge)?"""
+        I = self.head.info([p])
+        th = math.radians(VIEW_ANGLE["side" if v.startswith("side") else v]) * (-1.0 if v == "side-" else 1.0)
+        depth = -float(I["dx"][0]) * math.sin(th) + float(I["z"][0]) * math.cos(th)
+        return depth > -FACE_SEEN * self.head.R
 
     def _mirror_null(self, v, parent):
         return Layer(f"{parent} mirror [{v}]", null=True, parent=parent, a=(self.ch.CX, 0.0), p=(self.ch.CX, 0.0), s=(-100.0, 100.0))
@@ -971,6 +1101,31 @@ class ViewState:
 
 
 TAIL = dict(angle=60.0, depth=0.8, min=0.5, flip=0.85)
+
+
+def _samples(x, n):
+    """The n per-frame values of a property (an Anim's samples, or a constant repeated)."""
+    if isinstance(x, Anim):
+        return list(x.s)
+    return [tuple(x) if isinstance(x, (tuple, list)) else x] * n
+
+
+def _clusters(points, d):
+    """Indices of points grouped so that each point is within d of another one of its group (single linkage)."""
+    left = list(range(len(points)))
+    out = []
+    while left:
+        group = [left.pop(0)]
+        grew = True
+        while grew:
+            grew = False
+            for q in list(left):
+                if any(math.dist(points[q], points[g]) < d for g in group):
+                    group.append(q)
+                    left.remove(q)
+                    grew = True
+        out.append(group)
+    return out
 
 
 def _upright(items, comp):
