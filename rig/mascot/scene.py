@@ -169,22 +169,17 @@ class Scene:
             half = max((dx for dx, _ in getattr(ch, "BODY_R", ())), default=70.0)
             return ch.body_to_world(f, ch.body_pt(f, (cx + sgn * half * 0.9, chest_y + 10.0)))
         if part == "shoulder":
-            return ch.body_to_world(f, ch.shoulder_pt(side, f))
+            return ch.shoulder_world(side, f)
         if part == "hip":
-            return ch.root_to_world(f, ch.hips_to_root(f, ch.hip_pt(side, f)))
+            return ch.hip_world(side, f)
         if part == "paw":
             return ch.hand_to_world(side, f, tuple(ch.paw["c"]))
         if part == "wrist":
             return ch.hand_to_world(side, f, (0.0, 0.0))
         if part == "foot":
-            if ch.leg is not None:
-                legs = getattr(ch, "legs", None)
-                if not legs:
-                    raise RuntimeError("'foot' is known once the scene is finished (legs are solved after the pins)")
-                return ch.root_to_world(f, tuple(legs[side]["A"][f]))
-            c = ch.side(ch.foot, side)
-            T = ch.T
-            return ch.root_to_world(f, (c[0] + sgn * T[f"foot.{side}.x"][f], c[1] + T[f"foot.{side}.y"][f]))
+            if ch.leg is not None and not getattr(ch, "legs", None):
+                raise RuntimeError("'foot' is known once the scene is finished (legs are solved after the pins)")
+            return ch.foot_world(side, f)
         if part == "ground":
             return ch.root_to_world(f, (cx, ch.GROUND))
         raise AssertionError(part)
@@ -230,7 +225,7 @@ class Scene:
         worst = 0.0
         for f in frames if frames is not None else range(pin["t0"], pin["t1"] + 1):
             bp = ch.world_to_body(f, self.to_local(a.id, tg(f)))
-            sh = ch.shoulder_pt(s, f)
+            sh = ch.shoulder_shown(s, f)                        # a drawn view's arm leaves its own shoulder
             worst = max(worst, math.hypot(bp[0] - sh[0], bp[1] - sh[1]) / rest)
         return worst
 

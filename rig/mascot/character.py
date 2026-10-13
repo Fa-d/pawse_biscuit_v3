@@ -90,6 +90,7 @@ class Character:
     view_body: dict = {}             # depth (0.8)
     view_tail: dict = {}             # angle (60: the tail points out and back), depth of its root (0.8), x scale min / after the flip
     view = None                      # the ViewState of the clip being built, while one of the yaw channels moves
+    view_name = None                 # 'side' or 'back' on the copy that draws a drawn view (views.view_proxy); None: the front
     # which way each side's limbs reach out on screen (+1 right), and which eyes, brows and cheeks are drawn.  A drawn
     # view (seen from the side or from behind, views.py) changes these; the front view never does.
     dirs = {"R": 1.0, "L": -1.0}
@@ -188,7 +189,13 @@ class Character:
         bend=+1 puts the elbow outwards, -1 inwards.  `hand` = absolute heading of the paw (0 down, 90 out, 180 up).
         The arm stretches (cartoon style) when the target is out of reach.
         """
-        S = self.shoulder["R"]
+        return self.ik_from(self.shoulder["R"], target, 1.0, bend, ln, hand, wr, max_len)
+
+    def ik_from(self, S, target, d=1.0, bend=1.0, ln=1.0, hand=None, wr=0.0, max_len=1.7):
+        """ik() for an arm leaving the shoulder S (body space) and reaching out towards screen-right (d=+1, as the right
+        arm does from the front) or screen-left (d=-1): a drawn view's arms leave shoulders of their own."""
+        if d < 0:
+            target = (2.0 * S[0] - target[0], target[1])
         vx, vy = target[0] - S[0], target[1] - S[1]
         dist = math.hypot(vx, vy)
         base = self.arm["L1"] + self.arm["L2"]
@@ -335,8 +342,39 @@ class Character:
 
     def body_pt(self, f, p):
         """A point on the front of the body (rest-pose body space) where it is at frame f: it rides the body round
-        when the mascot turns (pass the result to body_to_world)."""
-        return self.view.body_point(p, f) if self.view is not None else p
+        when the mascot turns, and lands on a drawn view's body where that view shows it (pass the result to
+        body_to_world)."""
+        return self.view.body_at(p, f) if self.view is not None else p
+
+    def drawn(self, f):
+        """The drawn view the body shows at frame f ('side', 'side-', 'back'), or None while the front drawing shows."""
+        return self.view.body_view(f) if self.view is not None else None
+
+    def shoulder_shown(self, s, f):
+        """Where the shoulder of arm s is drawn at frame f, in body space: the front's (turned) or a drawn view's own."""
+        return self.view.shoulder_at(s, f) if self.drawn(f) else self.shoulder_pt(s, f)
+
+    def shoulder_world(self, s, f):
+        """The shoulder of arm s on the canvas at frame f, as drawn."""
+        return self.body_to_world(f, self.shoulder_shown(s, f))
+
+    def hip_world(self, s, f):
+        """The hip joint of leg s on the canvas at frame f, as drawn."""
+        J = self.view.hip_at(s, f) if self.drawn(f) else self.hip_pt(s, f)
+        return self.root_to_world(f, self.hips_to_root(f, J))
+
+    def foot_world(self, s, f):
+        """The ankle of foot s on the canvas at frame f, as drawn.  A mascot with legs knows it once the legs are solved
+        (finish())."""
+        if self.drawn(f):
+            return self.root_to_world(f, self.view.foot_at(s, f))
+        if self.leg is not None:
+            legs = getattr(self, "legs", None)
+            if not legs:
+                raise RuntimeError("a foot is known once the legs are solved (finish(), after the pins)")
+            return self.root_to_world(f, tuple(legs[s]["A"][f]))
+        c, T = self.side(self.foot, s), self.T
+        return self.root_to_world(f, (c[0] + self.dir(s) * T[f"foot.{s}.x"][f], c[1] + T[f"foot.{s}.y"][f]))
 
     def arm_solve(self, s, f):
         """Shoulder, elbow, wrist positions and the paw's heading, in body space."""
@@ -403,8 +441,10 @@ class Character:
         return (self.CX, (top + self.GROUND) / 2.0 - 6.0)
 
     def head_to_world(self, f, p):
-        if self.view is not None:                     # a point of the face slides with the turn
-            p = self.view.head_point(p, f)
+        """A point of the head drawing -> canvas at frame f, where it is shown: a point of the face slides with the turn,
+        and lands on a drawn view's head (the mouth where the side view draws its mouth)."""
+        if self.view is not None:
+            p = self.view.head_at(p, f)
         T, nk, at, k = self.T, self.neck, self.neck_at or self.neck, self.head_scale
         q = ((p[0] - nk[0]) * k * T["head.sx"][f] / T["body.sx"][f], (p[1] - nk[1]) * k * T["head.sy"][f] / T["body.sy"][f])
         q = rot_pt(q, T["head.rot"][f])
@@ -440,6 +480,9 @@ class Character:
                 at = pin["at"](f) if callable(pin["at"]) else pin["at"]
                 hand = pin["hand"](f) if callable(pin["hand"]) else pin["hand"]
                 bp = self.world_to_body(f, at)
+                if self.drawn(f):                     # the arm a drawn view draws: from its own shoulder (views.py)
+                    self.view.pin_arm(s, f, bp, bend=pin["bend"], hand=hand, w=w)
+                    continue
                 if self.view is not None:             # the IK works from the rest shoulder: move the target as the shoulder moved
                     s0, s1 = self.side(self.shoulder, s), self.view.shoulder(s, f)
                     bp = (bp[0] - (s1[0] - s0[0]), bp[1] - (s1[1] - s0[1]))
@@ -454,7 +497,10 @@ class Character:
                     T[ch][f] = old + (val - old) * w
 
     def hand_to_world(self, s, f, local=(0.0, 0.0)):
-        """A point given in paw coordinates (wrist at origin, fingers towards +y) -> canvas."""
+        """A point given in paw coordinates (wrist at origin, fingers towards +y) -> canvas, on the paw as drawn at
+        frame f (a drawn view draws the arm from its own shoulder)."""
+        if self.drawn(f):
+            return self.body_to_world(f, self.view.hand_at(s, f, local))
         _, _, W, _ = self.arm_solve(s, f)
         k = self.T[f"hand.{s}.s"][f]
         q = rot_pt((local[0] * k, local[1] * k), self.hand_rot(s, f))

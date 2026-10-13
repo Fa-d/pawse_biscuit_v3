@@ -31,6 +31,7 @@ from functools import lru_cache
 
 import numpy as np
 
+from .geom import rot as rot_pt
 from .lottie import Anim, Layer, Path, gr, prop
 
 WARP_MAX = 45.0           # degrees the front drawing turns at most (Character.view_warp_max)
@@ -45,6 +46,10 @@ ARM_BANDS = ("paws_over", "arms_front", "arms", "arms_back")
 SIDE_FROM = 67.5          # degrees of turn from which a part is drawn from the side (mirrored for a negative turn)...
 BACK_FROM = 135.0         # ... and from which it is drawn from behind (the hybrid's snaps)
 SMEAR = {-1: 0.06, 0: 0.14, 1: 0.06}     # how much a part squashes in x on the frames around a snap
+VIEW_ANGLE = {"side": 90.0, "back": 180.0}  # the turn a drawn view shows (a point of the front drawing goes round this far)
+HEAD_PLACES = ("eye", "cheek", "ear_pivot", "nose", "mouth", "tuft_pivot", "crown", "top")   # places of the head a drawn view may give
+BODY_PLACES = ("shoulder", "hip")                                          # ... and of the body
+PLACE_REACH = 40.0        # px (in 3D, depth included): how far a drawn view's named place pulls the points around it
 HEAD_SET = ("brows", "eyes", "face", "head", "right ear", "left ear")
 WEAR_EVERY_VIEW = ("hat",)                 # worn things that look right from every side (the crown is in the same place)
 PROXY_METHODS = ("head_shapes", "tuft_shapes", "ear_shapes", "eye_shapes", "nose_shapes", "blush_shapes", "face_static",
@@ -387,6 +392,10 @@ class ViewState:
         self.head = head_surface(ch)
         self.body = body_surface(ch)
         self._pts = {}
+        self._places = {}
+        self._mapped = {}
+        self._legs = {}
+        self.raw = {s: np.zeros(self.n, dtype=bool) for s in "RL"}     # frames a pin solved an arm of a drawn view
         self.proxies = {}
 
     def _front_angles(self, deg, buckets):
@@ -514,6 +523,166 @@ class ViewState:
     def foot(self, s, f):
         return self.ground_point(self.ch.side(self.ch.foot, s), f)
 
+    # ---- where things are as drawn: the front drawing (turned) or a drawn view.  Every point is given in the front's
+    # coordinates (body space, hips space, root space, the head drawing): a drawn view hangs from the same nulls, and a
+    # mirrored side view ('side-') is drawn mirrored about CX under them, so its points come back mirrored.
+    def body_view(self, f):
+        """The drawn view the body shows at frame f ('side', 'side-', 'back'), or None while its front drawing shows."""
+        b = self.body_bucket[f]
+        return None if b == "front" else b
+
+    def head_view(self, f):
+        b = self.head_bucket[f]
+        return None if b == "front" else b
+
+    @staticmethod
+    def drawn_side(v, s):
+        """The side of a drawn view's rig that the channels of side s move: seen from the side the right side's channels
+        move the near arm, leg, eye and ear (the side view's 'L'), whichever way the mascot faces (ViewT)."""
+        return ("L" if s == "R" else "R") if v in ("side", "side-") else s
+
+    def mirrored(self, v, p):
+        """A point of a drawn view's own drawing -> the front's coordinates (the same point unless v is 'side-')."""
+        return (2.0 * self.ch.CX - float(p[0]), float(p[1])) if v == "side-" else (float(p[0]), float(p[1]))
+
+    def head_at(self, p, f):
+        """A point of the front head drawing (an eye, the mouth, the crown) where it is shown at frame f, in the head
+        drawing's coordinates: slid with the turn, or the same place on a drawn view."""
+        v = self.head_view(f)
+        return self.head_point(p, f) if v is None else self.drawn_point("head", v, p)
+
+    def body_at(self, p, f):
+        """A point of the front of the body (the collar, the belly) where it is shown at frame f, in body space."""
+        v = self.body_view(f)
+        return self.body_point(p, f) if v is None else self.drawn_point("body", v, p)
+
+    def shoulder_at(self, s, f):
+        """The shoulder of arm s where a drawn view draws it at frame f (body space)."""
+        v = self.body_view(f)
+        p = self.proxy(v)
+        return self.mirrored(v, p.side(p.shoulder, self.drawn_side(v, s)))
+
+    def hip_at(self, s, f):
+        """The hip joint of leg s where a drawn view draws it at frame f (hips space)."""
+        v = self.body_view(f)
+        p = self.proxy(v)
+        return self.mirrored(v, p.side(p.hip, self.drawn_side(v, s)))
+
+    def foot_at(self, s, f):
+        """The ankle of foot s where a drawn view draws it at frame f (root space).  Needs the clip's channels final."""
+        v = self.body_view(f)
+        p = self.proxy(v)
+        d = self.drawn_side(v, s)
+        if p.leg is None:
+            c, T = p.side(p.foot, d), p.T
+            return self.mirrored(v, (c[0] + p.dir(d) * T[f"foot.{d}.x"][f], c[1] + T[f"foot.{d}.y"][f]))
+        if v not in self._legs:
+            p.solve_legs()
+            self._legs[v] = p.legs
+        return self.mirrored(v, tuple(self._legs[v][d]["A"][f]))
+
+    def hand_at(self, s, f, local=(0.0, 0.0)):
+        """A point given in paw coordinates (wrist at the origin, fingers towards +y) of the paw of arm s as a drawn view
+        draws it at frame f (body space).  The paw of the mirrored side view is drawn mirrored, so is its local x."""
+        v = self.body_view(f)
+        p = self.proxy(v)
+        d = self.drawn_side(v, s)
+        _, _, W, ang = p.arm_solve(d, f)
+        k = float(p.T[f"hand.{d}.s"][f])
+        q = rot_pt((local[0] * k, local[1] * k), -ang * p.dir(d))
+        return self.mirrored(v, (W[0] + q[0], W[1] + q[1]))
+
+    def pin_arm(self, s, f, bp, bend=1.0, hand=None, w=1.0):
+        """Solve the arm of side s at frame f, as the drawn view draws it, towards bp (body space), blended in by w, into
+        the clip's channels: the IK runs from the view's own shoulder and reaches the way its arm reaches, the blend runs
+        on the arm as drawn (from the pose the motion shows there), and the frame is drawn as solved (ViewT.raw)."""
+        v = self.body_view(f)
+        p = self.proxy(v)
+        d = self.drawn_side(v, s)
+        new = p.ik_from(p.side(p.shoulder, d), self.mirrored(v, bp), d=p.dir(d), bend=bend, hand=hand)
+        old = [float(p.T[f"arm.{d}.{k}"][f]) for k in ("sh", "el", "wr", "len")]
+        out = []
+        for q, (o, n_) in enumerate(zip(old, new)):
+            if q < 3:
+                n_ = o + ((n_ - o + 180.0) % 360.0 - 180.0)        # blend the short way round
+            out.append(o + (n_ - o) * w)
+        T, turn = self.ch.T, float(p.view_options.get("arm_turn", 0.0))
+        self.raw[s][f] = True                                   # drawn as solved: not folded forward (ViewT)
+        for k, val in zip(("sh", "el", "wr", "len"), (out[0] - turn, out[1], out[2], out[3])):
+            T[f"arm.{s}.{k}"][f] = val
+
+    def drawn_point(self, part, v, p):
+        """A point of the front drawing of a part ('head': head drawing, 'body': body space) where drawn view v shows it,
+        in the front's coordinates.  It goes round the part's dome by the view's turn (VIEW_ANGLE), and the named places
+        the view gives (its eyes, nose, shoulders: HEAD_PLACES, BODY_PLACES) land exactly where it draws them, pulling
+        the points around them along.  A point of the far side lands where it would be, hidden behind the near one."""
+        if v == "side-":
+            q = self._drawn_map("side", part, self.mirrored(v, p))
+            return self.mirrored(v, q)
+        return self._drawn_map(v, part, p)
+
+    def _drawn_map(self, v, part, p):
+        key = (v, part, round(float(p[0]), 3), round(float(p[1]), 3))
+        got = self._mapped.get(key)
+        if got is not None:
+            return got
+        S = self.head if part == "head" else self.body
+        th = math.radians(VIEW_ANGLE[v])
+        F, R = self._place_pairs(v, part)
+        I = S.info([p])
+        z = float(I["z"][0])
+        x = S.cx + float(I["dx"][0]) * math.cos(th) + z * math.sin(th)
+        y = float(p[1])
+        if len(F):
+            # how far each place is on the surface (depth included: the crown is not near the tuft just in front of it),
+            # and the pull of the near ones (1/d^4, so a place only moves its own neighbourhood)
+            d2 = ((F - np.array([float(p[0]), y, z])) ** 2).sum(axis=1)
+            hit = np.where(d2 < 1e-12)[0]
+            if len(hit):
+                dx, dy = R[hit[0]]
+            else:
+                w = 1.0 / (d2 * d2)
+                tot = w.sum() + 1.0 / PLACE_REACH ** 4
+                dx, dy = (R * w[:, None]).sum(axis=0) / tot
+            x, y = x + float(dx), y + float(dy)
+        got = self._mapped[key] = (x, y)
+        return got
+
+    def _place_pairs(self, v, part):
+        """(front places with their depth on the part's dome (k, 3), how far each must move after the turn to land where
+        view v draws it (k, 2))."""
+        key = (v, part)
+        if key in self._places:
+            return self._places[key]
+        ch = self.ch
+        data = ch.view_data(v) or {}
+        F, D = [], []
+        for k in (HEAD_PLACES if part == "head" else BODY_PLACES):
+            if k not in data:
+                continue
+            base = getattr(ch, k, None)
+            if k == "cheek" and base is None:
+                base = {"R": (ch.eye["R"][0] + 38.0, ch.eye["R"][1] + 40.0)}
+            if base is None:
+                continue
+            val = data[k]
+            for s in (("R", "L") if isinstance(val, dict) else (None,)):
+                if s is not None and s not in val:
+                    continue
+                front = ch.side(base, s) if (s is not None and isinstance(base, dict)) else base
+                F.append(tuple(map(float, front)))
+                D.append(tuple(map(float, val[s] if s is not None else val)))
+        if not F:
+            got = self._places[key] = (np.zeros((0, 3)), np.zeros((0, 2)))
+            return got
+        F, D = np.array(F), np.array(D)
+        S = self.head if part == "head" else self.body
+        th = math.radians(VIEW_ANGLE[v])
+        I = S.info(F)
+        turned = np.column_stack([S.cx + I["dx"] * math.cos(th) + I["z"] * math.sin(th), F[:, 1]])
+        got = self._places[key] = (np.column_stack([F, I["z"]]), D - turned)
+        return got
+
     # ---- the baked layers
     def apply(self, out):
         """(band, Layer) pairs from Character.bake() -> the same with the turn applied."""
@@ -562,7 +731,12 @@ class ViewState:
         """The mascot as drawn from `view` ('side', 'side-', 'back'): a copy whose drawings and anchors are the view's
         (Character.view_data); 'side-' is the side view with left and right swapped, drawn under mirror nulls."""
         if view not in self.proxies:
-            self.proxies[view] = view_proxy(self.ch, view)
+            p = self.proxies[view] = view_proxy(self.ch, view, raw=self.raw)
+            if view == "side-":
+                # its legs are drawn under the root's mirror null, but must meet the hips where the front's hips carry
+                # them: the hips' move is not mirrored (a sway to the right stays a sway to the right)
+                m = lambda q, cx=self.ch.CX: (2.0 * cx - q[0], q[1])          # noqa: E731
+                p.hips_to_root = lambda f, q, h=self.ch.hips_to_root: m(h(f, m(q)))
         return self.proxies[view]
 
     def _drawn(self, res):
@@ -626,7 +800,7 @@ class ViewState:
         p = self.proxy(v)
         opt = p.view_options
         fx = getattr(self.ch, "_fx", None) or {}
-        swap = (lambda s: "L" if s == "R" else "R") if v == "side-" else (lambda s: s)
+        swap = lambda s: self.drawn_side(v, s)                  # noqa: E731  (the same swap both ways)
         out = []
         hips, root = "hips", "root"
         if v == "side-":
@@ -634,24 +808,39 @@ class ViewState:
             hips, root = f"hips mirror [{v}]", f"root mirror [{v}]"
         if p.leg is not None:
             p.solve_legs()
+            self._legs[v] = p.legs
         body = p.body_layer()
         body.nm, body.parent = f"body [{v}]", hips
+        if v == "side-":
+            # drawn mirrored under the hips' mirror null, but moved as the front body moves (the head rides the front's
+            # neck): its transform is the front one seen through the mirror, so a lean to the right stays to the right
+            T, pv, cx = p.T, p.pelvis, self.ch.CX
+            body.a = (2.0 * cx - pv[0], pv[1])
+            body.p = p.A(lambda f: (2.0 * cx - pv[0] - T["body.x"][f], pv[1] + T["body.y"][f]))
+            body.r = p.A(lambda f: 0.0 - float(T["body.rot"][f]), tol=0.12)
         out.append(("body", body))
         behind = opt.get("arms_behind", "far")
         near = p.view_sides[0] if p.view_sides else None
         for s in "RL":
-            held_u, held_o = fx.get(f"hand.{swap(s)}", []), fx.get(f"hand.{swap(s)}.over", [])
+            src = swap(s)
+            held_u, held_o = fx.get(f"hand.{src}", []), fx.get(f"hand.{src}.over", [])
+            # a held thing turns with the paw as it does from the front (upright in the pose it was made for), whatever
+            # the drawn arm does: the paw's turn here less its turn there
+            here = sum(np.asarray(p.T[f"arm.{s}.{k}"], dtype=float) for k in ("sh", "el", "wr"))
+            there = sum(np.asarray(self.ch.T[f"arm.{src}.{k}"], dtype=float) for k in ("sh", "el", "wr"))
+            comp = p.dir(s) * here - self.ch.dir(src) * there
+            held = lambda items, comp=comp: _upright(copy.deepcopy(items), comp)       # noqa: E731
             back = behind == "both" or (behind == "far" and s != near)
             side_nm = "right" if s == "R" else "left"
             if back:
-                L = p.arm_layer(s, False, held_under=copy.deepcopy(held_u), held_over=copy.deepcopy(held_o), name=f"{side_nm} arm [{v}]")
+                L = p.arm_layer(s, False, held_under=held(held_u), held_over=held(held_o), name=f"{side_nm} arm [{v}]")
                 L.o = 100
                 out.append(("arms_back", L))
                 continue
             fr = np.asarray(p.T[f"arm.{s}.front"]) > 0.5
             for front, band in ((True, "arms_front"), (False, "arms")):
                 if (fr == front).any():
-                    L = p.arm_layer(s, front, held_under=copy.deepcopy(held_u), held_over=copy.deepcopy(held_o))
+                    L = p.arm_layer(s, front, held_under=held(held_u), held_over=held(held_o))
                     L.nm = f"{L.nm} [{v}]"
                     out.append((band, L))
         for L in out:
@@ -784,6 +973,20 @@ class ViewState:
 TAIL = dict(angle=60.0, depth=0.8, min=0.5, flip=0.85)
 
 
+def _upright(items, comp):
+    """Things held in a drawn view's paw, each turned back by comp (degrees per frame) about where it is held."""
+    comp = np.asarray(comp, dtype=float)
+    if not len(items) or float(np.abs(comp).max()) < 1e-6:
+        return items
+    out = []
+    for it in items:
+        piv = (0.0, 0.0)
+        if it.get("ty") == "gr" and not animated(it["it"][-1]["p"]):
+            piv = tuple(float(q) for q in static_value(it["it"][-1]["p"])[:2])
+        out.append(gr(f"{it.get('nm', 'held')} upright", [it], a=piv, p=piv, r=Anim([float(c) for c in comp], tol=0.4)))
+    return out
+
+
 def _times(o, mask, n):
     """Opacity o (constant or Anim) shown only on the frames where mask is True (hold keys)."""
     os_ = o.s if isinstance(o, Anim) else [float(o)] * n
@@ -801,16 +1004,24 @@ def _mask(o, mask, n):
 
 
 class ViewT(dict):
-    """A clip's channels as a drawn view reads them: with left and right swapped (the mirrored side view draws its
-    near, left side from the right side's channels, so the paw nearer the viewer is still the one that moves) and with
-    offsets added (arm_turn: arms hang a little more forward... or back, seen from the side)."""
+    """A clip's channels as a drawn view reads them.
 
-    def __init__(self, T, swap=False, add=None):
+    swap : left and right swapped.  Seen from the side the arm, leg, eye and ear nearer the viewer move with the right
+           side's channels, whichever way the mascot faces, so the paw a motion acts with (most act with the right one)
+           is the paw in sight; the mirrored side view ('side-') is the side view drawn mirrored.
+    turn : degrees added to both arms at the shoulder (Character.view_data's arm_turn).
+    fold : seen from the side, an arm reaching in across the body (to the mouth, round a friend, onto the belly) reaches
+           forward: every bone's heading is folded onto the front half (h -> |h|), so it keeps how high it reaches."""
+
+    ARM = (".sh", ".el", ".wr")
+
+    def __init__(self, T, swap=False, turn=0.0, fold=False, raw=None):
         super().__init__()
         self.T = T
         self.sw = swap
-        self.add = {k: v for k, v in (add or {}).items() if v}
-        self._got = {}
+        self.turn = float(turn)
+        self.fold = bool(fold)
+        self.raw = raw if raw is not None else {}         # channel side -> frames a pin solved as drawn (not folded)
 
     def swap(self, k):
         if not self.sw:
@@ -821,30 +1032,48 @@ class ViewT(dict):
             return k.replace(".L.", ".R.")
         return k
 
+    def arm(self, s):
+        """(shoulder, elbow, wrist) angles of the drawn arm s, per frame (read through every time: pins change the
+        channels after a view is made)."""
+        src = self.swap(f"arm.{s}.")
+        sh = np.asarray(self.T[src + "sh"], dtype=float) + self.turn
+        el = np.asarray(self.T[src + "el"], dtype=float)
+        wr = np.asarray(self.T[src + "wr"], dtype=float)
+        if not self.fold:
+            return sh, el, wr
+        a1 = np.abs(norm_deg(sh))
+        a2 = np.abs(norm_deg(sh + el))
+        a3 = np.abs(norm_deg(sh + el + wr))
+        raw = self.raw.get(src[4])
+        if raw is not None and raw.any():                # a pin's frames: the arm as solved, wherever it reaches
+            a1 = np.where(raw, sh, a1)
+            a2 = np.where(raw, sh + el, a2)
+            a3 = np.where(raw, sh + el + wr, a3)
+        return a1, a2 - a1, a3 - a2
+
     def __getitem__(self, k):
-        if k in self.add:
-            if k not in self._got:
-                self._got[k] = np.asarray(self.T[self.swap(k)], dtype=float) + self.add[k]
-            return self._got[k]
+        if (self.turn or self.fold) and k.startswith("arm.") and k[-3:] in self.ARM and k.count(".") == 2:
+            return self.arm(k[4])[self.ARM.index(k[-3:])]
         return self.T[self.swap(k)]
 
     def __contains__(self, k):
         return self.swap(k) in self.T
 
     def get(self, k, d=None):
-        return self.T.get(self.swap(k), d)
+        return self[k] if k in self else d
 
     def keys(self):
         return self.T.keys()
 
 
-def view_proxy(ch, view):
-    """A copy of the character that draws itself as seen from `view` (see ViewState.proxy)."""
+def view_proxy(ch, view, raw=None):
+    """A copy of the character that draws itself as seen from `view` (see ViewState.proxy).  raw: ViewT's raw."""
     data = ch.view_data("side" if view.startswith("side") else view)
     if data is None:
         raise ValueError(f"{ch.name} has no {view} view")
     p = copy.copy(ch)
     p.view = None
+    p.view_name = "side" if view.startswith("side") else view
     opts = {}
     for k, v in data.items():
         if k in VIEW_OPTIONS:
@@ -854,14 +1083,15 @@ def view_proxy(ch, view):
         else:
             setattr(p, k, v)
     p.view_options = opts
+    side = view.startswith("side")
     turn = float(opts.get("arm_turn", 0.0))
-    if (view == "side-" or turn) and getattr(ch, "T", None) is not None:      # (no clip yet: the drawings alone)
-        p.T = ViewT(ch.T, swap=view == "side-", add={"arm.R.sh": turn, "arm.L.sh": turn})
+    if (side or turn) and getattr(ch, "T", None) is not None:      # (no clip yet: the drawings alone)
+        p.T = ViewT(ch.T, swap=side, turn=turn, fold=side, raw=raw)
     return p
 
 
-VIEW_ANCHORS = ("eye", "eye_size", "lid", "brow", "mouth", "nose", "cheek", "ear_pivot", "tuft_pivot", "shoulder", "hip", "foot", "tail",
-                "dirs", "view_sides")
+VIEW_ANCHORS = ("eye", "eye_size", "lid", "brow", "mouth", "nose", "cheek", "ear_pivot", "tuft_pivot", "crown", "top", "shoulder", "hip",
+                "foot", "tail", "dirs", "view_sides")
 BOTH_SIDES = ("ear_pivot", "shoulder", "hip", "foot")
 
 
