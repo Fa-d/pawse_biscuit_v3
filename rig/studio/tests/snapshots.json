@@ -1,0 +1,1521 @@
+{
+ "items": {
+  "clip:bao:idle": {
+   "bytes": 48163,
+   "sha256": "bdf1d8661758857b9f91043eecf873dc02cbb5ab9351dd3f4a9c87abbff6f6fc"
+  },
+  "clip:bao:sleepy": {
+   "bytes": 44896,
+   "sha256": "40ce793c38311952d3b671e263dece7a15ca4e4e40f9bc76320bd1f93fe05085"
+  },
+  "clip:bao:wave": {
+   "bytes": 53580,
+   "sha256": "6b1cd451f5fb037d7c402d8b968e79399980854aad8e1912cdebd6c43d36104e"
+  },
+  "clip:biscuit:badge_unlock": {
+   "bytes": 93595,
+   "sha256": "bdceade3faca569158e36cbd9615162879c60b31c2f1a7f4ca1d5a94f756f735"
+  },
+  "clip:biscuit:big_celebration": {
+   "bytes": 139467,
+   "sha256": "54835fb0dec414b447882a02e87e0be6fe104c97a5acb605df13ec24903d71cc"
+  },
+  "clip:biscuit:breathe": {
+   "bytes": 50136,
+   "sha256": "63afa989fefcd236ccb43b87773189e650a00c53f3131b8c13272795121a10d1"
+  },
+  "clip:biscuit:carry_cloud": {
+   "bytes": 78973,
+   "sha256": "02be8949740ac0d5a0ddbe1a76ba6df95743bf7a3674d2c6f25a4be25cda8194"
+  },
+  "clip:biscuit:cheer": {
+   "bytes": 98889,
+   "sha256": "d5ca6938f281471e3bd5b445abaedda1b66dc4c91efba98223065f8ad9872d98"
+  },
+  "clip:biscuit:concerned": {
+   "bytes": 60671,
+   "sha256": "f2f3a982e5aad858fad9d36b81c3309c9c51e254b73a0dce03613fa531e59ae6"
+  },
+  "clip:biscuit:deep_sleep": {
+   "bytes": 55076,
+   "sha256": "37c25e8df410ed7f145e95fc037240a68988576369526b01d4769338f044691a"
+  },
+  "clip:biscuit:gift": {
+   "bytes": 109021,
+   "sha256": "66303ddd149b7af63f3892cd131d5629db63856fa24a6d822cea908b13c27ea4"
+  },
+  "clip:biscuit:happy": {
+   "bytes": 95128,
+   "sha256": "d12ea67f764b176e97b2c51731b0ba702a07401794f3c2f48e1cfc2191552e11"
+  },
+  "clip:biscuit:hop_in": {
+   "bytes": 116061,
+   "sha256": "d24b2e7f6b521fb37532c483f214aa8b3906eef0c0348cfccdebbd9320fa4709"
+  },
+  "clip:biscuit:idle": {
+   "bytes": 61253,
+   "sha256": "c98458c997e80ab265a50d13001b9cc3df96f571b2924fe5558c5d9e4845fbdd"
+  },
+  "clip:biscuit:idle_alt_butterfly": {
+   "bytes": 121028,
+   "sha256": "a2443089c674dd03f3a4e8ff4f73c7d8c461786eef7c5986e0c2b0ff2cf52520"
+  },
+  "clip:biscuit:idle_alt_peekaboo": {
+   "bytes": 102285,
+   "sha256": "7024598253cda84d4d78cb0c3106013f4df5e4740c2db0dfb5cfa11fb3f30620"
+  },
+  "clip:biscuit:idle_alt_sneeze": {
+   "bytes": 125969,
+   "sha256": "51f137ad4aede38dc6f74312317124139e3afe5432e964d1ddc49bb17626c026"
+  },
+  "clip:biscuit:meditate": {
+   "bytes": 70756,
+   "sha256": "fdd7d8db5d9eecdd3296d8dad165fd378dc9cfafe039a07670221e19a686f4ea"
+  },
+  "clip:biscuit:peek_phone": {
+   "bytes": 70841,
+   "sha256": "4b3aa17c1ab7d1fa7e0d26d7bb8b69e6907ebe140c86337add432b3b56dc126d"
+  },
+  "clip:biscuit:pop_up": {
+   "bytes": 91446,
+   "sha256": "62713712b225bef13877b37a79ecaf2d3160b575efea140de0249c6a301fbc32"
+  },
+  "clip:biscuit:read_chart": {
+   "bytes": 68086,
+   "sha256": "67e6d2f872250e35c93849e942ddc5c9e054361f35f660c8ecdf3261376a3731"
+  },
+  "clip:biscuit:ring_bell": {
+   "bytes": 70267,
+   "sha256": "494df4f7ccfea0d761c0e795653f9a03fadee38f5ea60442459643fc92b69b13"
+  },
+  "clip:biscuit:sleepy": {
+   "bytes": 56976,
+   "sha256": "d2dbf79c13f1df3657063f5b77a033380013bd564bb380ffc89bd8baf3216184"
+  },
+  "clip:biscuit:sleepy_alt_bubble": {
+   "bytes": 65335,
+   "sha256": "8b2bb5bcead4f6b263034f8516b742654d7399b30581050ce962a85cdb18f921"
+  },
+  "clip:biscuit:thinking": {
+   "bytes": 70392,
+   "sha256": "41400d635484ddf939e975d293fd5595cfc801cc6a5f9eb287bd411f5eecb3d4"
+  },
+  "clip:biscuit:wave": {
+   "bytes": 67398,
+   "sha256": "c2d944aac4a7900b5e98391c43cd6090f3bf923a66fc2986c980e21d072e1a4d"
+  },
+  "clip:bruno:idle": {
+   "bytes": 47633,
+   "sha256": "74204a4193ace9f7ca4728b8d6278c73fa5f3a67d2b447a1859d5b91f3c1f117"
+  },
+  "clip:bruno:sleepy": {
+   "bytes": 44366,
+   "sha256": "a5253241d5d6c1db399622d0793b1ef625b77a653b4748513d890d5f631bac04"
+  },
+  "clip:bruno:wave": {
+   "bytes": 53050,
+   "sha256": "1146442926a67f508278ce76a27a37603a4de3510057990cd34332d8559064a9"
+  },
+  "clip:clover:idle": {
+   "bytes": 48768,
+   "sha256": "6c3e48e690c61fff22a201baaa22a71b2a062d00bb2c226392f1ead63248f17d"
+  },
+  "clip:clover:sleepy": {
+   "bytes": 45983,
+   "sha256": "63016e594c61987f5332b5fc2bb6482875a17afbaf6e77021710d192dbe2f971"
+  },
+  "clip:clover:wave": {
+   "bytes": 54264,
+   "sha256": "bc3362a291f0ba5c2e2367a6398bdaa250fb8bb884f9bd7bb472c6ee7f122340"
+  },
+  "clip:fern:idle": {
+   "bytes": 41871,
+   "sha256": "b3ed7474e6961687439cb7b5bc048c0588ed69b2dda5e5fcf047ceb1ee251364"
+  },
+  "clip:fern:sleepy": {
+   "bytes": 39774,
+   "sha256": "11dd45cb83c867ac0b63dc02617e929636ef93d97a57c11c2b46e76a04bca72f"
+  },
+  "clip:fern:wave": {
+   "bytes": 47212,
+   "sha256": "c4e8f16a18effff003b0d395c7b2dc9f0b99782e07696edc435034ad691a4dcc"
+  },
+  "clip:kiko:idle": {
+   "bytes": 48812,
+   "sha256": "c4f95c22e64e346b44281544478ced2e3be9c06040be32f4b179c58acb4ab514"
+  },
+  "clip:kiko:sleepy": {
+   "bytes": 45698,
+   "sha256": "7fa713a76a9d8b2905f9e488e4a6aa967171cd145d8651914ae27a46c686f449"
+  },
+  "clip:kiko:wave": {
+   "bytes": 54231,
+   "sha256": "7f7b27d9a3f8396b35a6db4c732536397747db0ffbd0d6a6fcbd003d2045d6b4"
+  },
+  "clip:leo:idle": {
+   "bytes": 55643,
+   "sha256": "b0f7f99d96bd6a06da6615d694bd766d912924dad53a81437500daa4e5034b7d"
+  },
+  "clip:leo:sleepy": {
+   "bytes": 51631,
+   "sha256": "8ce2fad82a459f0364e9da7c35a72ad86eaba4aa4aa0cb52eacdd363c3d56bfa"
+  },
+  "clip:leo:wave": {
+   "bytes": 61404,
+   "sha256": "1dc31dd757f9cfb491511e76a16a8fca6e7995824a29eae43d5c916934b9e5e3"
+  },
+  "clip:mochi:idle": {
+   "bytes": 60223,
+   "sha256": "f710d22fe4803661c4a46948e90539a039895a3073483391fe43ce5c245b7901"
+  },
+  "clip:mochi:sleepy": {
+   "bytes": 55916,
+   "sha256": "5d6686ebc68bfa0cc1ec827666bab8162a97e88f3ddd2a4e837fc463756291f0"
+  },
+  "clip:mochi:wave": {
+   "bytes": 66388,
+   "sha256": "b6ec4a62e62f144141db9a6b7d3be422c3d10e284c46cde13548b05d16319b98"
+  },
+  "clip:nib:idle": {
+   "bytes": 56818,
+   "sha256": "31abe186aa0cdadbc74ca00a421d1d0b8c5695ca61dd15b4154535dd3de969bd"
+  },
+  "clip:nib:sleepy": {
+   "bytes": 52449,
+   "sha256": "40ec653944782ceb5fbb7ff7aa5d93f42952dba85f61f9fbdf48e9d608b44f32"
+  },
+  "clip:nib:wave": {
+   "bytes": 62976,
+   "sha256": "fdbb03243b9987616eb8a7c94cd581f309fa1dacc333bc6212ae5ee98b800a9d"
+  },
+  "clip:pebble:idle": {
+   "bytes": 46508,
+   "sha256": "7255a2b92a308b7c4f7ea5297f5889148bc3061d433492e2d382e97b766bec2a"
+  },
+  "clip:pebble:sleepy": {
+   "bytes": 43392,
+   "sha256": "e3ec4d959537dfe6b762bf8a8ec54ff4c49166685f1e8f16dabb64df7f598a01"
+  },
+  "clip:pebble:wave": {
+   "bytes": 51844,
+   "sha256": "60000d0475846a2e9dd5e55da1fecf76167d4745ea72bf9e68f00e0467d6aab8"
+  },
+  "clip:pip:idle": {
+   "bytes": 54918,
+   "sha256": "2488066fdc98e7980ecf811b47707cd17e63b7a1a5a351f46078c13a4049b9b1"
+  },
+  "clip:pip:sleepy": {
+   "bytes": 50841,
+   "sha256": "622ef262c699a1e60374eb7e0b31e58a7521581ab660bebd6593a473064c365a"
+  },
+  "clip:pip:wave": {
+   "bytes": 59756,
+   "sha256": "54f13e35940d5e23fc258104010b008edebca4c851ed37b33efe551fb22dc4ce"
+  },
+  "clip:rocco:idle": {
+   "bytes": 60453,
+   "sha256": "b211d1582bcf563e91ab8b829a66d3051b3e99d4a6ae61aad41ea2f2fe86b09f"
+  },
+  "clip:rocco:sleepy": {
+   "bytes": 56176,
+   "sha256": "4e767726b216654d1373ed672f02753da62773b8ef5932426bda95d7df2cb34a"
+  },
+  "clip:rocco:wave": {
+   "bytes": 66598,
+   "sha256": "29b8ba97941e89bed9ef46e043aaeef9471cff6762e2129e82760cc499d11cd8"
+  },
+  "clip:tora:idle": {
+   "bytes": 59867,
+   "sha256": "0919aec821f4430bfeacbc60238877dc218f57f4f4ac2dd48b4ecd521cce3443"
+  },
+  "clip:tora:sleepy": {
+   "bytes": 55644,
+   "sha256": "521ca3c89eb6cebcc2fec38d83d6fde9920a2ff55fa83cb4c94549b7c0f1cd0b"
+  },
+  "clip:tora:wave": {
+   "bytes": 66002,
+   "sha256": "40dcd367bd75ac32a40f81be1401f8b3bf6b5f87f30905b021c08ea4a6945680"
+  },
+  "clip:truffle:idle": {
+   "bytes": 52407,
+   "sha256": "1eb00994037311d228b4409f85c808164b1e1facfd64e161620f1023f6bb12aa"
+  },
+  "clip:truffle:sleepy": {
+   "bytes": 49294,
+   "sha256": "35f16adbf401fd2c23eb8f43a8e5bcb037e7521593aa65c1d850767ab8588838"
+  },
+  "clip:truffle:wave": {
+   "bytes": 58781,
+   "sha256": "3568f397f9b89616c288b1121042f7f1b639c28f79813853a23e8d83688c3931"
+  },
+  "effect-file:check_burst": {
+   "bytes": 13036,
+   "sha256": "6133b82f9202ba7addcc1791fc9a82bba6cfe9e8bddf058031483a8ad8837aee"
+  },
+  "effect-file:flame": {
+   "bytes": 14352,
+   "sha256": "0faf1fa535f989fd6105ff24b44a571d84ee1a3cc223e7c3ae74a7c2ea770ad5"
+  },
+  "effect-file:sparkle": {
+   "bytes": 3427,
+   "sha256": "02f4c4f763d3f6da69e9512b8af7a67a08dda2657148e8d13604ed562811cce7"
+  },
+  "effect-file:star_burst": {
+   "bytes": 12832,
+   "sha256": "9a79a03ce0b62912fd8e113af1f460f37d4a1c2f8617b1245a3d92309c58fdf7"
+  },
+  "sticker:base:bao:sit": {
+   "bytes": 3599,
+   "sha256": "7560ae3fe32bed2d763697863a40915593d0c8a1e0c10a3f04c990ec1409eee2"
+  },
+  "sticker:base:bao:wave": {
+   "bytes": 4223,
+   "sha256": "37746e19300ba3c0dc24b1c4a4ed076b5482171dea11394274e157fa5323dda2"
+  },
+  "sticker:base:biscuit:sit": {
+   "bytes": 5023,
+   "sha256": "2631a572e00331d686c1929db3030f92f5d63d056ce2abb3fa90540a2ba4b5e9"
+  },
+  "sticker:base:biscuit:wave": {
+   "bytes": 5699,
+   "sha256": "23bc2eec439fb0947e5eda3fbc7f9631c2deecfb9b8d42c36ab1e9ece0c4e55d"
+  },
+  "sticker:base:bruno:sit": {
+   "bytes": 3485,
+   "sha256": "7a9c768416e5527152c3845af9394d39c9a581950da3bf51e3607ad5357b937f"
+  },
+  "sticker:base:bruno:wave": {
+   "bytes": 4106,
+   "sha256": "8cc4190cf64317b28d8d45cbcd370fcb3f7328798379cb0a9b9550530bb875d7"
+  },
+  "sticker:base:clover:sit": {
+   "bytes": 3878,
+   "sha256": "992912ba75214cb02a23e094b47172d894ce39b6e9cc6d73748666133ef7c3ff"
+  },
+  "sticker:base:clover:wave": {
+   "bytes": 4522,
+   "sha256": "c92447556a46fb6a2a6803c5707490a8cf696a4e90dbb857f5a39a1ddd7c41f0"
+  },
+  "sticker:base:fern:sit": {
+   "bytes": 2981,
+   "sha256": "b8e524a86c38058fceb6f3f37c8d5ec04106f38781ce5556b3c9b2786076588b"
+  },
+  "sticker:base:fern:wave": {
+   "bytes": 3582,
+   "sha256": "aff78296908f4f02b8962438ab8a1faeecc3a0e0f2d6b7d26a1b9760618883fa"
+  },
+  "sticker:base:kiko:sit": {
+   "bytes": 3576,
+   "sha256": "6259f44854c4bad6a6a8db3cb961d13af984f9d25149525e450a70c874e7a6d4"
+  },
+  "sticker:base:kiko:wave": {
+   "bytes": 4197,
+   "sha256": "c7317e023de3a403ccec8ac721fa114ba6b36779058b251a80cb78e9187a7f12"
+  },
+  "sticker:base:leo:sit": {
+   "bytes": 4058,
+   "sha256": "7f333cf78691310c99e6bdcd9512c44cfb9a0c949874b7545c1ca1e2fa37822b"
+  },
+  "sticker:base:leo:wave": {
+   "bytes": 4718,
+   "sha256": "28acb25fa54f0c21d8fdba3a8aa71c925fa2891cdf5e6f20d967e8bd6d81aaeb"
+  },
+  "sticker:base:mochi:sit": {
+   "bytes": 4543,
+   "sha256": "2084ae2391c98838460f6c808cad285d963962bebbc860fb9a71bd7bdbebb58b"
+  },
+  "sticker:base:mochi:wave": {
+   "bytes": 5198,
+   "sha256": "bbf24d8c686996c2d5efd9bd500e566949995834157b703e134e96716dd346cf"
+  },
+  "sticker:base:nib:sit": {
+   "bytes": 3938,
+   "sha256": "078c4f6c0624698286ff826024d49037dbcea374efefb87eccb38f708113e0aa"
+  },
+  "sticker:base:nib:wave": {
+   "bytes": 4596,
+   "sha256": "fd17a83de1e862e33228c899999a4eedfc781f2495fa501b7aad57c5ed121f8a"
+  },
+  "sticker:base:pebble:sit": {
+   "bytes": 3639,
+   "sha256": "2f45dfe199b9a1e821465507149951305d282fcba5eb8d5e346a74fe8a22f1d0"
+  },
+  "sticker:base:pebble:wave": {
+   "bytes": 4271,
+   "sha256": "d22b79e29cff64a7212c791e6b0918e33618aa902eaf945d9eadfa95564d33cc"
+  },
+  "sticker:base:pip:sit": {
+   "bytes": 4216,
+   "sha256": "83ab8fe560f7e2e30b711fbb863578362c6cfab6cb90fe9335158aa3c16c8eab"
+  },
+  "sticker:base:pip:wave": {
+   "bytes": 4885,
+   "sha256": "6c5ba0571e5c9ded4f52ff8ab3954d328e21e5b5127ff329fb5da0b804ad0182"
+  },
+  "sticker:base:rocco:sit": {
+   "bytes": 4701,
+   "sha256": "853f24974e06adea1776d34b09a2482908e73c32e724392626b1f50d57401c9c"
+  },
+  "sticker:base:rocco:wave": {
+   "bytes": 5361,
+   "sha256": "f9be5c1bd1f78c2768bb84df5b98a39bd24753465e5c0180300ada569be28156"
+  },
+  "sticker:base:tora:sit": {
+   "bytes": 4397,
+   "sha256": "d29ed15f6fc05df23f28f04b2f215b8a7a8983470ebc6cc8f584d10c57789f9d"
+  },
+  "sticker:base:tora:wave": {
+   "bytes": 5059,
+   "sha256": "120896ded97c122f87bf2852db0dc15b6edcd5ee73c62fdcdf6317c5ae608f39"
+  },
+  "sticker:base:truffle:sit": {
+   "bytes": 4033,
+   "sha256": "78c6ad450223bc9c6b58ba26edd05733d470f97f30aabfcda3efb27be8c680d6"
+  },
+  "sticker:base:truffle:wave": {
+   "bytes": 4703,
+   "sha256": "39b03db42799b3cf7f34035b8b57445c7285480f65abbf04b927f8a9cf0f372e"
+  },
+  "sticker:busy:monday": {
+   "bytes": 10460,
+   "sha256": "71a99e10f092185fe40c4d4e45552e9d82083a23374e9206e589454bba2778c7"
+  },
+  "sticker:caption:bubble:bottom": {
+   "bytes": 10192,
+   "sha256": "380df4b7fa25780550e2b0ad3480bdbcf375f0d094b17bb0bf116dfbe727ca21"
+  },
+  "sticker:caption:bubble:top": {
+   "bytes": 10182,
+   "sha256": "8b847f89fb92684ea6fbe1589c2bbaa7dca65a04cb02418fb2dc00ba5a0a9099"
+  },
+  "sticker:caption:outline:bottom": {
+   "bytes": 10408,
+   "sha256": "189c87943ccbf9421d76aeb217baddc235373945b05987529c5b6c1b561c8f2a"
+  },
+  "sticker:caption:outline:top": {
+   "bytes": 10336,
+   "sha256": "afaed6c69caf49b7e0a3ffe431ca0d07b3e80be026ffe465d2a5d89dd0af8ba1"
+  },
+  "sticker:colour:black-dog": {
+   "bytes": 7337,
+   "sha256": "bf543774d3a111e962112ba248afc166cf45e83564d20074fd0310d1d9fd5016"
+  },
+  "sticker:colour:purple-cat": {
+   "bytes": 4773,
+   "sha256": "f3e085c122e09d12e5e9a61f9380f24b196bf5c7828151b6429b1278d5013e63"
+  },
+  "sticker:effect:anger": {
+   "bytes": 5046,
+   "sha256": "dd8712937e9ad34ad5de2b3bdb4461f5f66fdde6290d53fb2aa41ebedec9a23c"
+  },
+  "sticker:effect:aura": {
+   "bytes": 3670,
+   "sha256": "4e3f47b907e9f84964c8411991e48528ae5871a16e48ff1b3e4aa1819b5875fd"
+  },
+  "sticker:effect:bats": {
+   "bytes": 4754,
+   "sha256": "520c511b25e0b509fbbdec3724f22513b023398723240f3bc93f709e8b686bcf"
+  },
+  "sticker:effect:boom": {
+   "bytes": 3596,
+   "sha256": "aa136c9fdc2c98444d026b7a38bd6b971e986e6faf34e056a928456506842442"
+  },
+  "sticker:effect:broken_heart": {
+   "bytes": 3774,
+   "sha256": "418d96a9e3d64cc73a31678335f5d88eb16c175f9add3b9a34b9be887418becc"
+  },
+  "sticker:effect:bubbles": {
+   "bytes": 5358,
+   "sha256": "77906b86f601654b97eade73a83eb2b5e807f52e399b41665dce8a63cfa19c44"
+  },
+  "sticker:effect:butterflies": {
+   "bytes": 4502,
+   "sha256": "ebf7c575e40e620a4b0c034757d452b6650c1543c78aca1cac0049130c21d1b4"
+  },
+  "sticker:effect:check": {
+   "bytes": 3692,
+   "sha256": "3657899c1aed85b91bc79cf9c6caa2cd3cc4647d86dbb247cc8717593a200500"
+  },
+  "sticker:effect:clock": {
+   "bytes": 4029,
+   "sha256": "1224d64e5b8ebbe1296e696c916468ed048b806e043a6afa856ed268a3608647"
+  },
+  "sticker:effect:cold_breath": {
+   "bytes": 4206,
+   "sha256": "1eff6eaa186cecc4102db11ef23bd4a342a28554b2ea20fc882a02510662ea93"
+  },
+  "sticker:effect:confetti": {
+   "bytes": 6603,
+   "sha256": "6a6044dcb2a2fc2e0c5460d885781124608d20636b50c4050eb5488cb1c95ea2"
+  },
+  "sticker:effect:cross_mark": {
+   "bytes": 4481,
+   "sha256": "a3207c23f751c365736a9b671803bbaeffb93e153fb35fee62fad78ed792c4c1"
+  },
+  "sticker:effect:dizzy_stars": {
+   "bytes": 8885,
+   "sha256": "2cf68012ee978758311c90b8212c8fc742699525580444d5b566b2ac2c6babbf"
+  },
+  "sticker:effect:exclaim": {
+   "bytes": 3561,
+   "sha256": "354991f5c30b460d13a88db2c6d572c0db8e7763ec7c74104570f727cfa081ea"
+  },
+  "sticker:effect:fireworks": {
+   "bytes": 6383,
+   "sha256": "2767361c698d08183bfb90187610b1387e8e309530b144dc0621870d2a22d74c"
+  },
+  "sticker:effect:flies": {
+   "bytes": 6392,
+   "sha256": "595d55c5da31ddccf76e3045ad7819183796ebe79fb85b8846ea7f24be5ab850"
+  },
+  "sticker:effect:ghost": {
+   "bytes": 4366,
+   "sha256": "21f17185eeff27e24a815e544922627cc325257452ee7f4f1dea56ece9b030b5"
+  },
+  "sticker:effect:hearts": {
+   "bytes": 4739,
+   "sha256": "e3897470e4fd6de7c623c5c76bf22467f5deb3403507aa00060cccb16bd69e1a"
+  },
+  "sticker:effect:idea": {
+   "bytes": 4511,
+   "sha256": "e383c1476a0fce350a9a25df07f1ce2aa9f202a0b1b3393edd311cb92306e205"
+  },
+  "sticker:effect:leaves": {
+   "bytes": 6189,
+   "sha256": "59d7801287f9c83b91c4153983084ef272029eba652a626e44d3bec04a281dfb"
+  },
+  "sticker:effect:lightning": {
+   "bytes": 3591,
+   "sha256": "fe166b1c66ac74cb6f1717c2681464464dcacc8324dc99cf02366486f989cd35"
+  },
+  "sticker:effect:money_rain": {
+   "bytes": 6993,
+   "sha256": "35ea4d06f1bd28cbe09edb1e9a31e1b2e56026b67942ef168eabdb1bf1700816"
+  },
+  "sticker:effect:night_sky": {
+   "bytes": 4608,
+   "sha256": "4f427d3bb53aea25fa66f360c526e4aacef6f7421e54e9ba8fd3c30312e11376"
+  },
+  "sticker:effect:notes": {
+   "bytes": 3947,
+   "sha256": "a95457a816c0fd7ca1654ec012387f826b9daa28101b68249ea7918a071b136f"
+  },
+  "sticker:effect:orbs": {
+   "bytes": 5685,
+   "sha256": "a2ced8c5bf495f8464ef4583ca61c8a5de9254cd6319529c4858c21240f5c1c9"
+  },
+  "sticker:effect:panic_sweat": {
+   "bytes": 3322,
+   "sha256": "05ca8e2b72e63928db1627c8e8234b1b942ebb3fcf14c4711e5e1c40eb014fe2"
+  },
+  "sticker:effect:petals": {
+   "bytes": 6660,
+   "sha256": "21c2599f4bf9b81ab46133c65229dbfbbd964b223bad4ab1cb109875f2d3a7ab"
+  },
+  "sticker:effect:question": {
+   "bytes": 4984,
+   "sha256": "670fded3858e38db8e5e69bfab4a96663ad430380dd0ff4d860b4984e3c603a4"
+  },
+  "sticker:effect:rain": {
+   "bytes": 4750,
+   "sha256": "2df908ba58b45469920f0f79ca28311f8e644f0a13c1cd2f7d04ad95d5341586"
+  },
+  "sticker:effect:rainbow": {
+   "bytes": 4790,
+   "sha256": "4b92c717dbed8b2e2f1f4983507a47b2ac6bac1938219a4570d5a8264fa38f4f"
+  },
+  "sticker:effect:shock_lines": {
+   "bytes": 5089,
+   "sha256": "ecb0688f19f8f62a2b838499e8080eef0f89f6923b0d30a35821f8e576df9d4a"
+  },
+  "sticker:effect:snore_bubble": {
+   "bytes": 4381,
+   "sha256": "f40b1c181e6e71d9ba571815ebe9832722ff8df135bba7f5b36173f7be2b55ae"
+  },
+  "sticker:effect:snow": {
+   "bytes": 6801,
+   "sha256": "08b75210cd64d1949cfaed78bdc9e84ae2ef5eca8ddb787f8ab4253ce5273ecb"
+  },
+  "sticker:effect:sparkles": {
+   "bytes": 4532,
+   "sha256": "6cf4f7ea4d0cbe8ec91a27cee2738b6ef2b4b1de585e0216b096d13d62b08aa2"
+  },
+  "sticker:effect:speed_lines": {
+   "bytes": 5393,
+   "sha256": "0e967d8bf39095dde49089b25caec2399748dee25496fbde7b987ba62bbfb169"
+  },
+  "sticker:effect:spotlight": {
+   "bytes": 4904,
+   "sha256": "f8c0652b9898c21b56ea29d2d39ae52feeba39a48d9cc316a2d45acc1567b061"
+  },
+  "sticker:effect:steam": {
+   "bytes": 4333,
+   "sha256": "7730974c23fa034fd2e8bf9d97fbf8d39926f53dec83ae56c2bfb9c5000c665d"
+  },
+  "sticker:effect:sun": {
+   "bytes": 3649,
+   "sha256": "805859502b52d98b658a95cd9dace37f13655e76e7e1ce5d417396db01be446d"
+  },
+  "sticker:effect:sweat": {
+   "bytes": 4806,
+   "sha256": "c83610bf212796059cc80be2edf885d302abeb35524e5019b4a30ee6dbbcad9e"
+  },
+  "sticker:effect:tear": {
+   "bytes": 3655,
+   "sha256": "e9c15a517b1b24985c32527d73cf4f4425e0baee2e4aa08fd0baf01c948981fc"
+  },
+  "sticker:effect:thought": {
+   "bytes": 4592,
+   "sha256": "0cf3ff59cfe136c50640bcfb089aadfd04634496e0b5d65baf7f35b12cf8a09c"
+  },
+  "sticker:effect:waterfall_tears": {
+   "bytes": 4976,
+   "sha256": "e96344e122c516121518005afe952c07113f6dc16c70a076c9770bc737a547f5"
+  },
+  "sticker:effect:zzz": {
+   "bytes": 4293,
+   "sha256": "23301c19b52cb278a0695cb45e617d4c09949e1f62bfbbc138eccb84fc855073"
+  },
+  "sticker:gift:3s": {
+   "bytes": 11924,
+   "sha256": "2a6fdb36b689d67b6ae9db4687e9efa9fc2d91c5b5819b031772f8aed861abba"
+  },
+  "sticker:motion:bashful": {
+   "bytes": 5705,
+   "sha256": "efa9b884ef402eb3f9ff8f28be1f6b377123e9c995d3d3ee3cb9bcb079dcf98a"
+  },
+  "sticker:motion:blow_kiss": {
+   "bytes": 6098,
+   "sha256": "8d410787fa50c59e2e31b27cbff1bc814b563786682513166e09cde281fda5f4"
+  },
+  "sticker:motion:blow_nose": {
+   "bytes": 6130,
+   "sha256": "66fd4b961176aed36f39d404e5e26b49befcfedbd09648eea14f8847decea782"
+  },
+  "sticker:motion:bounce": {
+   "bytes": 5991,
+   "sha256": "291c5356bb10f7867ea25203c437abb3488729d1254dae9154e482e4198180e8"
+  },
+  "sticker:motion:bow": {
+   "bytes": 5626,
+   "sha256": "c76e84260c0a5223c4846404fcdf48a1e4f45cc6a8465aeecbee0de2941e8833"
+  },
+  "sticker:motion:brush_teeth": {
+   "bytes": 7375,
+   "sha256": "70ca3176758697016bcd08e0c02e02956c70de25997825daff74e10e6603ba3a"
+  },
+  "sticker:motion:cheer": {
+   "bytes": 6797,
+   "sha256": "c9e7b75844af57261972a551e3a9d76ba80adb1c8a30fea58f1cb500acd4c659"
+  },
+  "sticker:motion:clap": {
+   "bytes": 7616,
+   "sha256": "83c24e7c6a21040faf5f66dcf6d754326544285a5088d53d18ac8032af881311"
+  },
+  "sticker:motion:cuddle": {
+   "bytes": 5238,
+   "sha256": "b77ab869bf7762fb98b86de38c231610405bbe213fffb08f8f99b6850facfc1e"
+  },
+  "sticker:motion:dab": {
+   "bytes": 6288,
+   "sha256": "a6317d623c6c9131897006802ea077e7724ceffbda9114a312a4ac1428396306"
+  },
+  "sticker:motion:dance": {
+   "bytes": 8197,
+   "sha256": "08ded51d17684d72b4020bea8eb912233a6b9ab9f8fc59be1c49cd1e5e57c2fc"
+  },
+  "sticker:motion:disco": {
+   "bytes": 7982,
+   "sha256": "83837fa2931e3d1255fd14e2fef9f8451f3873f125af647ba9ff2fae227e8899"
+  },
+  "sticker:motion:eat": {
+   "bytes": 8797,
+   "sha256": "90c9d4679d46400dd07282e744f59407b9d30c757c31d4d5a8fc14156ea6086c"
+  },
+  "sticker:motion:eureka": {
+   "bytes": 8850,
+   "sha256": "1b961bccdf40259c5c518e584d6edfd8ac945bf3c5bfc5bf049043d1700267e1"
+  },
+  "sticker:motion:facepalm": {
+   "bytes": 5917,
+   "sha256": "37b6acdc9237b4212a6867fb395a987e98c9b40c38b5677818b2e0d067aadeab"
+  },
+  "sticker:motion:faint": {
+   "bytes": 8499,
+   "sha256": "73c6431b19660a39e672938b5638eea805e49c670e2d4684a66262a6349ac93b"
+  },
+  "sticker:motion:fan_self": {
+   "bytes": 5534,
+   "sha256": "069b7a37cae97081d56bcb2d02cd5e9c36b4a4a90b8d45edbeda5d13641b7eaf"
+  },
+  "sticker:motion:fist_pump": {
+   "bytes": 6934,
+   "sha256": "83110a625d86ee14bbdfe82bda172cbc68d2f2a10816c091297f9ca91a736413"
+  },
+  "sticker:motion:flex": {
+   "bytes": 5864,
+   "sha256": "418929d548e6dae49bc4316d618b6ca4319c0f14b08f8ee12e6804fe9f22cd5d"
+  },
+  "sticker:motion:flip": {
+   "bytes": 10216,
+   "sha256": "5faa687ea0f54f3623a5f957802fea292b227b49328f943247f9c548c7ecc191"
+  },
+  "sticker:motion:float": {
+   "bytes": 4849,
+   "sha256": "2275f26cde5eefedecce1d89d23e028d7d9f3f67c9bbfd1c08dc40cc67ea80f5"
+  },
+  "sticker:motion:floss": {
+   "bytes": 9033,
+   "sha256": "134950cfe9e22113fb7f7aa844b37c3e9db4ed9c003ce9f28a9855575ff4863f"
+  },
+  "sticker:motion:gaming": {
+   "bytes": 7105,
+   "sha256": "e18ee47aa66fd333a44974fac04a278cc8830878da2ba33cf20305497358533e"
+  },
+  "sticker:motion:giggle": {
+   "bytes": 6356,
+   "sha256": "410cda292d808ae986240a90f5aac00e597c4081eaf896e7aed4dbdcfe140eef"
+  },
+  "sticker:motion:headbang": {
+   "bytes": 6980,
+   "sha256": "282f661ae0d27812ea200499faa03cc1166bdf1b6b093ff6606f4570eb89a5b5"
+  },
+  "sticker:motion:hide": {
+   "bytes": 5477,
+   "sha256": "1bd280b54a361f2e43aae81147d9253885c0db91374c86280e539314746fefbf"
+  },
+  "sticker:motion:high_five": {
+   "bytes": 6811,
+   "sha256": "315f3d66627245fb82b7baf80dd494ecdda7144e17d8a23fb7f8ddc241d3d8b3"
+  },
+  "sticker:motion:hop": {
+   "bytes": 9794,
+   "sha256": "5eda3ef287c6340bd35a24b407365fb436f00a28d0eb4b4b1a075c4a30930095"
+  },
+  "sticker:motion:hug": {
+   "bytes": 5819,
+   "sha256": "acc18e2d19e9cb5ab714fe62695916dc476dbe361a0f1566471f80c1cc2c4c34"
+  },
+  "sticker:motion:idle": {
+   "bytes": 4834,
+   "sha256": "7be9a6a138df9f6f9e25617ad4baaa6b73c02aa40c72469cb47794ea517a9501"
+  },
+  "sticker:motion:impatient": {
+   "bytes": 6355,
+   "sha256": "2a84c0a3b7c2ea1c2abd599f9e4c8918641812d6e24b64ff347e080bb75712b2"
+  },
+  "sticker:motion:juggle": {
+   "bytes": 7413,
+   "sha256": "c7054acce69c859d0e050b76513825db0b2213c3dff19020dd175ff2f1b648c8"
+  },
+  "sticker:motion:jump": {
+   "bytes": 9722,
+   "sha256": "82f80359e60e70ae69cdf0f86e5db1756de2466b177546d8f0e715f3f02440c7"
+  },
+  "sticker:motion:jumping_jacks": {
+   "bytes": 9725,
+   "sha256": "0a7e42f338b9282288a2ce43f126870282765c8105542d659a09c895599c520f"
+  },
+  "sticker:motion:kick_feet": {
+   "bytes": 5577,
+   "sha256": "0b10e0c415382c868a5c152d95ae44a103c0534d203b6419f238aae88707eb90"
+  },
+  "sticker:motion:knock": {
+   "bytes": 6202,
+   "sha256": "2a45a837ed549267d5db250aeb8b77bfe042402945f71de4fac8f6431b1949ae"
+  },
+  "sticker:motion:laugh": {
+   "bytes": 8234,
+   "sha256": "f90d248eac0a673920bf1a37785e4d6415f2f717b53ccbe101d649304d5feacf"
+  },
+  "sticker:motion:lift": {
+   "bytes": 6094,
+   "sha256": "15f28d1803d23537edc167a3bae4630af92ec9232663fe5916d2c95094684428"
+  },
+  "sticker:motion:look_around": {
+   "bytes": 5185,
+   "sha256": "ae4f6df3965d7c74d37ed775b32af1b5ef28bbc871698a73eeb3e14b6b3d3141"
+  },
+  "sticker:motion:magic": {
+   "bytes": 8439,
+   "sha256": "6d3bde5b5bcf43eb0f9c7f705a16c934fecd7481063de5148d8de494288adbaf"
+  },
+  "sticker:motion:march": {
+   "bytes": 8135,
+   "sha256": "24204c93d751f30d8b2cd8f0a173dc1f8b8fd9dc68b4b1fbb13a4791425d9482"
+  },
+  "sticker:motion:meditate": {
+   "bytes": 4624,
+   "sha256": "6dc13c6bd33b02f0c43dbbbe4c49aa9df002f808eba597761fd02044c94d039b"
+  },
+  "sticker:motion:moonwalk": {
+   "bytes": 6993,
+   "sha256": "31c19c7952f50cebc527b5e38e82040b9d16e858d225ea4d793eadb290497168"
+  },
+  "sticker:motion:no": {
+   "bytes": 5215,
+   "sha256": "116725bab9116c6f0f371d1f2b18e79fa3f6d6ce5f852a42ccfac900353baa48"
+  },
+  "sticker:motion:nod": {
+   "bytes": 5483,
+   "sha256": "24dc296daa44013d8667061d8155a9411865ff147ef7bc7f22372003eeb33544"
+  },
+  "sticker:motion:nod_off": {
+   "bytes": 5205,
+   "sha256": "b7fd64fcbc1143279ed7a337e40d7012454168d9bd1a4f86e487fe95263a4038"
+  },
+  "sticker:motion:paint": {
+   "bytes": 6768,
+   "sha256": "a3bf7708e4762acd5e076a2cc7d97407e0374cb43b3bbd514176bcebde934386"
+  },
+  "sticker:motion:panic": {
+   "bytes": 7423,
+   "sha256": "b0e05c09267a9d8177c75fb569e093dd4876bd73a2b41c8190bf2921147398ee"
+  },
+  "sticker:motion:peace": {
+   "bytes": 5933,
+   "sha256": "e06f1efcd0fafc31f4b74b761520a8f73c8c9cc5bb03d2e6cb25b021047e720a"
+  },
+  "sticker:motion:phone_call": {
+   "bytes": 6678,
+   "sha256": "71f6d24c05fc0152686c641a1eebf57a146972a8ab368839418d43cde6ae4de1"
+  },
+  "sticker:motion:photo": {
+   "bytes": 6307,
+   "sha256": "231acef541d20f1348d8ebe31b22074ad844361ac3c7943fc50426a2c99c12a2"
+  },
+  "sticker:motion:plead": {
+   "bytes": 5617,
+   "sha256": "754b58428ca117a545b8e6f45109bf9f9b4fd95cdea9169fa701be373e83ece8"
+  },
+  "sticker:motion:point": {
+   "bytes": 5691,
+   "sha256": "f6f7a21df608658d5908e32ef69f9f56aedfa64c9d587af325c686b28d9e9849"
+  },
+  "sticker:motion:pray": {
+   "bytes": 4793,
+   "sha256": "8feae74caf53bcf662a36cac7d6dfafd9259cf0f7a7c7fa76d16d9f49c782f33"
+  },
+  "sticker:motion:punch": {
+   "bytes": 7985,
+   "sha256": "aa0c3bdd6830ab76972a238391913935203d8e19a4cb8bc55d5d0d579b0649b8"
+  },
+  "sticker:motion:read": {
+   "bytes": 5451,
+   "sha256": "1827305c7f4e314e30624f4af0d9e12ce9c076aea7f6538352a42d0603a8abee"
+  },
+  "sticker:motion:roar": {
+   "bytes": 8569,
+   "sha256": "892d2ea187db7efbeb51664e43941a0cc21b69920a89e71c4b2e3667d1fbf338"
+  },
+  "sticker:motion:robot": {
+   "bytes": 4561,
+   "sha256": "c4dd5c937a8b835454bc1f4eb79a7b223b22345dd73b4f7df0a035c1e9c932d5"
+  },
+  "sticker:motion:run": {
+   "bytes": 11141,
+   "sha256": "ec527deb280ae7f5e147488506a662731df091c72c7f1447517034f008202587"
+  },
+  "sticker:motion:salute": {
+   "bytes": 5875,
+   "sha256": "a9aacc745a716ecca950fd683eada8c17d1d44b909ccaeaffe4c454f51711c0c"
+  },
+  "sticker:motion:scheme": {
+   "bytes": 4999,
+   "sha256": "4c09b780d834e5328b293c8394c905daa026b0e4a30d370eac730106c9300e97"
+  },
+  "sticker:motion:scratch_head": {
+   "bytes": 5593,
+   "sha256": "23c2ceea4daee1f84b5230efcf63d59f1d63c307b3bb91c99180187212d0af6d"
+  },
+  "sticker:motion:selfie": {
+   "bytes": 7962,
+   "sha256": "fb220470953a1a1a4fbec702fb4d934ac74a1f0a141726cbeafab30ccab28314"
+  },
+  "sticker:motion:shake": {
+   "bytes": 13344,
+   "sha256": "cb0844a0255408e10f2c4c620e5f039845a95b0198988e68c600761da51ba10b"
+  },
+  "sticker:motion:shiver": {
+   "bytes": 6820,
+   "sha256": "903a47d43b314aae7a3d81ea4fbd627b8256af6d6472126dc3fa5ad6dec1e6cf"
+  },
+  "sticker:motion:show_off": {
+   "bytes": 9562,
+   "sha256": "6343036f8096469f209ee31a746c8256660553b54839b26deda53016709e8820"
+  },
+  "sticker:motion:shrug": {
+   "bytes": 5954,
+   "sha256": "f74efc47c974459434612df5ac1eb7324a5ff9296691a72c1837dfd6625b709f"
+  },
+  "sticker:motion:shush": {
+   "bytes": 5549,
+   "sha256": "606c59ee1e73ab079a1c5f239304109e189f0b84f52ad6789a8ce215786736c3"
+  },
+  "sticker:motion:sigh": {
+   "bytes": 5220,
+   "sha256": "9587ba75330cbff3182e880ec24a55d2607048af0decaad00e52ac435fe56896"
+  },
+  "sticker:motion:sing": {
+   "bytes": 7398,
+   "sha256": "85edbcd0338dcfbb5a5066bdf09d2d75baa56c299911f29efe3dee2a6710aed6"
+  },
+  "sticker:motion:sip": {
+   "bytes": 6947,
+   "sha256": "c4641961f732b0c3101f8a141d522c92600e1e0cdb29f878882e58991017c478"
+  },
+  "sticker:motion:sleep": {
+   "bytes": 4677,
+   "sha256": "9cc9ad9e068dc00a6ea5d150a31170a819c6d8c8e32544145b33ace9d3619003"
+  },
+  "sticker:motion:sneak": {
+   "bytes": 6215,
+   "sha256": "5ee788931e13a031d06f655b3a27e877210dac9ca630465f256b68c8e296fd15"
+  },
+  "sticker:motion:sneeze": {
+   "bytes": 6657,
+   "sha256": "7d901b4a18edc1cc86f3644748d790308bbab993096de42871899d37e9e636e1"
+  },
+  "sticker:motion:soar": {
+   "bytes": 5833,
+   "sha256": "0d743c4666646fc732a38c3adda67ac67323b1eaaf44124f2ce0818a6b2dd794"
+  },
+  "sticker:motion:sob": {
+   "bytes": 7887,
+   "sha256": "cf89b5a9cf2ce31f1de6d06d738feaaca5b6a1a85765cbbea30edf4c00b60674"
+  },
+  "sticker:motion:spin": {
+   "bytes": 6703,
+   "sha256": "6d30ad6e32b57c2fabf4c48a471c8d5f0346ce75616ecb5fa23b76c56bbbc109"
+  },
+  "sticker:motion:stomp": {
+   "bytes": 9635,
+   "sha256": "8130a07feb5b234de3ee25fb16b37a08074cfcfc2d2ab73dd76bcfca26beeff5"
+  },
+  "sticker:motion:stretch": {
+   "bytes": 6683,
+   "sha256": "3fb9ed96c2ee4c3495cabd9b0eeef25e34fd77d1162a2c096bc29b54be49e6d4"
+  },
+  "sticker:motion:strum": {
+   "bytes": 6913,
+   "sha256": "b5aac4a579915448134eaf67bd88d47b86f94bdaef1e5ef8303514971d10d41b"
+  },
+  "sticker:motion:sulk": {
+   "bytes": 5551,
+   "sha256": "edc627539e7df21317396823e11b9797253ab595f31b60338020da03449751fa"
+  },
+  "sticker:motion:sway": {
+   "bytes": 5061,
+   "sha256": "9e3ad64760eb2caf0a9f91a6c4479586421d9d6b3c3a3c7e2fb218f34d11acd7"
+  },
+  "sticker:motion:ta_da": {
+   "bytes": 7733,
+   "sha256": "50d27190137210080533b83844ee6a8fdce07fed68d4bbfdf178e50922ae0c8e"
+  },
+  "sticker:motion:texting": {
+   "bytes": 6633,
+   "sha256": "74571ede39272ccf2caf39bf4cf4796cbd5b133e87d8a18c31caa336e34c75f0"
+  },
+  "sticker:motion:think": {
+   "bytes": 4721,
+   "sha256": "0ba79a836c7918cb50edc2f54573d9b8cf4583eec906f8a14810ee67ae836029"
+  },
+  "sticker:motion:thumbs_down": {
+   "bytes": 5150,
+   "sha256": "6b3a7c4f7fe89d8ec76d088cd6eda114bd6f798558fcf9b4b1b89419492d3782"
+  },
+  "sticker:motion:thumbs_up": {
+   "bytes": 6212,
+   "sha256": "f89acbd31fb1b8bfbd66dff89b7b43669252cdc616f33c7afb73f82e955e940d"
+  },
+  "sticker:motion:toast": {
+   "bytes": 8601,
+   "sha256": "6471f38a47216eb0216c051bc140638cb25514b1a7a5d826931f9637bc7f7c4b"
+  },
+  "sticker:motion:tremble": {
+   "bytes": 6397,
+   "sha256": "d0b91c79a113214ae144b53ecf6a6f641a2b62db52d9a21f4a527b57c2b78fbf"
+  },
+  "sticker:motion:typing": {
+   "bytes": 6048,
+   "sha256": "29147e6c851946729c9623f9ab33a3e1525be0f661560d4593ae6a4eb4575ce5"
+  },
+  "sticker:motion:victory": {
+   "bytes": 9940,
+   "sha256": "581b7593719b7fb1c7e9ce748ac185965b037e9f621f9eae8d3c52c35cc5a492"
+  },
+  "sticker:motion:walk": {
+   "bytes": 7353,
+   "sha256": "c777290a2e7bca72c773649b1c140d31534c8829a09f2dbb375db5ebb5260a89"
+  },
+  "sticker:motion:wave": {
+   "bytes": 5699,
+   "sha256": "23bc2eec439fb0947e5eda3fbc7f9631c2deecfb9b8d42c36ab1e9ece0c4e55d"
+  },
+  "sticker:motion:wave_both": {
+   "bytes": 6073,
+   "sha256": "11cec8b4824d65145fb1c5312622d77fa070d1fdd54b4da06bdba72cbb99800b"
+  },
+  "sticker:motion:wave_flag": {
+   "bytes": 7974,
+   "sha256": "328a5106d44b45f4e0c80aafa367463276cce65f038a61a158976967c6fe2069"
+  },
+  "sticker:motion:wiggle": {
+   "bytes": 9757,
+   "sha256": "d85cdbca8345702563cf1ab5de52695c84d39496db7999eefd4fbc08b881c1bb"
+  },
+  "sticker:motion:workout": {
+   "bytes": 6541,
+   "sha256": "ae3d4cb6f30a5728b8515bd54bebee1a6cd612ac47400803854a56d787d47d1c"
+  },
+  "sticker:motion:write": {
+   "bytes": 5958,
+   "sha256": "ce8d72ff17da412f72455e5bcdefbfa48dd2e6be256ffd9dd267649b81cfc50f"
+  },
+  "sticker:motion:yawn": {
+   "bytes": 5240,
+   "sha256": "e3be0c2bc2592325f2f5394a8d657b3aad94dad246a246c4ed7eec7889dc5931"
+  },
+  "sticker:prop:alarm_clock": {
+   "bytes": 3769,
+   "sha256": "113f91dc7fa854429d3345ccef93c92b5d4c4a51fd7473652e552195fabf75c2"
+  },
+  "sticker:prop:apple": {
+   "bytes": 4618,
+   "sha256": "ebfc402a4f40a44a168253684aa2f2f98f34451845263383f62d0dbef0192eca"
+  },
+  "sticker:prop:badge": {
+   "bytes": 4637,
+   "sha256": "ee55bf811907e8bc36ad6472d430e1dc079e4f10ad5fdc2efb0ec032c503227c"
+  },
+  "sticker:prop:ball": {
+   "bytes": 4748,
+   "sha256": "9fcda96c108898a51083ad6d903832dfc39f5849ce3da94c7b54e57fbba4fdb3"
+  },
+  "sticker:prop:balloons": {
+   "bytes": 5154,
+   "sha256": "23f1dc9030a8faea7f849b3d842944e35035505b57ee5c38d0bcab5be2bcaed1"
+  },
+  "sticker:prop:bamboo": {
+   "bytes": 5016,
+   "sha256": "bd4dfe252038c2c81dff99b2e286317145efff0ec3d5ecad698c7c91fbb94644"
+  },
+  "sticker:prop:banana": {
+   "bytes": 3613,
+   "sha256": "903645a9db7693a9ebcbfbee0f295a1307e9e5aeb2870ae1b2298a8babf15c63"
+  },
+  "sticker:prop:basketball": {
+   "bytes": 3494,
+   "sha256": "ff4453b4a9e0d08ee876e3a132b300f13914615e675dcc17c90cfe063f056902"
+  },
+  "sticker:prop:bell": {
+   "bytes": 4158,
+   "sha256": "8c4537ca3fb4e7a02a4f20c88def121158abeab71a70927227d1f0476cbd044f"
+  },
+  "sticker:prop:boba": {
+   "bytes": 4318,
+   "sha256": "73491efae550743279dc4de1451722c98952951ce0267fc232949ed104ef699d"
+  },
+  "sticker:prop:bone": {
+   "bytes": 3888,
+   "sha256": "5e1d09a5fba390be3302c3578676ae73c386ad395be6acd27415b45e6ec94b6d"
+  },
+  "sticker:prop:book": {
+   "bytes": 4109,
+   "sha256": "c77c5be8eb7d65ad7925a5c36af72f7b94f5e4030bcf3279893d4535a1938383"
+  },
+  "sticker:prop:bouquet": {
+   "bytes": 4204,
+   "sha256": "46bf5b68425da6546fd49d74f20fff40c159932c7ec5c62783ed7bacd608ca84"
+  },
+  "sticker:prop:burger": {
+   "bytes": 4336,
+   "sha256": "796dd5e66f1d50cd541d9c6c2adee401dbd775e125681f5e9e459c430710306a"
+  },
+  "sticker:prop:cake": {
+   "bytes": 4754,
+   "sha256": "40e3b4a8a3ec79215d64d2b3f72fa6a6e86248cb2ba06f1c875d832e6f246132"
+  },
+  "sticker:prop:camera": {
+   "bytes": 4201,
+   "sha256": "41443583a729e921f863197febd3e9114af86ad797fc0f88a3b21122605d112b"
+  },
+  "sticker:prop:candy_cane": {
+   "bytes": 4499,
+   "sha256": "9775d079af8c85dd1f0446a7076e2a5e55883ed0cf6c59f5b2332eda6a46162e"
+  },
+  "sticker:prop:carrot": {
+   "bytes": 3024,
+   "sha256": "62b6baab8c86af5f78a454b5bbec93368e681460603ed8980a007bf8775ae971"
+  },
+  "sticker:prop:cheese": {
+   "bytes": 4051,
+   "sha256": "940e0e22d0201457eeeb79e1cf71fff573fa3a47be3d77510b2e4c8be871a5b0"
+  },
+  "sticker:prop:chocolate": {
+   "bytes": 3645,
+   "sha256": "80f75d1e509c3c3c4e1825ab6b3156a8435a6f32abbc50f5d6e5d4ade20c8dce"
+  },
+  "sticker:prop:clipboard": {
+   "bytes": 4759,
+   "sha256": "808cdc0462c46f391e700fb6d24ce0037edabcce4277e6b44af6483350269de5"
+  },
+  "sticker:prop:cloud": {
+   "bytes": 4698,
+   "sha256": "58093f8fe254e1b6681e715274bf397dd4c151899a15474e768fc200d072e355"
+  },
+  "sticker:prop:controller": {
+   "bytes": 5056,
+   "sha256": "d422ba49107e692ddbbcada55e3ffa87bd71b3bdd89eb70710a80e9df116433f"
+  },
+  "sticker:prop:cookie": {
+   "bytes": 4164,
+   "sha256": "44a59e3ee662bdd1afd032bb5f0cec7390b76f14a6dc9d4d20e74ffc7161fab3"
+  },
+  "sticker:prop:cupcake": {
+   "bytes": 4845,
+   "sha256": "f028e2c2e55fe85fd80d88a648b5362053486cad556d2b29cad5af32c3089289"
+  },
+  "sticker:prop:diploma": {
+   "bytes": 3613,
+   "sha256": "a51f82006985e7000578e7dc4bc389af7e3fc8b0c7ecff73d2b2863ecac34a68"
+  },
+  "sticker:prop:diya": {
+   "bytes": 4934,
+   "sha256": "52c31f886a8fa154ffb89e04ecff98ffb9cd7092117254e92ed2f31e17568028"
+  },
+  "sticker:prop:donut": {
+   "bytes": 3058,
+   "sha256": "66d891e8e5590498e6d8407d7ea52165beed9d3a7750d724cb3cb3e8391eedf5"
+  },
+  "sticker:prop:dumbbell": {
+   "bytes": 4990,
+   "sha256": "cf7588b09a9fe7527ca33cae6c376cd6406bcbd83f3ab4cc24d6aef6cc83ca51"
+  },
+  "sticker:prop:easter_egg": {
+   "bytes": 3695,
+   "sha256": "5f1a131ed797299aac5b4aa5bfda7fe364fd08d712adaa7516e984c81ebcb92b"
+  },
+  "sticker:prop:fan": {
+   "bytes": 4034,
+   "sha256": "4ddd6b91dff9c32b600a70228def3f80f0e925bf9ebc3a523f20fb884f7d2243"
+  },
+  "sticker:prop:fish": {
+   "bytes": 3711,
+   "sha256": "af738fd58c5972cd30d8daf2a897c714d090da013dfdaf891c88da366f90af7a"
+  },
+  "sticker:prop:flag": {
+   "bytes": 4501,
+   "sha256": "eb683a3026943a0e39d5f742d0fb7c5e16a2b34fe545da150b4f28a65b2863e5"
+  },
+  "sticker:prop:gift": {
+   "bytes": 6914,
+   "sha256": "160f5306ef7e94b860e11185c9a6fc9a67a79dd33c891bad56919cc995f5b392"
+  },
+  "sticker:prop:glass": {
+   "bytes": 3937,
+   "sha256": "13c6e26d78214ee7bd24c5a75a516994fc3038b9d97109a69ac3ed26bcbe47f1"
+  },
+  "sticker:prop:guitar": {
+   "bytes": 3881,
+   "sha256": "e81b7944f2268ec01759a39f8bfe31ff586d5effc1f52f3f9823e7fae0855415"
+  },
+  "sticker:prop:heart": {
+   "bytes": 3683,
+   "sha256": "3fa831b28f23c805e60ddf89dfb0bd31859a50ce419a901bab61b71f23bbe94c"
+  },
+  "sticker:prop:honey": {
+   "bytes": 4740,
+   "sha256": "08fc6fced091c545f01afda873411472f2394b9e0daea5424d896e72065e008d"
+  },
+  "sticker:prop:hotdog": {
+   "bytes": 4061,
+   "sha256": "3049d9345f712ac72d3c7745e2cf8b95294acb7f2e5d08b681e73af5db050a34"
+  },
+  "sticker:prop:ice_cream": {
+   "bytes": 3880,
+   "sha256": "63a9df70ae2894827205afdd78e4321de59550b6c6158668fcc3d39ec01a9546"
+  },
+  "sticker:prop:lantern": {
+   "bytes": 4485,
+   "sha256": "848a30a126d8df92f7b06c22d49bd968982b3d868611d8dafbe2d3b595b145d2"
+  },
+  "sticker:prop:laptop": {
+   "bytes": 4712,
+   "sha256": "b9e1fb774048b41872cf7ed846dbdb1fce5c12bdc629d163917a8754619e4374"
+  },
+  "sticker:prop:lollipop": {
+   "bytes": 3743,
+   "sha256": "6340ffdf94dbb69d3e4d8b26c41c38be7e9589abaac75cbc806a2a9e2e066d73"
+  },
+  "sticker:prop:love_letter": {
+   "bytes": 4443,
+   "sha256": "d6cf7e8264da066ce540bfd73cccd233eead5b5c819a67c863c20a9f1bb8921d"
+  },
+  "sticker:prop:magnifier": {
+   "bytes": 3514,
+   "sha256": "834cd7f8c6c03c9fafc235e7e89e6e3c3473747bd4db75ed5600c87b1ad41260"
+  },
+  "sticker:prop:microphone": {
+   "bytes": 4000,
+   "sha256": "06813388cf5fa900faad4b1ac67e88e1fc9ca03a516fe569033a3f1691d62032"
+  },
+  "sticker:prop:money": {
+   "bytes": 4695,
+   "sha256": "8b70b8e4ccb6bf7431a65f46267f60c1202d54ded80393e26a0509b5825fd3ed"
+  },
+  "sticker:prop:mug": {
+   "bytes": 4620,
+   "sha256": "c462648a75df7bed8e330446ee650fae17026afddbf57443bf2ce296a54ccd7c"
+  },
+  "sticker:prop:paintbrush": {
+   "bytes": 4585,
+   "sha256": "85f55f0ba4e948ecca8282cd0a265aa724efcdd86df974fe5e24992d8dbd1e59"
+  },
+  "sticker:prop:party_horn": {
+   "bytes": 4042,
+   "sha256": "c34fe12d4340c0e16775b375852e6af939c933e216ef195f2a44892a75a55dbb"
+  },
+  "sticker:prop:pencil": {
+   "bytes": 3038,
+   "sha256": "4c2e71848e515863ccfefb846776d76a9c161c74589310dcb7971cca37429133"
+  },
+  "sticker:prop:phone": {
+   "bytes": 5358,
+   "sha256": "5f0cdc23810c8f9e687e4512e9a6208c6dfdffb60cfdbdc8946fa4767e7177b3"
+  },
+  "sticker:prop:pillow": {
+   "bytes": 4076,
+   "sha256": "c8bf1b25a45dca2c81a419df26386e015dd9de2f05410b4ab6a38cd5e70b76f2"
+  },
+  "sticker:prop:pizza": {
+   "bytes": 4818,
+   "sha256": "9eda877c97f7939c19acffe74514876300ba9ac05ffc8f7980f7da4a53232638"
+  },
+  "sticker:prop:plushie": {
+   "bytes": 4048,
+   "sha256": "34756831059a879e4213347bcfbdacae98f7204c4488da152e82e5f4a7b4336e"
+  },
+  "sticker:prop:pom_poms": {
+   "bytes": 4672,
+   "sha256": "a30967fd66132a7ad8eda0e3ace50111eda2af5fc61b8eab99d47b781a4c6c2e"
+  },
+  "sticker:prop:popcorn": {
+   "bytes": 5076,
+   "sha256": "a2d06ee7d27e716cefed90293a8867cfe99af67db93035492887fc62995c08f4"
+  },
+  "sticker:prop:pumpkin": {
+   "bytes": 4630,
+   "sha256": "61a50f5f118dae51e945c670a46ef58ef1fb3fadc52f405c2a69e15c9442873e"
+  },
+  "sticker:prop:red_envelope": {
+   "bytes": 3891,
+   "sha256": "65690772871b691a68382ded278dc7ec2e7b0c05013d3097cd38d30b53bd2511"
+  },
+  "sticker:prop:rose": {
+   "bytes": 3717,
+   "sha256": "8a99d5f3d910aa353e0639a7ee479c5dd17970dbfe0a03eebbf95cf783e4fc33"
+  },
+  "sticker:prop:shopping_bag": {
+   "bytes": 4107,
+   "sha256": "f2b6eddf6d30efb745ca51d8a22f47e6f2c838f7f10a1cbf67e2d27a1125eb66"
+  },
+  "sticker:prop:sign": {
+   "bytes": 4404,
+   "sha256": "fbccfefe9c749272fe13ea26c676f25ea6462384a3dc423dfd5c9c67f609015c"
+  },
+  "sticker:prop:soda": {
+   "bytes": 3874,
+   "sha256": "9491d768a8672c01e986fababd1907855d5770645c747914393c5acc06c0126a"
+  },
+  "sticker:prop:sparkler": {
+   "bytes": 5270,
+   "sha256": "c520c81de83fd27187280f3d0127325bcaac4ddfe3e9fdae8390280971b2c262"
+  },
+  "sticker:prop:suitcase": {
+   "bytes": 3066,
+   "sha256": "41da098b1a0c8a95984baaf2622febdaa34e3e9f10c0c9d12c252ae738c66f66"
+  },
+  "sticker:prop:sushi": {
+   "bytes": 3963,
+   "sha256": "11dd185f58e6a8de1a9a4cb7bdf96ceda03aee1dc476131c5e6791544471f16f"
+  },
+  "sticker:prop:taco": {
+   "bytes": 4806,
+   "sha256": "4a1b57ef609baf7a8952c6dc56cae49332fbbcaf47da5f6b45697a1ec8d01dce"
+  },
+  "sticker:prop:takeaway": {
+   "bytes": 3647,
+   "sha256": "67c7f1aa2b10adf9468180fe42fcf1d651cfc2a3e0ede099f811452911176ff5"
+  },
+  "sticker:prop:thermometer": {
+   "bytes": 3893,
+   "sha256": "079f9b21ce47a3f7ce4dd6c53aa6b2014d950c07a88d6cbb4139a9daef867782"
+  },
+  "sticker:prop:tissue": {
+   "bytes": 4316,
+   "sha256": "ada5e9aae7c002b7a6cac5eea95dccee7d9e68cedc63f7b4b6fa55eb405cad6e"
+  },
+  "sticker:prop:toothbrush": {
+   "bytes": 3669,
+   "sha256": "f542c2f0642b56b508ada24245fdbf9756b00bd18ab2256777741434ace7b0f8"
+  },
+  "sticker:prop:trophy": {
+   "bytes": 4221,
+   "sha256": "1bfff87a0bf4782954ed180d72af744b49f874bad41a510282d863131c18468b"
+  },
+  "sticker:prop:umbrella": {
+   "bytes": 3776,
+   "sha256": "748df95197e78e1383987596ca3eedd816a84d7c0385d577f3eebed4868f3a60"
+  },
+  "sticker:prop:wand": {
+   "bytes": 3452,
+   "sha256": "8471788979cdab6ee620efdd1d7955fda474143e6188b84fb53a2353924eddc1"
+  },
+  "sticker:prop:water_bottle": {
+   "bytes": 4363,
+   "sha256": "1b604d427b1a0dc22351b2b49256656f8d90d519d7c6d90e1ff87123f502c610"
+  },
+  "sticker:prop:watermelon": {
+   "bytes": 4284,
+   "sha256": "567076867d193ffe1e8f7322d4ffcb894e910899bf12c9c17b581a9c2f7ec293"
+  },
+  "sticker:short:1s-jump": {
+   "bytes": 7712,
+   "sha256": "0cb154961afbf605d841dafae2538897599bf4ede0fd6b9d8ba7dd1c1d1c3587"
+  },
+  "sticker:sides:left-paw": {
+   "bytes": 6205,
+   "sha256": "6317ca42b2e5d11785381d5f3db8ad2c4fcd79674e62dbd083e5bfc71b76fcf8"
+  },
+  "sticker:tempo:fast-dance": {
+   "bytes": 13722,
+   "sha256": "6cb31ee4902a6f81aefb718b1d149fb72dd206efb387999a5b1d414e1cf821df"
+  },
+  "sticker:wear:angel_wings": {
+   "bytes": 5317,
+   "sha256": "2fe0f0cd1600df585a19cddde7e4397f4d84fa5333b9a8e7f9c6f6d39950a6da"
+  },
+  "sticker:wear:apron": {
+   "bytes": 4348,
+   "sha256": "102cd75240222b54190f9e85c86c8fb0f24524a6a314b729eea5f47e74938ba3"
+  },
+  "sticker:wear:backpack": {
+   "bytes": 3432,
+   "sha256": "ab1977d8f8d98039b755545cabfa55806e51b15c2a2d7627a8488e909ee9a135"
+  },
+  "sticker:wear:beanie": {
+   "bytes": 4804,
+   "sha256": "5fcc5dc95ea9c20956a2a3e044d9b95b540c383dc970ccf75a3342bfaf3251ff"
+  },
+  "sticker:wear:bell_collar": {
+   "bytes": 3599,
+   "sha256": "317d35d144baa46571654134da4f4ac70f6797e9136616f10754ee5f4a5755fc"
+  },
+  "sticker:wear:beret": {
+   "bytes": 3825,
+   "sha256": "c11ba1028f33df1e998d2c5a4986ae447d88b85d20443125379b9b91c1296072"
+  },
+  "sticker:wear:bib": {
+   "bytes": 3954,
+   "sha256": "58ed50ecd2a8c70aaade42c6927758fea6055aaf85d0d5196bd067a88977bb76"
+  },
+  "sticker:wear:bow": {
+   "bytes": 3624,
+   "sha256": "123d7f1b76732f080f051349c7c1dddf91d449162999dfe42e6e55594ed39185"
+  },
+  "sticker:wear:bow_tie": {
+   "bytes": 4633,
+   "sha256": "137502838ab217cbf149d14db3fff32a34b5e598b4366a67e8bb5b16d4fea9a7"
+  },
+  "sticker:wear:bunny_ears": {
+   "bytes": 4522,
+   "sha256": "938c5c638ef17393e1ec1bd3450570c62135045819c7dbbd9b99eaf8d2d3840b"
+  },
+  "sticker:wear:cap": {
+   "bytes": 3732,
+   "sha256": "9032de6232fe7f0e9c9962f5c673cc701831c24046c28f451f63d9a052acf1bb"
+  },
+  "sticker:wear:chef_hat": {
+   "bytes": 4027,
+   "sha256": "d3c192189bebc4ba4354fcfea8f497d827a92448e7f71667a0f1b65871b9559c"
+  },
+  "sticker:wear:clown_nose": {
+   "bytes": 3468,
+   "sha256": "44dfd7bf7a2d90210ef5971a2fc3f285756cb91805e45eba7b5f44dfefe30179"
+  },
+  "sticker:wear:cowboy_hat": {
+   "bytes": 3711,
+   "sha256": "0d6f9fbff18e3c692a8c4b9f75b2c83bb19f6cf465b81a2316edf268ea49dfbf"
+  },
+  "sticker:wear:crown": {
+   "bytes": 4679,
+   "sha256": "1508ada75e43e870fbc6d71b6d94f986e2580f50b0c2934c5dabed1267ad67b5"
+  },
+  "sticker:wear:devil_horns": {
+   "bytes": 5033,
+   "sha256": "f80ab73df82c7ff589c24942de620491f54602ef65ca0d01fc4035e4194ef3aa"
+  },
+  "sticker:wear:earmuffs": {
+   "bytes": 3606,
+   "sha256": "5dae551dd352b7e5633eab12a5136e844c17018d4c191e20a2bbb621d6781b98"
+  },
+  "sticker:wear:eye_patch": {
+   "bytes": 4138,
+   "sha256": "f170e1be0efb260829f0b9d19df20d0bb8a7abefe05dde1eccf8a53b936731a9"
+  },
+  "sticker:wear:face_mask": {
+   "bytes": 4392,
+   "sha256": "3c9b6e7476911f28c33c977f83420389a5a1f377119a1226367b12b968a30a77"
+  },
+  "sticker:wear:fairy_wings": {
+   "bytes": 4893,
+   "sha256": "709e2e09a984c5c5290ccadae8892ed159cea30a8413624c282f7941217ba3c1"
+  },
+  "sticker:wear:flower": {
+   "bytes": 3856,
+   "sha256": "0575d0172c21b13dbe3ac2f386c9501bd9ada1ae8aa3d375829b0d398835ef7f"
+  },
+  "sticker:wear:flower_crown": {
+   "bytes": 4151,
+   "sha256": "ba21fe76c350687b19043008853a86c682c98866b2221d928665535c6d2bfb0d"
+  },
+  "sticker:wear:glasses": {
+   "bytes": 3990,
+   "sha256": "8c15c9609ed4a4d95a37bf0b1fe0d66587ed1b64d148965f71ce38c4bfde5e6e"
+  },
+  "sticker:wear:glasses_3d": {
+   "bytes": 4465,
+   "sha256": "eb48c10b6df460eb3c559947bf20c4b2482d8b69cbf77c682e422b77f90e259e"
+  },
+  "sticker:wear:goggles": {
+   "bytes": 5018,
+   "sha256": "8c1fef4ae47c90df9899283fa3dbf68bc47f22ff9b1d63390e154905c5681829"
+  },
+  "sticker:wear:grad_cap": {
+   "bytes": 3025,
+   "sha256": "7663ba65bf6fb99e1b69f63a1203883bae97dd2223aaf31e86f54db7fe18ed6d"
+  },
+  "sticker:wear:halo": {
+   "bytes": 3983,
+   "sha256": "e4ca4f563551cf450bf0f99a66d949c82266da8ad88aa173102b89997aacc630"
+  },
+  "sticker:wear:hard_hat": {
+   "bytes": 4226,
+   "sha256": "072f1633b30fffd3cc2fa4d95013d4cc497720dedb96c57cf4b96d31e1e0e942"
+  },
+  "sticker:wear:headband": {
+   "bytes": 4289,
+   "sha256": "5775121e5d263eadf0f5dda15c795383993652b7a8680f7b6229f8a61aefd490"
+  },
+  "sticker:wear:headphones": {
+   "bytes": 3974,
+   "sha256": "139a17813844454399ecb4445cca159563ef6a720dce7cef06d3f5451460355b"
+  },
+  "sticker:wear:heart_glasses": {
+   "bytes": 3982,
+   "sha256": "e379c66eadd4cb606c7563359cf4b974739d24a64da64a7412204bce51a26bfd"
+  },
+  "sticker:wear:hero_cape": {
+   "bytes": 5224,
+   "sha256": "0b777cf0f1669eb7009f54f89f19d3c13f2e0f8ef5524f82e254fcae089bc64d"
+  },
+  "sticker:wear:lei": {
+   "bytes": 3281,
+   "sha256": "ca22e7d93615788b1de830dfb4eaceee90f88a0f70fbc706ea95b1704a66a5c2"
+  },
+  "sticker:wear:monocle": {
+   "bytes": 3439,
+   "sha256": "7dc947d3bc01385b3c3d0d4abc8c6e40fa0b556f9ba67ca52e0be76f65acb217"
+  },
+  "sticker:wear:mustache": {
+   "bytes": 3609,
+   "sha256": "9ce8024a90990cd4406f50f879961c7a19ae68061c24797c7387b3712681e519"
+  },
+  "sticker:wear:necktie": {
+   "bytes": 4061,
+   "sha256": "4b0fa3f4ebd740f0518f96f5846d3274215f759ede56df1d6643b903c62512e1"
+  },
+  "sticker:wear:nightcap": {
+   "bytes": 4811,
+   "sha256": "fd5fef2295097de543c2d530253e2d829bbcab647a560e48a12d8958b577e4f0"
+  },
+  "sticker:wear:party_hat": {
+   "bytes": 3573,
+   "sha256": "dc1a78cfd05ea8b8c8e836c0a455439c7406c098bb039461d42de8d6b0aa9d85"
+  },
+  "sticker:wear:pirate_hat": {
+   "bytes": 3680,
+   "sha256": "e81fb2219e0bf5a68de913580fe361213ce4809fc8a357813c44eab52bb7bb63"
+  },
+  "sticker:wear:propeller_cap": {
+   "bytes": 3900,
+   "sha256": "3852272f45d328ffd16ace204b75c0cfde74c607df44f27397e3ef782dde3462"
+  },
+  "sticker:wear:santa_hat": {
+   "bytes": 3590,
+   "sha256": "827d6716de76650fcfde2dc3e77c26494da07c58214e1f02e4291e1e49447f76"
+  },
+  "sticker:wear:scarf": {
+   "bytes": 5002,
+   "sha256": "d506ccd475e8bb2268aef032a49560fc18b4a0d845ffe2fa186dbc4167282fd2"
+  },
+  "sticker:wear:sleep_mask": {
+   "bytes": 3934,
+   "sha256": "2ca2bc423462a30fdb87f8bd59a5792df43507da7cfef3e7c912bc0a4bccbda2"
+  },
+  "sticker:wear:star_clip": {
+   "bytes": 4452,
+   "sha256": "33b8420385b7df7032699636f2e4eeb547bd5f2073c4a6baefab6347a6cc62e1"
+  },
+  "sticker:wear:star_glasses": {
+   "bytes": 4107,
+   "sha256": "9119c6b4770403d75a4a7862ee20748fe138173506f4c9f280aa516a566f9867"
+  },
+  "sticker:wear:sun_hat": {
+   "bytes": 3573,
+   "sha256": "d58349d5c0a21bb68043893e0d10e57a295c00f0265846bd44ac06f7abc07395"
+  },
+  "sticker:wear:sunglasses": {
+   "bytes": 2909,
+   "sha256": "8c64dc36f85ce243839b85dae880b8b075587bcc0ffbf880c1033b675838c914"
+  },
+  "sticker:wear:tiara": {
+   "bytes": 2909,
+   "sha256": "593dcec2f7f081a81641265811377599304e54bdf477957ec58fe97dbeb67120"
+  },
+  "sticker:wear:top_hat": {
+   "bytes": 4344,
+   "sha256": "78a58d229cfa8841a2a1ddc5d9f44311431bce2b9b517290f0f8b9d6ad1a7143"
+  },
+  "sticker:wear:tshirt": {
+   "bytes": 3624,
+   "sha256": "12e716ba8edd7482a04bc3f70de4d0f138748088827a563d9e483bb6f8e1c7fa"
+  },
+  "sticker:wear:tutu": {
+   "bytes": 4387,
+   "sha256": "701191917a0f79bb2b2b9e459d9d366a375e0ad4adf3602010a3cf881bf9abd0"
+  },
+  "sticker:wear:unicorn_horn": {
+   "bytes": 3456,
+   "sha256": "31ee66bac4bc224292df2e96249218e6ee811def182e24f3b055d8c6fe49d9dd"
+  },
+  "sticker:wear:viking_helmet": {
+   "bytes": 4226,
+   "sha256": "a796ac269e679b7f1c4ebcd34f19a06653d7892545152e5d1b1849a70299ae16"
+  },
+  "sticker:wear:witch_hat": {
+   "bytes": 4320,
+   "sha256": "e3c2c8d3a3d7d0a345d9414f3fd8bea9475eb3f293ebf9fb92fb2f1f1499381c"
+  },
+  "sticker:wear:wizard_hat": {
+   "bytes": 4137,
+   "sha256": "f1b8cbae4d26a9a629fd6c2265b76ae2e8cd301f7601a045252093843f1be2e3"
+  },
+  "sticker:wear:xmas_sweater": {
+   "bytes": 4095,
+   "sha256": "0cfedb96c8158a235971c60798ded2ed2fdafeb08142489c6ec1f60bd2a9528c"
+  }
+ },
+ "note": "hashes of the v4 output; python -m studio.snapshots --check compares"
+}
