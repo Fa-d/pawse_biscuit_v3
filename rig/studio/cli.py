@@ -54,7 +54,7 @@ def apply_set(spec: StickerSpec, items):
             spec.caption = Caption(spec.caption.text if spec.caption else "", style=v)
         elif k == "caption_pos":
             spec.caption = Caption(spec.caption.text if spec.caption else "", style=spec.caption.style if spec.caption else "outline", pos=v)
-        elif k in ("intensity", "seconds", "tempo"):
+        elif k in ("intensity", "seconds", "tempo", "yaw"):
             try:
                 setattr(spec, k, float(v))
             except ValueError:

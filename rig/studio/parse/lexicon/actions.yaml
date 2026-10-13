@@ -403,11 +403,39 @@ actions:
     means: {motion: wiggle}
     suggests: {face: silly}
   spin:
-    words: [spin, spinning, spins, spun, twirl, twirling, twirls, twirled, pirouette, spin around, spinning around, turn around,
-      turning around, whirl, whirling, whirls, round and round, do a spin, twirly, spinny, spin spin, ice skating, skating,
-      figure skating, roller skating, skates]
+    words: [spin, spinning, spins, spun, twirl, twirling, twirls, twirled, pirouette, spin around, spinning around, whirl,
+      whirling, whirls, round and round, do a spin, twirly, spinny, spin spin, ice skating, skating, figure skating,
+      roller skating, skates]
     means: {motion: spin}
     suggests: {face: joy, effects: [sparkles]}
+  # ---------------------------------------------------------------- v5: turning away from the viewer (the view words: core.yaml)
+  turn_around:
+    words: [turn around, turning around, turns around, turn round, turning round, turns round, turn away and back, about face,
+      about turn, turns its back, turning its back, turned its back, turn its back, turn my back, turning my back,
+      whip around, whips around, whipping around, swing around, swings around, swivel, swivels, swiveling, swivelling,
+      turning to look, turn to look]
+    means: {motion: turn_around}
+    suggests: {face: smiley}
+  look_back:
+    words: [look back, looking back, looks back, looked back, glance back, glancing back, glances back, glanced back,
+      peek back, peeking back, peeks back, look over the shoulder, looking over the shoulder, looks over the shoulder,
+      over the shoulder, over its shoulder, over my shoulder, over her shoulder, over his shoulder, over your shoulder,
+      looking over its shoulder, looking over my shoulder, looking over her shoulder, looking over his shoulder,
+      glancing over its shoulder, glancing over the shoulder, look behind, looking behind, looks behind, look behind you,
+      looking behind it, behind you, someone behind me, is someone behind me, being followed, am i being followed,
+      are you following me, coy look back, flirty look back, sassy look back, hair flip, hair flipping, look back at you,
+      looking back at you]
+    means: {motion: look_back}
+    suggests: {face: smiley}
+  full_spin:
+    words: [full spin, full turn, full circle, full rotation, full twirl, do a 360, does a 360, doing a 360, did a 360, 360,
+      360 spin, 360 turn, 360 view, three sixty, spin all the way round, spin all the way around, turn all the way round,
+      turn all the way around, all the way round, all the way around, rotate, rotates, rotating, rotation, turntable,
+      on a turntable, show all sides, showing all sides, all sides, every side, from every side, all angles, every angle,
+      from every angle, from all angles, turnaround, character turnaround, turnaround sheet, model sheet, spin in place,
+      spinning in place, spins in place]
+    means: {motion: full_spin}
+    suggests: {face: joy}
   flip:
     words: [flip, flips, flipped, backflip, back flip, backflips, front flip, frontflip, somersault, somersaults, cartwheel,
       cartwheels, tumble, tumbling, acrobat, acrobatic, acrobatics, gymnast, gymnastics, parkour, stunt, stunts, trick, tricks,

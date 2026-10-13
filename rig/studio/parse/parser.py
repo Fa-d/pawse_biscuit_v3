@@ -20,7 +20,8 @@ How a spec is decided:
     flips ("not happy" -> sad), a negated prop, effect or worn item is kept out even if a template brings it
     ("birthday without the hat").  Phrases with a negator in them win first ("no way", "can't wait", "not bad").
   * A colour sticks to the item right after it ("a red scarf", "pink bow") or else colours the fur ("blue fox").
-  * "in its left paw", "looking up", "fast" / "slowly" set which paw, the gaze and the tempo.
+  * "in its left paw", "looking up", "fast" / "slowly" set which paw, the gaze and the tempo; "from behind", "side view",
+    "facing left" which way the mascot faces (v5: a yaw; turning words such as "turn around" are motions).
 """
 from __future__ import annotations
 
@@ -90,6 +91,8 @@ PARSER_RULES = [
             "a 'did you mean' suggestion."),
     ("P34", "One mascot is drawn per sticker for now: a second animal named ('a cat hugging a dog'), or two of one ('two foxes'), "
             "is left out with a note that says so, and counts as not understood."),
+    ("P35", "View words turn the mascot ('from behind', 'side view', 'in profile', 'facing left', 'three-quarter view'): the last "
+            "one said wins.  Turning is a motion ('turn around', 'looking back over its shoulder', 'do a 360')."),
 ]
 # words before a mascot that mean more than one of it ("two foxes", "a pair of cats")
 PLURAL_WORDS = {"two", "2", "both", "pair", "couple", "twins", "twin", "duo", "three", "3", "few", "several", "many"}
@@ -146,7 +149,8 @@ def _merge_dir(single, folder):
 @dataclass
 class Match:
     phrase: str
-    section: str            # template, moods, actions, props, effects, accessories, poses, bases, colours, strong, weak, side, look, tempo
+    section: str            # template, moods, actions, props, effects, accessories, poses, bases, colours, strong, weak, side, look, tempo,
+                            # view
     name: str
     pos: int                # token index where the phrase starts
     negated: bool = False
@@ -194,6 +198,7 @@ class Parser:
         self.lex.setdefault("tempo", {"fast": [], "slow": []})
         self.lex.setdefault("sides", {"L": [], "R": []})
         self.lex.setdefault("look", {})
+        self.lex.setdefault("view", {})
         self.lex.setdefault("colour_modifiers", {})
         self.lex.setdefault("translations", {})
         self.lex.setdefault("fillers", [])
@@ -232,6 +237,9 @@ class Parser:
         for name, e in self.lex["look"].items():
             for w in e["words"]:
                 add(w, "look", name)
+        for name, e in self.lex["view"].items():
+            for w in e["words"]:
+                add(w, "view", name)
         for name, words in self.lex["colour_modifiers"].items():
             for w in words:
                 add(w, "shade", name)
@@ -429,7 +437,7 @@ class Parser:
         votes = {s: [] for s in SCALAR_SLOTS}                 # slot -> [(weight, pos, value)]
         lists = {s: [] for s in LIST_SLOTS}                   # slot -> [(weight, pos, item)]
         banned = {s: set() for s in LIST_SLOTS}
-        palette, tints, sides, look, tempo = {}, {}, {}, None, None
+        palette, tints, sides, look, tempo, yaw = {}, {}, {}, None, None, None
         intensity = 1.0
         hint_mode = False
 
@@ -483,6 +491,10 @@ class Parser:
                 look = tuple(e["at"])
                 if e.get("face"):
                     votes["face"].append((MEANS["poses"] - 1, m.pos, e["face"]))
+                used.append(m)
+                continue
+            if m.section == "view":                           # P35: which way it faces, the last view word said
+                yaw = float(self.lex["view"][m.name]["yaw"])
                 used.append(m)
                 continue
             entry = self.lex[m.section][m.name]
@@ -589,6 +601,8 @@ class Parser:
         spec.sides = {k: v for k, v in sides.items() if k in spec.props}
         if look is not None:
             spec.look = look
+        if yaw is not None:
+            spec.yaw = yaw
         if tempo is not None:
             spec.tempo = tempo
         spec.intensity = round(min(1.6, max(0.5, intensity)), 2)
@@ -604,7 +618,7 @@ class Parser:
                    and len(t.text) > 1]
         unknown = [w for w, tk in zip([t.text for t in words], taken) if not tk and w in content]
         understood = sum(len(m.phrase.split()) for m in used if m.section not in ("strong", "weak") and not m.dropped)
-        has_core = core or hint_mode or any(m.section in ("bases", "colours", "look") for m in used) or bool(caption)
+        has_core = core or hint_mode or any(m.section in ("bases", "colours", "look", "view") for m in used) or bool(caption)
         confident = has_core and (len(unknown) <= max(1.0, 1.5 * understood) if (core or hint_mode) else not unknown)
         score_ = understood / max(1, understood + len(unknown) + dropped_words)
         suggestions = {}
@@ -771,7 +785,7 @@ class Parser:
             if sec not in SECTIONS or name not in self.lex[sec]:
                 bad.append(f"alone.{w}: {target!r} is not a lexicon entry (section.name)")
         small = self.stop | self.neg | FILLERS
-        loose = ("strong", "weak", "filler", "shade", "side", "look")
+        loose = ("strong", "weak", "filler", "shade", "side", "look", "view")
         for p, h in self.index.items():
             if h[0][0] in loose or not all(w in small for w in p.split()):
                 continue
@@ -783,12 +797,18 @@ class Parser:
                 bad.append(f"look.{name}: 'at' must be two numbers")
             if e.get("face") and e["face"] not in VOCAB["face"]:
                 bad.append(f"look.{name}: unknown face {e['face']!r}")
+        for name, e in self.lex["view"].items():
+            y = e.get("yaw")
+            if not isinstance(y, (int, float)) or not -180 <= y <= 180:
+                bad.append(f"view.{name}: 'yaw' must be a number of degrees from -180 to 180")
+            if not e.get("words"):
+                bad.append(f"view.{name}: no words")
         for name, e in self.lex["colours"].items():
             v = e["hex"] if isinstance(e, dict) and "hex" in e else e
             if isinstance(v, str) and not re.fullmatch(r"#[0-9a-fA-F]{6}", v):
                 bad.append(f"colours.{name}: {v!r} is not '#rrggbb'")
         lexical = ("moods", "actions", "props", "effects", "accessories", "poses", "bases", "colours", "strong", "weak", "tempo",
-                   "side", "look", "shade", "filler")
+                   "side", "look", "view", "shade", "filler")
         for p, h in self.index.items():
             if BREAK in p.split():
                 bad.append(f"phrase {p!r} ({h[0][0]}.{h[0][1]}) has a clause break in it ('but', 'though', punctuation) and can never match")

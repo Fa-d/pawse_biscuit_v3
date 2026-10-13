@@ -234,9 +234,9 @@ function syncEditor() {
   for (const group of $$("#editor .group[data-slot]")) {
     const slot = group.dataset.slot;
     if (slot === "colour") continue;
-    const val = s[slot];
-    for (const b of $$(".chips button", group)) {
-      b.ariaPressed = String(Array.isArray(val) ? val.includes(b.dataset.id) : val === b.dataset.id);
+    const val = s[slot] ?? group.dataset.default;    // (a spec leaves out a yaw of 0: the group says what that means)
+    for (const b of $$(".chips button", group)) {     // (ids are text in the page; a number in the spec, such as a yaw, is compared as text)
+      b.ariaPressed = String(Array.isArray(val) ? val.includes(b.dataset.id) : String(val ?? "") === b.dataset.id);
     }
   }
   const pal = JSON.stringify(s.palette || {});

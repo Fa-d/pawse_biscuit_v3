@@ -1,5 +1,5 @@
 # The small words: what carries no meaning, what negates, what makes things stronger or weaker, faster or slower,
-# which paw, where the eyes look, and words that shade a colour.
+# which paw, where the eyes look, which way the mascot faces, and words that shade a colour.
 #
 # Every file in this folder is read and merged (studio/parse/parser.py); ../lexicon.yaml is read first and is the
 # place for your own additions.  A phrase may belong to one entry only (`python -m studio.cli --check` says so).
@@ -75,10 +75,10 @@ sides:
 # where the eyes look: at [x, y], x to the right of the picture, y down, each -1.5 .. 1.5 (0, 0 = at you).
 # `face` (optional) is what the look means for the face (a side-eye is unamused).
 look:
-  left: {words: [looking left, look left, looks left, glancing left, glances left, eyes left, to the left, facing left, turned left,
+  left: {words: [looking left, look left, looks left, glancing left, glances left, eyes left, to the left,
     looking to the left, peering left, gazing left], at: [-1.0, 0.0]}
-  right: {words: [looking right, look right, looks right, glancing right, glances right, eyes right, to the right, facing right,
-    turned right, looking to the right, peering right, gazing right], at: [1.0, 0.0]}
+  right: {words: [looking right, look right, looks right, glancing right, glances right, eyes right, to the right,
+    looking to the right, peering right, gazing right], at: [1.0, 0.0]}
   up: {words: [looking up, look up, looks up, glancing up, gazing up, gaze up, eyes up, eyes to the sky, looking at the sky,
     looking up at the sky, up at the sky, at the sky, at the stars, stargazing, star gazing, looking up at the stars,
     cloud watching, looking at the moon, looking upward, looking upwards, heavenward], at: [0.0, -1.0]}
@@ -98,6 +98,28 @@ look:
   peeking_eyes: {words: [peeping eyes, watching closely, keeping an eye, keeping an eye on, nosy, nosey, eavesdropping, spying,
     lurking, lurker, lurk, peeping], at: [0.9, -0.1], face: curious}
   cross_eyed: {words: [cross eyed, crosseyed, cross eye, crossed eyes, eyes crossed], at: [0.0, 0.0], face: silly}
+
+# which way the mascot faces (v5): turned from facing the viewer by `yaw` degrees, + turning its face to screen-right (a side
+# view faces right; 'facing left' is the same view the other way round).  `label` is the editor's chip.  A mascot without
+# drawn side and back views turns as far as three-quarter (the composer's rule R24 says so in a note).
+view:
+  front: {label: Front, yaw: 0, words: [front view, from the front, seen from the front, facing forward, facing front,
+    facing the front, facing the camera, facing the viewer, facing you, facing me, face on, front facing, head on view]}
+  three_quarter: {label: Turned, yaw: 40, words: [three quarter view, three quarter, three quarters view, three quarters,
+    3 4 view, quarter view, quarter turn, half turned, half turn, turned a little, turned slightly, slightly turned, angled,
+    at an angle, angled view, turned right, turned to the right, angled right]}
+  three_quarter_left: {label: Turned the other way, yaw: -40, words: [turned left, turned to the left, angled left,
+    three quarter left]}
+  side: {label: Side, yaw: 90, words: [side view, from the side, seen from the side, viewed from the side, in profile, profile,
+    profile view, side profile, profile shot, side on, side shot, sideways, turned sideways, facing sideways, sideways view,
+    facing right, facing to the right, right facing, facing the right, side view right, right profile]}
+  side_left: {label: Other side, yaw: -90, words: [facing left, facing to the left, left facing, facing the left, side view left,
+    left profile]}
+  back: {label: Back, yaw: 180, words: [from behind, back view, from the back, rear view, view from behind, seen from behind,
+    viewed from behind, from the rear, rear, behind view, back side view, backside, facing away, facing away from you,
+    facing away from the camera, facing backwards, facing backward, turned away, turned around, back turned, its back turned,
+    with its back turned, back to the camera, back to the viewer, back to us, back to you, showing its back, shows its back,
+    showing his back, showing her back, back facing, backwards view]}
 
 # words that shade the colour right after them ("light blue", "dark red", "pastel pink")
 colour_modifiers:

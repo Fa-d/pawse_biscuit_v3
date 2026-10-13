@@ -252,6 +252,30 @@ class Studio(unittest.TestCase):
         with self.assertRaises(ValueError):
             StickerSpec.from_dict(dict(yaw=200))
 
+    def test_view_words_turn_the_mascot(self):
+        from studio.parse.fallback import default_parser
+        p = default_parser()
+        for prompt, yaw in (("a fox from behind", 180.0), ("fox in profile", 90.0), ("cat facing left", -90.0),
+                            ("three quarter view of a bunny", 40.0), ("fox facing the camera", 0.0),
+                            ("side view, then from behind", 180.0)):           # the last view word said wins
+            with self.subTest(prompt=prompt):
+                r = p.parse(prompt)
+                self.assertEqual(r.spec.yaw, yaw)
+                self.assertTrue(r.confident)
+        r = p.parse("fox looking left")
+        self.assertEqual((r.spec.yaw, tuple(r.spec.look)), (0.0, (-1.0, 0.0)), "looking is still the gaze")
+        for prompt, motion in (("turning around", "turn_around"), ("looking back over its shoulder", "look_back"),
+                               ("do a 360", "full_spin"), ("spinning around", "spin")):
+            with self.subTest(prompt=prompt):
+                self.assertEqual(p.parse(prompt).spec.motion, motion)
+        self.assertEqual(p.problems(), [])
+
+    def test_the_editor_has_a_facing_row(self):
+        from app.vocab import vocab
+        ids = [c["id"] for c in vocab()["yaw"]]
+        self.assertEqual(ids[0], 0.0, "front first")
+        self.assertTrue({90.0, -90.0, 180.0} <= set(ids))
+
     def test_turning_motions_and_fallback_notes(self):
         doc, info = compose(StickerSpec(base="biscuit", motion="turn_around"))
         self.assertEqual(info["notes"], [])

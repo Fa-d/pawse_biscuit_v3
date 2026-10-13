@@ -986,3 +986,26 @@
 - {tag: misfire, prompt: "nice", expect: {motion: thumbs_up}}
 - {tag: misfire, prompt: "you", expect: {motion: point}}
 - {tag: misfire, prompt: "hug", expect: {motion: hug}}
+
+# ---------------------------------------------------------------- v5: which way it faces, and turning
+- {tag: views, prompt: "a fox from behind", expect: {yaw: 180}}
+- {tag: views, prompt: "fox seen from the back with a backpack", expect: {yaw: 180, accessories: [backpack]}}
+- {tag: views, prompt: "sleepy cat facing away", expect: {yaw: 180, face: [sleep, drowsy]}}
+- {tag: views, prompt: "fox with its back turned", expect: {yaw: 180}}
+- {tag: views, prompt: "fox in profile", expect: {yaw: 90}}
+- {tag: views, prompt: "side view of a bear waving", expect: {yaw: 90, base: bruno, motion: wave}}
+- {tag: views, prompt: "a fox drinking coffee, side view", expect: {yaw: 90, props: [mug]}}
+- {tag: views, prompt: "bunny facing left", expect: {yaw: -90, base: clover}}
+- {tag: views, prompt: "fox facing right with sunglasses", expect: {yaw: 90, accessories: [sunglasses]}}
+- {tag: views, prompt: "three quarter view of a panda", expect: {yaw: 40, base: bao}}
+- {tag: views, prompt: "fox turned to the left", expect: {yaw: -40}}
+- {tag: views, prompt: "fox facing the camera", expect: {yaw: 0}}
+- {tag: views, prompt: "fox looking left", expect: {yaw: 0, look: [-1.0, 0.0]}}
+- {tag: views, prompt: "fox turning around", expect: {motion: turn_around}}
+- {tag: views, prompt: "turn around", expect: {motion: turn_around}}
+- {tag: views, prompt: "looking back over its shoulder", expect: {motion: look_back}}
+- {tag: views, prompt: "glancing back at you", expect: {motion: look_back}}
+- {tag: views, prompt: "do a 360", expect: {motion: full_spin}}
+- {tag: views, prompt: "show the fox from every angle", expect: {motion: full_spin}}
+- {tag: views, prompt: "a fox spinning around", expect: {motion: spin}}
+- {tag: views, prompt: "whips around in surprise", expect: {motion: turn_around}}

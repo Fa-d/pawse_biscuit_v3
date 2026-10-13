@@ -32,6 +32,11 @@ _lock = threading.Lock()
 
 
 # ------------------------------------------------------------------ LLM step
+def _views():
+    """The view words' entries (lexicon `view:`): name -> yaw, e.g. {'front': 0, 'side': 90, 'back': 180}."""
+    return {name: float(e["yaw"]) for name, e in default_parser().lex["view"].items()}
+
+
 def _schema():
     enum = lambda xs: {"type": "string", "enum": list(xs)}
     return {
@@ -41,12 +46,13 @@ def _schema():
             "face": enum(VOCAB["face"]),
             "motion": enum(VOCAB["motion"]),
             "stance": enum(VOCAB["stance"]),
+            "view": enum(_views()),
             "props": {"type": "array", "items": enum(VOCAB["props"])},
             "effects": {"type": "array", "items": enum(VOCAB["effects"])},
             "accessories": {"type": "array", "items": enum(VOCAB["accessories"])},
             "unknown_concepts": {"type": "array", "items": {"type": "string"}},
         },
-        "required": ["base", "face", "motion", "stance", "props", "effects", "accessories", "unknown_concepts"],
+        "required": ["base", "face", "motion", "stance", "view", "props", "effects", "accessories", "unknown_concepts"],
         "additionalProperties": False,
     }
 
@@ -59,6 +65,7 @@ def _system():
         "and three things worn, only from the allowed values. Keep the mascot 'biscuit' (a fox) unless another animal is asked for. "
         "Prefer fewer props and effects over loosely related ones. "
         f"Motions: {m}. "
+        "View is which way the mascot faces: 'front' unless the description asks to see it from the side, from behind or turned. "
         "List any part of the request the allowed values cannot show (for example an object or a second character) in unknown_concepts."
     )
 
@@ -112,6 +119,8 @@ def _clean(data):
         allowed = {v.lower(): v for v in VOCAB[slot]}
         v = data.get(slot)
         out[slot] = allowed.get(v.lower()) if isinstance(v, str) else None
+    v = data.get("view")
+    out["view"] = v.lower() if isinstance(v, str) and v.lower() in _views() else None
     for slot in ("props", "effects", "accessories"):
         allowed = {v.lower(): v for v in VOCAB[slot]}
         vs = data.get(slot) if isinstance(data.get(slot), list) else []
@@ -170,6 +179,8 @@ def merge(llm: dict, rules: ParseResult) -> StickerSpec:
         spec.motion = llm["motion"]
     if llm.get("stance") and "poses" not in understood and not ("moods" in understood and spec.stance != "stand"):
         spec.stance = llm["stance"]
+    if llm.get("view") and "view" not in understood:
+        spec.yaw = _views()[llm["view"]]
     spec.props = (spec.props + [p for p in llm.get("props", []) if p not in spec.props])[:MAX_PROPS]
     spec.effects = (spec.effects + [e for e in llm.get("effects", []) if e not in spec.effects])[:MAX_EFFECTS]
     spec.accessories = (spec.accessories + [w for w in llm.get("accessories", []) if w not in spec.accessories])[:MAX_WEAR]
