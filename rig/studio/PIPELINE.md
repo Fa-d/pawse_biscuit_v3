@@ -3,7 +3,7 @@
 Every decision between a typed sentence and a downloaded file, in the order it happens, with the file that owns it
 and the knob that changes it. Rules make every decision. A model is consulted only when the rules don't understand
 a prompt, and only when that is switched on. `python -m studio.cli --rules` prints every numbered rule
-(P01–P34 reading, R01–R24 composing, S01–S09 scenes of two, L01–L13 and L15–L17 what the library guarantees).
+(P01–P35 reading, R01–R24 composing, S01–S09 scenes of two, L01–L13 and L15–L18 what the library guarantees).
 
 ## Contents
 
@@ -107,11 +107,11 @@ What the parser can match (`python -m studio.cli --list templates` and friends):
 | --- | --- | --- |
 | `templates/everyday.yaml`, `occasions.yaml` | 220 scenarios, each a spec plus a suggested caption | 3 |
 | `lexicon/moods.yaml` | 56 feelings: what they MEAN (a face) and SUGGEST (motion, effects, stance) | means 5, suggests 1.5 |
-| `lexicon/actions.yaml` | 98 doing words, each meaning a motion | means 5, suggests 2.2 |
+| `lexicon/actions.yaml` | 101 doing words, each meaning a motion | means 5, suggests 2.2 |
 | `lexicon/things.yaml` | 76 props, 43 effects, 56 worn items | means 5, suggests 2 |
 | `lexicon/poses.yaml`, `mascots.yaml` | 31 poses and stances; 14 mascots with 33 named variants | 6 |
 | `lexicon/colours.yaml` | 45 colours and 6 shade words | — |
-| `lexicon/core.yaml` | stopwords, fillers, negators, intensity, tempo, sides, gaze, words that only count alone | — |
+| `lexicon/core.yaml` | stopwords, fillers, negators, intensity, tempo, sides, gaze, which way it faces (`view`), words that only count alone | — |
 
 ## 2. Turning matches into a spec
 
@@ -129,8 +129,10 @@ everything after this point reads only the spec.
    before it with 'in' ("a scarf in red"); otherwise the fur ("purple kitty with coffee" is a purple cat). A colour
    before 'eyes' colours the eyes. Shade words change it (light blue, dark red, pastel pink, neon green). Some mascot
    words bring a fur colour (polar bear, golden retriever) unless a colour is named.
-5. **Sides, gaze, tempo (P26, P27).** 'left paw' puts the nearest held thing in that paw; 'looking up', 'side eye'
-   set the gaze; 'fast', 'slowly' the tempo.
+5. **Sides, gaze, view, tempo (P26, P27, P35).** 'left paw' puts the nearest held thing in that paw; 'looking up',
+   'side eye' set the gaze; 'from behind', 'side view', 'in profile', 'facing left', 'three-quarter view' set which way
+   it faces (`yaw`: 180, 90, -90, 40; the last view word said wins); 'fast', 'slowly' the tempo. Turning is a motion:
+   'turn around', 'looking back over its shoulder', 'do a 360'.
 6. **Intensity (P28).** Starts at 1.0, ×1.35 per strong word, ×0.65 per soft word, more for `!!!` and CAPITALS.
    Clamped to 0.5–1.6. Motions scale their amplitude by it.
 7. **Captions as hints (P31).** When only the caption says anything ("a fox saying 'good morning'"), its words hint at
@@ -158,7 +160,8 @@ already tried inside the parser.
 1. **Small model (optional).** Only when the LLM switch is on (`--llm` on the command line; `STUDIO_LLM=1` in the web
    app, signed-in users only, `STUDIO_LLM_DAILY` calls a day each). Claude Haiku (`STUDIO_LLM_MODEL`, default
    `claude-haiku-5-5`) must answer a JSON schema whose fields are lists of the registry's own names: face, motion,
-   stance, props, effects, accessories, plus `unknown_concepts` for what it can't show. It can't invent a pose or a prop.
+   stance, view (which way it faces: the lexicon's `view` entries), props, effects, accessories, plus `unknown_concepts`
+   for what it can't show. It can't invent a pose or a prop.
    - The rules still win. The model's answer only fills what the rules left empty, and its props, effects and worn
      items go after the rules' own.
    - Answers are cached by normalised prompt in `cache/llm.json`; the same wording never costs twice.
@@ -215,7 +218,10 @@ for) come from the registry, so a new item obeys the rules without touching them
    unless the face or the motion keeps the eyes closed or special.
 4. **Props, effects, things worn.** Added as layers. Everything is placed from the mascot's own data (crown, top,
    collar, eyes, ears, nose, mouth, paw anchors), so it fits all 14 mascots and follows every head turn (L06, L08).
-   Things a motion acts with stay upright (L07).
+   Things a motion acts with stay upright (L07). Seen from the side or from behind (a mascot with drawn views), each
+   worn thing is drawn for that view (`library/wear_views.py`, or left out where it can't be seen, as glasses from
+   behind), effects on the face move onto the drawn head, and paws pinned to something reach it with the arm that
+   view draws (L18).
 5. **Frame 0 is the best frame.** The loop is turned so that frame 0 shows the motion's key pose with every effect at
    its fullest. The PNG still, Telegram's first frame and WhatsApp's resting frame are all frame 0.
 6. **Caption layout** (`studio/caption.py`). Text drawn as vector outlines of Fredoka SemiBold, one line if it fits
@@ -324,6 +330,8 @@ Prompt: `super sleepy purple kitty with coffee and a scarf saying 'monday again'
 | A motion's paws, sitting, swaps, what it brings | its `@motion(...)` in `library/motions_*.py` | composer rules R02–R09 |
 | A prop's paw, pose, colours, cost | its `@prop(...)` in `library/props_*.py` | paw claims, tints, size budget |
 | Where a worn item sits, what it covers | its `@wear(zone=..., covers=...)` in `library/wear_*.py` | clashes (R12), mouth and eyes (R13, R14) |
+| How a worn item looks from the side or behind | `library/wear_views.py`; `views=` in its `@wear(...)` | drawn views (L18) |
+| Which words turn the mascot | `view:` in `parse/lexicon/core.yaml` (a `yaw` and a chip `label` each) | P35, the editor's Facing row |
 | Which effects share a place | `zone=` in `@effect(...)`; `ONE_PER_ZONE` in `registry.py` | R16 |
 | How much a sticker may carry | `BUDGET` in `rules.py` | R17, Telegram size |
 | A mascot's favourite snack | `snack=` in `base(...)` in `library/looks.py` | what "eating" brings |

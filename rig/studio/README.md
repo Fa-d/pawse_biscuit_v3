@@ -1,7 +1,7 @@
 # Sticker studio
 
 Type a sentence and get a sticker of a mascot as PNG, WebP, a Telegram `.tgs` file, a WhatsApp animated WebP, a GIF
-or Lottie JSON. The rig draws everything. No AI is needed for prompts the word lists understand (all 941 test
+or Lottie JSON. The rig draws everything. No AI is needed for prompts the word lists understand (all 962 test
 prompts). Claude Haiku is an optional fallback for the rest, and it can only answer with names the rig knows.
 
 What changed in v4, with the bugs it fixed: [CHANGES.md](CHANGES.md). Every decision, step by step: [PIPELINE.md](PIPELINE.md).
@@ -29,14 +29,15 @@ python3 -m venv .venv && .venv/bin/pip install -r studio/requirements.txt
 
 `--set slot=value` changes one slot after parsing, as an editor chip would (`base`, `face`, `motion`, `stance`, `tail`,
 `arm_L`, `arm_R`, `props`, `effects`, `accessories`, `caption`, `caption_style`, `caption_pos`, `intensity`, `seconds`,
-`look`, `tempo`). `--llm` turns on the Haiku fallback; it needs Anthropic credentials.
+`look`, `tempo`, `yaw`: which way it faces, in degrees, 90 the side and 180 the back). `--llm` turns on the Haiku
+fallback; it needs Anthropic credentials.
 
 ## What's in the library
 
 | Kind | Count | Examples |
 |---|---|---|
 | Mascots | 14 | fox, cat, bear, dog, bunny, panda, tiger, koala, raccoon, pig, frog, penguin, mouse, lion (plus fur colours: "polar bear", "golden retriever", "black cat" …) |
-| Motions | 99 | wave, dance, clap, facepalm, shrug, salute, laugh, sob, roar, boxing, faint, run, dab, eat, sip, type, read, phone call, selfie, sing, toast, paint, game, lift weights, strum a guitar, juggle, magic, brush teeth, knock … |
+| Motions | 102 | wave, dance, clap, facepalm, shrug, salute, laugh, sob, roar, boxing, faint, run, dab, eat, sip, type, read, phone call, selfie, sing, toast, paint, game, lift weights, strum a guitar, juggle, magic, brush teeth, knock, turn around, look back, full spin … |
 | Held props | 76 | mug, boba, pizza, burger, ice cream, cake, laptop, phone, book, microphone, guitar, camera, balloon, flag, rose, sign, gift, trophy, diya, lantern, red envelope, pumpkin, wand … |
 | Effects | 43 | confetti, hearts, rain, snow, sparkles, fireworks, money rain, zzz, idea bulb, lightning, rainbow, butterflies, spotlight, speed lines, waterfall tears … |
 | Things worn | 56 | party hat, crown, santa hat, witch hat, grad cap, sunglasses, heart glasses, headphones, scarf, bow tie, hero cape, angel wings, halo, devil horns, tutu, lei … |
@@ -44,7 +45,12 @@ python3 -m venv .venv && .venv/bin/pip install -r studio/requirements.txt
 | Scenarios | 220 | good morning, monday, birthday, thank you, sorry, get well, exam, payday, Eid, Diwali, Lunar New Year, Christmas, Holi, Pohela Boishakh … |
 
 Every item is checked on every mascot (`python -m studio.qa`): it builds, its loop has no seam, nothing touches the
-canvas edge after framing, and the `.tgs` file fits Telegram's 64 KB.
+canvas edge after framing, and the `.tgs` file fits Telegram's 64 KB. A mascot with drawn side and back views (v5:
+Biscuit) is checked again in each of them: every motion, every worn thing (each drawn for that view) and the effects
+on its face.
+
+Which way it faces (v5): "from behind", "side view", "in profile", "facing left", "three-quarter view" turn the mascot
+(`yaw`); "turn around", "looking back over its shoulder", "do a 360" are motions. See `../V5.md`.
 
 ## Files
 
@@ -57,9 +63,9 @@ canvas edge after framing, and the `.tgs` file fits Telegram's 64 KB.
 | `compose.py` | Spec → plan (rules) → clip → the rig bakes Lottie; picks the still frame |
 | `framing.py` | Measures where the sticker draws and scales it to fill the canvas without touching the edge |
 | `parse/text.py` | From what people type to clean tokens: emoji, emoticons, laughter, stretched words, chat shorthand, translations |
-| `parse/lexicon/*.yaml` | What words mean: moods, actions, things, mascots, poses, colours, small words, translations (`../lexicon.yaml` is for your own words) |
+| `parse/lexicon/*.yaml` | What words mean: moods, actions, things, mascots, poses, colours, small words, which way it faces, translations (`../lexicon.yaml` is for your own words) |
 | `parse/templates/*.yaml` | Scenario recipes: everyday life and occasions (`../templates.yaml` is for your own) |
-| `parse/parser.py` | Rules P01–P33: longest phrase first, negation, weights, colours to items, sides, captions, confidence |
+| `parse/parser.py` | Rules P01–P35: longest phrase first, negation, weights, colours to items, sides, captions, confidence, one mascot, which way it faces |
 | `parse/morph.py`, `typo.py` | Word forms ("clapping" → clap) and safe typo fixes (real words are never "fixed") |
 | `parse/fallback.py` | Haiku with a JSON schema of the rig's own names; cached; misses logged to `cache/misses.jsonl` |
 | `caption.py` | Captions as vector paths (fontTools), so every player shows them; outline or bubble, top or bottom |
@@ -70,6 +76,7 @@ canvas edge after framing, and the `.tgs` file fits Telegram's 64 KB.
 | `scene_spec.py`, `scene_compose.py` | v5: stickers of two mascots (SceneSpec, scene rules S01-S09, composing); see `../V5.md` |
 | `qa_scene.py`, `snapshots.py` | v5: every pair of mascots as a scene (L12); one-mascot output byte-identical to v4 (L17) |
 | `library/motions_turn.py` | v5: turning motions (turn around, look back, full spin); `StickerSpec.yaw` turns any sticker (`../V5.md`) |
+| `library/wear_views.py` | v5: every worn thing seen from the side and from behind, drawn from the view's own anchors |
 
 ## Adding to it
 
@@ -83,7 +90,9 @@ canvas edge after framing, and the `.tgs` file fits Telegram's 64 KB.
   `paw_alt=`), and which effects it draws itself (`draws=`). Then give it words under `actions:` in the lexicon.
 - **A prop, effect or worn item:** a factory in `library/props_*.py`, `effects_*.py` or `wear_*.py` with `@prop`,
   `@effect` or `@wear`. Draw from the mascot's own data (crown, eyes, ears, `top`, `collar`), never from fixed
-  coordinates, so it fits every mascot. Then add its words to `parse/lexicon/things.yaml`.
+  coordinates, so it fits every mascot. Then add its words to `parse/lexicon/things.yaml`. A worn item also draws
+  itself from the side and from behind: when `wear_views.view_of(char)` is set, draw it for that view (helpers in
+  `wear_views.py`: the near eye, `head_span`, `body_span`, `neck_point`) and list the views in `@wear(views=...)`.
 - **A mascot:** see `rig/RIG.md` → "Adding a mascot", then `base(...)` in `library/looks.py` and its words in
   `parse/lexicon/mascots.yaml`.
 
@@ -93,7 +102,7 @@ Run the checks below after any change; the web editor's chips (`app/vocab.py`) p
 
 ```
 .venv/bin/python -m studio.cli --check                                       # lexicon and registry agree
-.venv/bin/python -m studio.tests.eval_parser --min 0.98                      # 941 golden prompts, no LLM
+.venv/bin/python -m studio.tests.eval_parser --min 0.98                      # 962 golden prompts, no LLM
 .venv/bin/python -m unittest studio.tests.test_library studio.tests.test_studio   # loops, limits, rules, captions
 .venv/bin/python -m studio.qa --kind motions --only strum                    # one item on every mascot
 .venv/bin/python -m studio.qa --sheet out/wear.png --kind wear --bases leo   # look at it
@@ -101,7 +110,8 @@ Run the checks below after any change; the web editor's chips (`app/vocab.py`) p
 .venv/bin/python -m studio.qa_scene                                          # v5: all 196 pairs of mascots as scenes
 .venv/bin/python -m unittest studio.tests.test_v5                            # v5: scenes, SceneSpec, parser notes
 .venv/bin/python -m studio.qa --kind views                                   # v5: turned stickers on every mascot (L15)
-.venv/bin/python -m unittest studio.tests.test_views                         # v5: the view rig, drawn views, yaw in specs
+.venv/bin/python -m studio.qa --kind turned                                  # v5: motions, worn things, face effects in drawn views (L18)
+.venv/bin/python -m unittest studio.tests.test_views                         # v5: the view rig, drawn views, pins, wear, yaw
 ```
 
 Captions use Fredoka SemiBold (`studio/assets/font.ttf`, SIL Open Font License, licence next to it). Set `STUDIO_FONT`

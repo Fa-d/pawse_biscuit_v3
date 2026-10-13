@@ -99,7 +99,7 @@ For a mascot with different proportions, start from a copy:
 | Drawings | `head_shapes`, `ear_shapes`, `tuft_shapes`, `eye_shapes`, `nose_shapes`, `blush_shapes`, `face_static`, `body_shapes`, `hand_shapes`, `foot_shapes` | Return Lottie shape groups. `geom.smooth(points)` makes a smooth outline through points. |
 | How floppy it is | `dyn` | Overrides for the follow-through springs, for example `{"ear.freq": 1.6, "ear.y": 0.8}` for long soft ears. |
 | Turning (v5, optional) | `view_head`, `view_body`, `view_tail`, `view_warp_max` | How the front drawing turns: dome depth and snout, the tail's angle, how far the warp goes (45 degrees). The defaults suit every mascot so far. |
-| Drawn views (v5, optional) | `view_data("side")`, `view_data("back")` | What differs from the front when seen from the side (facing right) or from behind: drawings, anchors for both sides, limb directions, options. Without them a mascot holds its three-quarter turn. See `V5.md` and Biscuit. |
+| Drawn views (v5, optional) | `view_data("side")`, `view_data("back")` | What differs from the front when seen from the side (facing right) or from behind: drawings, anchors for both sides (eyes, nose, mouth, cheeks, ears, tuft, crown, shoulders, hips, feet), limb directions, options. Pins, paw points, scene points, worn things and face effects follow these anchors by themselves. Without them a mascot holds its three-quarter turn. See `V5.md` and Biscuit. |
 
 Paws are drawn with the wrist at (0, 0) and the fingertips towards +y. Like a paw print, the toe beans
 go at the fingertip end and the big pad nearer the wrist. `thumb_at` is where the thumb sits when the
@@ -268,6 +268,7 @@ python3 tools/variants.py poses.png "wave:face=smiley;arm.R=wave_hi;tail=low" "s
 python3 tools/turnaround.py biscuit                                            # every view the rig draws, with the front's guide lines
 python3 -m studio.qa --bases leo                                              # every sticker item on one mascot
 python3 -m studio.qa --kind views                                             # turned stickers on every mascot; drawn views keep the guides
+python3 -m studio.qa --kind turned                                            # every motion, worn thing and face effect in each drawn view
 ```
 
 ## Compatibility notes
