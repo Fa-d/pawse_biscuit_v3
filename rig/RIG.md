@@ -2,7 +2,7 @@
 
 This is the generator behind the Biscuit animations. It exists so that the next mascot gets every
 animation for free: you describe the new character once, run one command, and all 23 clips are
-built for it, and the sticker studio (`studio/`) can use it with its 99 motions, 76 props, 43 effects and
+built for it, and the sticker studio (`studio/`) can use it with its 102 motions, 76 props, 43 effects and
 56 things to wear.
 
 ## The one rule
@@ -24,6 +24,8 @@ mascot/
   props.py                phone, bell, clipboard, badge, gift, cloud, sparkles, confetti...
   rig.py                  the list of channels, the 41 expressions, stances, automatic follow-through
   character.py            turns a pose into Lottie layers (shared by every mascot)
+  views.py                v5: turning away from the viewer (the front drawing turned, drawn side and back views)
+  scene.py                v5: two mascots in one file
   clip.py                 keyframe tracks, easing, springs
   lottie.py               Lottie writer and the keyframe fitter
   effects.py              flame, check burst, sparkle, star burst
@@ -96,6 +98,8 @@ For a mascot with different proportions, start from a copy:
 | Tail | `tail` | `base`, `length`, `bones`, width `profile`, `tip_from`, and the named `poses`. Set `tail = None` for a mascot without one. |
 | Drawings | `head_shapes`, `ear_shapes`, `tuft_shapes`, `eye_shapes`, `nose_shapes`, `blush_shapes`, `face_static`, `body_shapes`, `hand_shapes`, `foot_shapes` | Return Lottie shape groups. `geom.smooth(points)` makes a smooth outline through points. |
 | How floppy it is | `dyn` | Overrides for the follow-through springs, for example `{"ear.freq": 1.6, "ear.y": 0.8}` for long soft ears. |
+| Turning (v5, optional) | `view_head`, `view_body`, `view_tail`, `view_warp_max` | How the front drawing turns: dome depth and snout, the tail's angle, how far the warp goes (45 degrees). The defaults suit every mascot so far. |
+| Drawn views (v5, optional) | `view_data("side")`, `view_data("back")` | What differs from the front when seen from the side (facing right) or from behind: drawings, anchors for both sides, limb directions, options. Without them a mascot holds its three-quarter turn. See `V5.md` and Biscuit. |
 
 Paws are drawn with the wrist at (0, 0) and the fingertips towards +y. Like a paw print, the toe beans
 go at the fingertip end and the big pad nearer the wrist. `thumb_at` is where the thumb sits when the
@@ -150,6 +154,9 @@ bowing at the knee when it is shorter than its rest length.
   `foot.R.rot`, `foot.R.sole` (1 = pads towards the viewer), `foot.R.s`, `leg.R.bend` (1 knees out, -1 knees together)
 - **Tail:** named poses through `c.tailpose(...)`, `c.wag(...)`, plus `tail.len`, `tail.fluff`,
   `tail.front` (0 behind the body, 1 in the lap, 2 in front of the feet)
+- **Turning away (v5):** `body.yaw` (degrees; 0 faces the viewer, + turns the face towards screen-right, 90 the side,
+  180 the back) and `head.yaw` (the head's turn on top of the body's). Up to 45 degrees the front drawing turns by
+  itself on every mascot; past 67.5 and 135 a mascot with drawn views snaps to its side and back drawings (`V5.md`).
 
 Angles for arms: 0 hangs straight down, positive swings outwards and up, the same number for both sides.
 Tail headings: 0 points right, positive turns up.
@@ -214,6 +221,8 @@ Leg moves in `clips/moves.py`:
 | `M.kick(c, side, t)` | A little sideways kick |
 | `M.patter(c, t0, t1)` | Happy feet: quick alternating steps |
 | `M.walk(c, period)` | Walking towards the viewer on the spot, with a waddle |
+| `M.turn(c, t, to, dur)` | Turns the whole mascot to `to` degrees (v5), the head leading |
+| `M.look_back(c, t0, t1, at)` | Turns the head back over the shoulder from t0 to t1 (v5) |
 
 Register a clip in `CLIPS` with its frame count. Looping clips must end where they start; the build stops
 with a message naming the channel if one does not. Easing names: `io`, `soft`, `out`, `in`, `back`
@@ -256,8 +265,9 @@ python3 tools/smoke_test.py out/smoke                                         # 
 python3 tools/tailcheck.py                                                    # how low and how far right each tail pose reaches
 python3 tools/render_sheet.py --out sheet.png --n 12 --cols 6 dist/biscuit/biscuit_wave.json
 python3 tools/variants.py poses.png "wave:face=smiley;arm.R=wave_hi;tail=low" "sit:stance=sit;tail=ground;arms=belly"
-python3 tools/turnaround.py biscuit                                            # guide lines for drawing a mascot's other views
+python3 tools/turnaround.py biscuit                                            # every view the rig draws, with the front's guide lines
 python3 -m studio.qa --bases leo                                              # every sticker item on one mascot
+python3 -m studio.qa --kind views                                             # turned stickers on every mascot; drawn views keep the guides
 ```
 
 ## Compatibility notes

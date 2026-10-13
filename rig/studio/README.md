@@ -53,7 +53,7 @@ canvas edge after framing, and the `.tgs` file fits Telegram's 64 KB.
 | `spec.py` | `StickerSpec`, the one structure the parser, editor and composer share; its allowed names come from the registry |
 | `registry.py` | Every motion, prop, effect, worn item, face and mascot, registered once with the facts other parts need (paws, place on the body, colour choices, best still frame, size cost) |
 | `library/` | The drawings and the acting, registered with `@motion`, `@prop`, `@effect`, `@wear`, `face(...)`, `base(...)` |
-| `rules.py` | Composer rules R01–R23: paws, motion swaps, worn-item clashes, effect zones, size budget, tail, tempo, colours |
+| `rules.py` | Composer rules R01–R24: paws, motion swaps, worn-item clashes, effect zones, size budget, tail, tempo, colours, views a mascot has not got |
 | `compose.py` | Spec → plan (rules) → clip → the rig bakes Lottie; picks the still frame |
 | `framing.py` | Measures where the sticker draws and scales it to fill the canvas without touching the edge |
 | `parse/text.py` | From what people type to clean tokens: emoji, emoticons, laughter, stretched words, chat shorthand, translations |
@@ -69,6 +69,7 @@ canvas edge after framing, and the `.tgs` file fits Telegram's 64 KB.
 | `motions.py`, `accessories.py`, `extras.py` | v3 names, kept as views of the registry |
 | `scene_spec.py`, `scene_compose.py` | v5: stickers of two mascots (SceneSpec, scene rules S01-S09, composing); see `../V5.md` |
 | `qa_scene.py`, `snapshots.py` | v5: every pair of mascots as a scene (L12); one-mascot output byte-identical to v4 (L17) |
+| `library/motions_turn.py` | v5: turning motions (turn around, look back, full spin); `StickerSpec.yaw` turns any sticker (`../V5.md`) |
 
 ## Adding to it
 
@@ -99,6 +100,8 @@ Run the checks below after any change; the web editor's chips (`app/vocab.py`) p
 .venv/bin/python -m studio.snapshots --check                                 # v5: one-mascot output unchanged (379 items)
 .venv/bin/python -m studio.qa_scene                                          # v5: all 196 pairs of mascots as scenes
 .venv/bin/python -m unittest studio.tests.test_v5                            # v5: scenes, SceneSpec, parser notes
+.venv/bin/python -m studio.qa --kind views                                   # v5: turned stickers on every mascot (L15)
+.venv/bin/python -m unittest studio.tests.test_views                         # v5: the view rig, drawn views, yaw in specs
 ```
 
 Captions use Fredoka SemiBold (`studio/assets/font.ttf`, SIL Open Font License, licence next to it). Set `STUDIO_FONT`

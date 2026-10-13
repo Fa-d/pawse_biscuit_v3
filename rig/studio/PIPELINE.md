@@ -3,7 +3,7 @@
 Every decision between a typed sentence and a downloaded file, in the order it happens, with the file that owns it
 and the knob that changes it. Rules make every decision. A model is consulted only when the rules don't understand
 a prompt, and only when that is switched on. `python -m studio.cli --rules` prints every numbered rule
-(P01–P34 reading, R01–R23 composing, S01–S09 scenes of two, L01–L13 and L17 what the library guarantees).
+(P01–P34 reading, R01–R24 composing, S01–S09 scenes of two, L01–L13 and L15–L17 what the library guarantees).
 
 ## Contents
 
@@ -35,7 +35,7 @@ flowchart TD
     LLMON -- no --> DEF[Best guess + log miss<br/>'did you mean' hints] --> SPEC
     SPEC --> EDIT[Editor chips change the spec]
     EDIT --> SPEC
-    SPEC --> RES[Composer rules R01-R23<br/>paws, motion swaps, wear zones, effect zones,<br/>size budget, tail, tempo, colours]
+    SPEC --> RES[Composer rules R01-R24<br/>paws, motion swaps, wear zones, effect zones,<br/>size budget, tail, tempo, colours, views]
     RES --> CLIP[Act it out on a clip<br/>motion, wag, blink, props, effects, wear]
     CLIP --> ROLL[Turn the loop so frame 0 is the best frame]
     ROLL --> RIG[Mascot rig bakes Lottie]
@@ -183,6 +183,7 @@ for) come from the registry, so a new item obeys the rules without touching them
 | R05 | A motion done with a thing that has its own use becomes that use: waving a flag, cheering with a glass raises a toast, dancing with a microphone sings, with a guitar strums |
 | R06 | A prop that needs a stance gets it (feet apart either side of a gift box) |
 | R07 | A motion that needs legs is swapped for one that works sitting |
+| R24 | v5, runs here: a turned mascot (a `yaw`, or a turning motion) shows the drawn side and back views it has; without them it turns as far as three-quarter, and looking back over its shoulder becomes looking around |
 | R08 | A held prop the motion acts with goes with the motion: a snack to the mouth, a mug is sipped, a phone to the ear |
 | R09 | The motion gets the paws that are left; with too few it becomes its fewer-paws version, else a bounce |
 | R10 | Unclaimed paws take the spec's pose, else rest on the knees cross-legged, else hang |
@@ -207,8 +208,9 @@ for) come from the registry, so a new item obeys the rules without touching them
 1. **Loop length.** `seconds × 60` frames (default 120). Every periodic movement uses a period that fits a whole number
    of times into the loop (`m.per()`), every one-shot finishes before the loop ends, and every key ends on its start
    value, so the last frame equals the first at any length or tempo (L01–L03).
-2. **Motion.** One of 99 functions in `studio/library/motions_*.py`, each given the paws, stance, mascot and the props
-   it acts with. Each returns its best still frame (jump apex, wave at the top of its swing, the bite …).
+2. **Motion.** One of 102 functions in `studio/library/motions_*.py`, each given the paws, stance, mascot and the props
+   it acts with. Each returns its best still frame (jump apex, wave at the top of its swing, the bite …). A spec's
+   `yaw` (v5) is added on top: the mascot is turned that many degrees for the whole loop (`mascot/views.py`).
 3. **Tail wag and blink.** The motion's wag strength, halved when sitting, × intensity. One blink at 80 % of the loop
    unless the face or the motion keeps the eyes closed or special.
 4. **Props, effects, things worn.** Added as layers. Everything is placed from the mascot's own data (crown, top,
