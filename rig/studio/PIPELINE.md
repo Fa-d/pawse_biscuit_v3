@@ -3,7 +3,7 @@
 Every decision between a typed sentence and a downloaded file, in the order it happens, with the file that owns it
 and the knob that changes it. Rules make every decision. A model is consulted only when the rules don't understand
 a prompt, and only when that is switched on. `python -m studio.cli --rules` prints every numbered rule
-(P01–P33 reading, R01–R23 composing, L01–L11 what the library guarantees).
+(P01–P34 reading, R01–R23 composing, S01–S09 scenes of two, L01–L13 and L17 what the library guarantees).
 
 ## Contents
 
@@ -93,6 +93,9 @@ The prompt is read by rules only (`studio/parse/parser.py`). No model is called 
    - A phrase belongs to one lexicon entry only, and may also belong to a template; both fire.
    - Some words mean something only as the whole prompt (P14, `alone:` in `core.yaml`): "nice" alone is a thumbs up,
      "nice fox" is a fox. "No!" alone is a head shake (P15).
+   - One mascot per sticker for now (P34): a second animal named ("a cat hugging a dog") or two of one ("two foxes")
+     is left out with a note, struck through in the editor, and counted as not understood. Scenes of two mascots
+     exist (`studio/scene_compose.py`, see `../V5.md`); the parser starts filling them with duets in v5 phase 3.
 5. **Negation (P16–P18).** `not`, `no`, `never`, `without` … negate the next thing said in the same clause; in a list
    after a negator every item is negated. A negated feeling becomes its partner ("not happy" is sad, "not scared" is
    determined). A negated prop, effect or worn item is kept out, even when a scenario would bring it ("birthday

@@ -67,6 +67,8 @@ canvas edge after framing, and the `.tgs` file fits Telegram's 64 KB.
 | `export.py` | rlottie rasteriser, white die-cut edge, messenger size limits |
 | `qa.py` | Library checks on every mascot and contact sheets |
 | `motions.py`, `accessories.py`, `extras.py` | v3 names, kept as views of the registry |
+| `scene_spec.py`, `scene_compose.py` | v5: stickers of two mascots (SceneSpec, scene rules S01-S09, composing); see `../V5.md` |
+| `qa_scene.py`, `snapshots.py` | v5: every pair of mascots as a scene (L12); one-mascot output byte-identical to v4 (L17) |
 
 ## Adding to it
 
@@ -94,6 +96,9 @@ Run the checks below after any change; the web editor's chips (`app/vocab.py`) p
 .venv/bin/python -m unittest studio.tests.test_library studio.tests.test_studio   # loops, limits, rules, captions
 .venv/bin/python -m studio.qa --kind motions --only strum                    # one item on every mascot
 .venv/bin/python -m studio.qa --sheet out/wear.png --kind wear --bases leo   # look at it
+.venv/bin/python -m studio.snapshots --check                                 # v5: one-mascot output unchanged (379 items)
+.venv/bin/python -m studio.qa_scene                                          # v5: all 196 pairs of mascots as scenes
+.venv/bin/python -m unittest studio.tests.test_v5                            # v5: scenes, SceneSpec, parser notes
 ```
 
 Captions use Fredoka SemiBold (`studio/assets/font.ttf`, SIL Open Font License, licence next to it). Set `STUDIO_FONT`

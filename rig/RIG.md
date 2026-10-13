@@ -239,6 +239,13 @@ on exactly the first frame of `biscuit_idle`. `biscuit_sleepy_alt_bubble` does t
 time in eight) play one alternate once, then go back to the regular clip. `biscuit_hop_in` also ends
 on the first frame of `biscuit_idle`.
 
+## Scenes of two mascots
+
+`mascot/scene.py` (v5) bakes two mascots into one file: layer names prefixed per mascot (`a/neck`, `b/neck`), a stage
+null per mascot, layers ordered by the depth bands of `Character.DEPTH`, lifts of one layer over the other mascot, and
+paws pinned to a named part of the other mascot (`Scene.point`). `Character.build()` runs in three stages for it
+(`prepare`, `finish`, `bake`) and writes the same files as before. How to use it: `V5.md`.
+
 ## Checks
 
 ```
@@ -249,6 +256,7 @@ python3 tools/smoke_test.py out/smoke                                         # 
 python3 tools/tailcheck.py                                                    # how low and how far right each tail pose reaches
 python3 tools/render_sheet.py --out sheet.png --n 12 --cols 6 dist/biscuit/biscuit_wave.json
 python3 tools/variants.py poses.png "wave:face=smiley;arm.R=wave_hi;tail=low" "sit:stance=sit;tail=ground;arms=belly"
+python3 tools/turnaround.py biscuit                                            # guide lines for drawing a mascot's other views
 python3 -m studio.qa --bases leo                                              # every sticker item on one mascot
 ```
 
