@@ -29,7 +29,7 @@
 }
 .demo-prompt .caret { display: inline-block; width: 2px; height: 1.1em; background: var(--ink); vertical-align: -0.15em; margin-left: 1px; }
 .demo-sticker { width: min(420px, 100%); aspect-ratio: 1; filter: url(#diecut); }
-.demo-sticker svg { display: block; }
+.demo-sticker img { display: block; width: 100%; height: 100%; }
 
 .band { max-width: 1120px; margin: 0 auto; padding: 64px 24px; }
 /* full-width tint, content lined up with the other bands (1072 px of content inside a 1120 px band) */
@@ -52,7 +52,8 @@
 @media (max-width: 640px) { .cast { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } }
 .cast li { text-align: center; }
 .cast-sticker { aspect-ratio: 1; background: var(--mat); border-radius: var(--r-big); padding: 8%; }
-.cast-sticker > div, .cast-sticker svg { filter: url(#diecut); }
+.cast-sticker img { display: block; width: 100%; height: 100%; filter: url(#diecut); }
+.demo-sticker img, .cast-sticker img { pointer-events: none; user-select: none; -webkit-user-drag: none; }   /* no drag or save menu (a nuisance, not protection) */
 .cast h3 { font: 600 1.25rem var(--display); margin: 12px 0 0; }
 .cast p { margin: 0; color: var(--ink-soft); }
 

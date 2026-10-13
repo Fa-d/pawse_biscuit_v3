@@ -29,6 +29,7 @@
   <ul>
     <li><strong>Stripe</strong> handles payments. We never see or keep card numbers; we keep the Stripe customer reference that links your account to your plan.</li>
     <li><strong>Our email provider</strong> delivers password resets and invites.</li>
+    <li><strong>Cloudflare</strong> carries every visit to the studio, and its Turnstile check on our forms (signup, waitlist, feedback, password reset) tells people from bots. It looks at your browser and connection, not at what you type.</li>
     <li><strong>Google</strong> confirms who you are if you choose to sign in with Google. We receive only your email address and that account number, not your name, photo or contacts.</li>
     <li><strong>Anthropic</strong>, only when the optional AI fallback is on: a sentence the studio couldn't understand may be sent to Anthropic's Claude model to pick from our sticker options.</li>
   </ul>
@@ -38,7 +39,7 @@
   <p>One cookie keeps you signed in. It lasts 30 days or until you sign out.</p>
 
   <h2>Your choices</h2>
-  <p>You can delete saved stickers at any time in My stickers. To delete your account and everything linked to it, <span id="contact-line">write to us</span>.</p>
+  <p>You can delete saved stickers at any time in My stickers. To delete your account and everything linked to it, open your account and choose Delete my account; it takes effect at once. You can also <span id="contact-line">write to us</span>. Records of payments stay with Stripe, as the law requires.</p>
 </main>
 <footer class="foot"><p>Pawse Studio</p><nav aria-label="Legal"><a href="/privacy">Privacy</a></nav></footer>
 <script src="/static/privacy.js" defer></script>

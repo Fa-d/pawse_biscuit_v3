@@ -14,6 +14,24 @@ from . import db
 from .config import settings
 
 COOKIE = "sid"
+
+
+def cookie_name(base):
+    """__Host- cookies can only be set over HTTPS, for this exact host and path /, so no other site or subdomain can
+    plant or overwrite them.  Plain names over local http, where browsers refuse the prefix."""
+    return f"__Host-{base}" if settings.secure_cookies else base
+
+
+def set_cookie(resp, base, value, seconds):
+    resp.set_cookie(cookie_name(base), value, max_age=seconds, path="/", httponly=True, samesite="lax", secure=settings.secure_cookies)
+
+
+def clear_cookie(resp, base):
+    resp.delete_cookie(cookie_name(base), path="/", httponly=True, samesite="lax", secure=settings.secure_cookies)
+
+
+def get_cookie(request, base):
+    return request.cookies.get(cookie_name(base))
 SESSION_DAYS = 30
 EMAIL = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,255}\.[^@\s]{2,}$")
 _N, _R, _P = 2 ** 14, 8, 1
@@ -34,6 +52,9 @@ def check_password(pw: str, stored: str) -> bool:
     return hmac.compare_digest(got.hex(), h)
 
 
+DUMMY_HASH = hash_password(secrets.token_urlsafe(16))      # compared when no password exists, so timing reveals nothing
+
+
 def digest(token):
     return hashlib.sha256(token.encode()).hexdigest()       # the database never holds a usable session token
 
@@ -41,22 +62,23 @@ def digest(token):
 def start_session(resp: Response, user_id: int):
     token = secrets.token_urlsafe(32)
     with db.connect() as c:
+        c.execute("DELETE FROM sessions WHERE user_id=? AND expires<?", (user_id, db.now()))   # tidy this person's old ones
         c.execute("INSERT INTO sessions (token, user_id, expires) VALUES (?, ?, ?)",
                   (digest(token), user_id, db.now() + SESSION_DAYS * 86400))
-    resp.set_cookie(COOKIE, token, max_age=SESSION_DAYS * 86400, httponly=True, samesite="lax", secure=settings.secure_cookies)
+    set_cookie(resp, COOKIE, token, SESSION_DAYS * 86400)
 
 
 def end_session(request: Request, resp: Response):
-    token = request.cookies.get(COOKIE)
+    token = get_cookie(request, COOKIE)
     if token:
         with db.connect() as c:
             c.execute("DELETE FROM sessions WHERE token=?", (digest(token),))
-    resp.delete_cookie(COOKIE)
+    clear_cookie(resp, COOKIE)
 
 
 def current_user(request: Request):
     """The signed-in user row, or None."""
-    token = request.cookies.get(COOKIE)
+    token = get_cookie(request, COOKIE)
     if not token:
         return None
     with db.connect() as c:
@@ -91,6 +113,26 @@ def throttle(*keys):
 def failed(*keys):
     for k in keys:
         _fails[k].append(time.time())
+
+
+# ---- rate limits on the expensive calls (composing and rendering are CPU work): every call counts, unlike throttle.
+# Kept in memory per instance; Cloudflare's edge rule is the shared backstop (see DEPLOY.md).
+_hits = defaultdict(deque)
+
+
+def limit(key, n, seconds):
+    if not settings.rate_limits:
+        return
+    t = time.time()
+    if len(_hits) > 50_000:                             # forget idle keys now and then, so memory stays bounded
+        for k in [k for k, q in _hits.items() if not q or q[-1] < t - 3600]:
+            del _hits[k]
+    q = _hits[key]
+    while q and q[0] < t - seconds:
+        q.popleft()
+    if len(q) >= n:
+        raise HTTPException(429, "Slow down a moment, then try again.", headers={"Retry-After": str(int(q[0] + seconds - t) + 1)})
+    q.append(t)
 
 
 def validate_signup(email: str, password: str):

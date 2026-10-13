@@ -36,6 +36,8 @@ repository.
 | `PRICE_PRO_LABEL`, `PRICE_PACK_LABEL` | `$4.99 a month`, `$2.99` | What the pricing panel says; keep in step with the Stripe prices |
 | `STUDIO_ORIGIN_KEY` | none | When set, requests without a matching `X-Origin-Key` header get 404, so only the Cloudflare Worker can reach the app |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | none | Sign in with Google (an OAuth "Web application" client). Without both, the studio shows only the email form |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET` | none | Cloudflare Turnstile on signup, waitlist, feedback and password reset. Without both, no check |
+| `STUDIO_RATE_LIMITS` | on | Per-address and per-account limits on making stickers; tests turn it off |
 | `STUDIO_INVITE_ONLY` | off | Beta: signing up needs an invite code, and the landing page shows a waitlist |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` | none, 587 | Your email provider's SMTP server. Without `SMTP_HOST`, emails are written to `outbox/` next to the database instead of being sent |
 | `SMTP_SECURITY` | `starttls` | `starttls`, `ssl` (port 465) or `none` |
@@ -62,6 +64,11 @@ Payments stay switched off, and the buy buttons explain that, until all four Str
    before launch. It only collects once you have an active registration, so turning it on alone isn't enough.
 
 Plans and credits change only from these signed webhook events, never from the page Stripe sends people back to.
+
+## Security
+
+Previews are pictures drawn on the server; the browser never receives Lottie. The full list of protections, and
+where each lives, is in `../DEPLOY.md` → Security.
 
 ## Sign in with Google
 

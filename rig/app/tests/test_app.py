@@ -14,18 +14,20 @@ import tempfile
 import time
 import unittest
 import zipfile
+
+from PIL import Image
 from urllib.parse import parse_qs, urlparse
 
 _tmp = tempfile.mkdtemp()
 os.environ.update({
     "STUDIO_DB": os.path.join(_tmp, "test.db"), "STUDIO_DEV": "1", "STUDIO_CACHE": _tmp, "FREE_DAILY_EXPORTS": "2",
     "PACK_CREDITS": "20", "STRIPE_API_KEY": "rk_test_dummy", "STRIPE_WEBHOOK_SECRET": "whsec_test_dummy",
-    "STRIPE_PRICE_PRO": "price_pro_dummy", "STRIPE_PRICE_PACK": "price_pack_dummy",
+    "STRIPE_PRICE_PRO": "price_pro_dummy", "STRIPE_PRICE_PACK": "price_pack_dummy", "STUDIO_RATE_LIMITS": "0",
 })
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from app import billing, db, google  # noqa: E402
+from app import auth, billing, db, google  # noqa: E402
 from app.main import app  # noqa: E402
 
 SPEC = {"face": "joy", "motion": "bounce"}
@@ -89,10 +91,16 @@ class Making(unittest.TestCase):
         self.assertTrue(r["confident"])
 
     def test_preview_is_marked_until_you_pay(self):
-        anon = TestClient(app).post("/api/preview", json={"spec": SPEC}).json()
-        self.assertIn("watermark", layer_names(anon["lottie"]))
-        pro = new_client("pro-preview@example.com", plan="pro").post("/api/preview", json={"spec": SPEC}).json()
-        self.assertNotIn("watermark", layer_names(pro["lottie"]))
+        anon = TestClient(app).post("/api/preview", json={"spec": SPEC})
+        self.assertEqual(anon.headers["content-type"], "image/webp")
+        self.assertIn("notes", json.loads(anon.headers["x-preview"]))
+        pro_client = new_client("pro-preview@example.com", plan="pro")
+        stills = [cl.post("/api/preview", json={"spec": SPEC, "kind": "still"}) for cl in (TestClient(app), pro_client)]
+        self.assertEqual([r.headers["content-type"] for r in stills], ["image/png"] * 2)
+        marked, clean = (Image.open(io.BytesIO(r.content)).convert("RGBA") for r in stills)
+        self.assertEqual(marked.size, (400, 400))
+        changed = sum(1 for a, b in zip(marked.getdata(), clean.getdata()) if a != b)
+        self.assertGreater(changed, 2000)                     # the mark is in the pixels, not a layer to delete
 
     def test_bad_specs_are_refused(self):
         c = TestClient(app)
@@ -285,7 +293,10 @@ class Pages(unittest.TestCase):
         self.assertEqual(c.get("/static/app.js").headers["cache-control"], "public, max-age=300")
         ex = c.get("/api/examples").json()
         self.assertGreaterEqual(len(ex), 4)
-        self.assertNotIn("watermark", layer_names(ex[0]["lottie"]))
+        self.assertEqual(set(ex[0]), {"prompt", "base", "image", "still"})
+        img = c.get(ex[0]["image"])
+        self.assertEqual((img.headers["content-type"], "immutable" in img.headers["cache-control"]), ("image/webp", True))
+        self.assertEqual(c.get("/api/examples/../../main.py").status_code, 404)
         self.assertEqual(c.post("/api/feedback", json={"kind": "wrong", "prompt": "x", "note": "it waved", "spec": SPEC}).status_code, 200)
         self.assertEqual(c.post("/api/feedback", json={"kind": "rant"}).status_code, 422)
 
@@ -299,6 +310,117 @@ class Pages(unittest.TestCase):
             self.assertEqual(c.get("/", headers={"X-Origin-Key": "from-the-worker"}).status_code, 200)
         finally:
             object.__setattr__(settings, "origin_key", "")
+
+
+class Protection(unittest.TestCase):
+    """The art never reaches the browser as Lottie; limits, headers, cookies, bot checks and account deletion."""
+
+    def setUp(self):
+        from app.config import settings
+        self.settings = settings
+
+    def test_no_lottie_reaches_the_browser(self):
+        c = TestClient(app)
+        bodies = [c.post("/api/preview", json={"spec": SPEC}).content, c.post("/api/preview", json={"spec": SPEC, "kind": "still"}).content,
+                  c.get("/api/examples").content, c.get(c.get("/api/examples").json()[0]["image"]).content]
+        for b in bodies:
+            self.assertNotIn(b'"layers"', b)
+        self.assertEqual(c.post("/api/export", json={"spec": SPEC, "format": "lottie"}).status_code, 401)
+        for page_ in ("/", "/studio"):
+            self.assertFalse("lottie-web" in c.get(page_).text, page_)                    # no player script on the pages
+
+    def test_thumbs_are_private(self):
+        owner, other = new_client("thumb-owner@example.com"), new_client("thumb-other@example.com")
+        sid = owner.post("/api/stickers", json={"spec": SPEC, "prompt": "joy"}).json()["id"]
+        r = owner.get(f"/api/stickers/{sid}/thumb.png")
+        self.assertEqual((r.status_code, r.headers["content-type"], Image.open(io.BytesIO(r.content)).size), (200, "image/png", (200, 200)))
+        self.assertEqual(other.get(f"/api/stickers/{sid}/thumb.png").status_code, 404)
+        self.assertEqual(TestClient(app).get(f"/api/stickers/{sid}/thumb.png").status_code, 401)
+
+    def test_rate_limits(self):
+        object.__setattr__(self.settings, "rate_limits", True)
+        auth._hits.clear()
+        try:
+            c = TestClient(app)
+            codes = [c.post("/api/parse", json={"prompt": "happy fox"}).status_code for _ in range(61)]
+            self.assertEqual((codes.count(200), codes[-1]), (60, 429))
+            self.assertIn("retry-after", c.post("/api/parse", json={"prompt": "happy fox"}).headers)
+        finally:
+            object.__setattr__(self.settings, "rate_limits", False)
+            auth._hits.clear()
+
+    def test_body_limit(self):
+        c = TestClient(app)
+        self.assertEqual(c.post("/api/parse", json={"prompt": "x" * 70_000}).status_code, 413)
+
+        def chunks():                                          # no Content-Length, like the Cloudflare Worker sends
+            yield b'{"prompt": "'
+            for _ in range(80):
+                yield b"x" * 1024
+            yield b'"}'
+        r = c.post("/api/parse", content=chunks(), headers={"Content-Type": "application/json"})
+        self.assertIn(r.status_code, (400, 413))
+
+    def test_headers(self):
+        c = TestClient(app)
+        h = c.get("/").headers
+        for name in ("strict-transport-security", "permissions-policy", "cross-origin-opener-policy", "cross-origin-resource-policy"):
+            self.assertIn(name, h)
+        self.assertIn("object-src 'none'", h["content-security-policy"])
+        self.assertNotIn("cdnjs", h["content-security-policy"])
+        self.assertEqual(c.get("/api/me").headers["cache-control"], "no-store")
+
+    def test_host_only_cookie(self):
+        object.__setattr__(self.settings, "base_url", "https://stickers.example")
+        try:
+            c = TestClient(app, base_url="https://testserver")
+            r = c.post("/api/signup", json={"email": "host-cookie@example.com", "password": "correct horse"})
+            self.assertIn("__Host-sid=", r.headers["set-cookie"])
+            self.assertIn("Secure", r.headers["set-cookie"])
+            self.assertEqual(c.get("/api/me").json()["user"]["email"], "host-cookie@example.com")
+        finally:
+            object.__setattr__(self.settings, "base_url", "http://localhost:8000")
+
+    def test_turnstile(self):
+        from app import turnstile
+        object.__setattr__(self.settings, "turnstile_site_key", "site")
+        object.__setattr__(self.settings, "turnstile_secret", "secret")
+        real = turnstile.verify
+        turnstile.verify = lambda token, ip: token == "good"
+        try:
+            c = TestClient(app)
+            self.assertEqual(c.get("/api/me").json()["turnstile"], "site")
+            body = {"email": "human@example.com", "source": "landing"}
+            self.assertEqual(c.post("/api/waitlist", json=body).status_code, 400)
+            self.assertEqual(c.post("/api/waitlist", json=dict(body, turnstile="bot")).status_code, 400)
+            self.assertEqual(c.post("/api/waitlist", json=dict(body, turnstile="good")).status_code, 200)
+            self.assertEqual(c.post("/api/signup", json={"email": "h2@example.com", "password": "correct horse"}).status_code, 400)
+        finally:
+            turnstile.verify = real
+            object.__setattr__(self.settings, "turnstile_site_key", "")
+            object.__setattr__(self.settings, "turnstile_secret", "")
+
+    def test_delete_account(self):
+        c = new_client("leaving@example.com")
+        c.post("/api/stickers", json={"spec": SPEC, "prompt": "bye"})
+        uid = db_user("leaving@example.com")["id"]
+        self.assertEqual(c.post("/api/account/delete", json={"email": "someone@example.com"}).status_code, 400)
+        self.assertEqual(c.post("/api/account/delete", json={"email": "Leaving@Example.com"}).status_code, 200)
+        self.assertIsNone(c.get("/api/me").json()["user"])
+        with db.connect() as conn:
+            for table in ("users", "sessions", "stickers"):
+                col = "id" if table == "users" else "user_id"
+                self.assertIsNone(conn.execute(f"SELECT 1 FROM {table} WHERE {col}=?", (uid,)).fetchone(), table)
+        new_client("leaving@example.com")                       # the address is free again
+        pro = new_client("pro-leaving@example.com", plan="pro")
+        with db.connect() as conn:
+            conn.execute("UPDATE users SET stripe_subscription='sub_123' WHERE email='pro-leaving@example.com'")
+        self.assertEqual(pro.post("/api/account/delete", json={"email": "pro-leaving@example.com"}).status_code, 409)
+
+
+def db_user(email):
+    with db.connect() as conn:
+        return conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
 
 
 class GoogleSignIn(unittest.TestCase):

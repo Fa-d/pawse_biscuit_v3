@@ -10,7 +10,7 @@ visitor ─► stickers.liveintently.app ─► Cloudflare Worker pawse-stickers
 | App | Cloud Run service `pawse-studio`, region `us-central1` | 2 vCPU / 2 GiB, scales to zero, at most 2 instances, 8 requests per instance |
 | Image | `us-central1-docker.pkg.dev/think-fast-62678/pawse/studio:<tag>` | Built by Cloud Build from `rig/` (the `Dockerfile`; `.gcloudignore` decides what is uploaded) |
 | Database | Cloudflare D1 `d6c84803-8d51-4c8d-b986-ac46e13b5455`, over the REST API | `STUDIO_D1=rest:<account>/<db>`; Cloud Run has no lasting disk, so SQLite files would vanish |
-| Secrets | Secret Manager: `cloudflare-d1-token`, `studio-origin-key`, `google-client-secret` | Read only by the service account `pawse-studio@think-fast-62678.iam.gserviceaccount.com` |
+| Secrets | Secret Manager: `cloudflare-d1-token`, `studio-origin-key`, `google-client-secret`, `turnstile-secret` | Read only by the service account `pawse-studio@think-fast-62678.iam.gserviceaccount.com` |
 | Front door | Worker `pawse-stickers-front` (`cloudflare/wrangler.jsonc`) | Adds the visitor's IP (`X-Client-IP`) and the shared `X-Origin-Key`; the app answers 404 without that key |
 | Cost guard | Billing budget "Pawse Studio guard", $5 a month | Emails at 50%, 90% and 100% |
 
@@ -71,3 +71,26 @@ Logs: `gcloud run services logs read pawse-studio --region=us-central1 --limit=1
 - A cold start (the first visit after about 15 quiet minutes) takes about 6 seconds. `--min-instances=1` removes it, but
   an always-on instance uses up the free tier.
 - Login and email limits are counted per instance, so with 2 instances someone could get up to twice the limit.
+
+## Security
+
+What protects what, and where it lives:
+
+| Concern | Protection | Where |
+| --- | --- | --- |
+| Copying the art | The browser only ever gets pictures: previews are a 400 px animated WebP or PNG drawn on the server, with the mark burned into the pixels for unpaid previews. Lottie, TGS and full-size files leave only as paid downloads | `app/render.py` `preview_image`, `/api/preview`, `plans.decide` |
+| Old scripts after a deploy | Static links carry a content hash (`?v=`), so no cache serves an old script with a new page | `app/main.py` `page()` |
+| Scraping and floods | Per-address and per-account limits on parse (60/min), preview (40/min, 600/h), export (20/min), packs (5/min), thumbnails (120/min); bodies over 64 KB refused; Cloudflare edge rule as backstop | `RATES` in `app/main.py`, `auth.limit`, `BodyLimit` |
+| Bots on forms | Cloudflare Turnstile on signup, waitlist, feedback, password reset (on when `TURNSTILE_SITE_KEY` and the `turnstile-secret` are set) | `app/turnstile.py`, `static/human.js` |
+| Password guessing | Failure limits per email and address; the slow hash runs even for unknown emails, so timing reveals nothing | `auth.throttle`, `login` |
+| Sessions | Random token in a `__Host-` httpOnly, Secure, SameSite=Lax cookie; only its sha256 is stored; expired ones removed | `app/auth.py` |
+| Cross-site requests | State-changing calls must be JSON (no cross-site forms), SameSite cookies, `form-action 'self'` | `guard` middleware |
+| Page injection | CSP `script-src 'self'` + Turnstile only, no inline script, `object-src 'none'`, `base-uri 'none'`, framing denied | `CSP` in `app/main.py` |
+| Transport | HSTS, Cloudflare TLS, the Cloud Run address refuses requests without the Worker's key | `guard`, `STUDIO_ORIGIN_KEY` |
+| Account data | Self-serve deletion removes the account, sessions, stickers, usage, pending sign-ins and waitlist entry | `/api/account/delete` |
+
+Limits of what any website can do: anything on screen can be screen-recorded. The guarantee is that the source files
+and clean full-size pictures never reach someone who hasn't paid.
+
+Dependencies: `uvx pip-audit -r requirements-server.txt` (clean on 2026-10-13).
+

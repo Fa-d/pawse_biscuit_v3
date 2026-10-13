@@ -35,6 +35,10 @@ class Settings:
     # can skip Cloudflare by calling the Cloud Run address directly (and fake the client address the limits rely on)
     origin_key: str = field(default_factory=lambda: os.environ.get("STUDIO_ORIGIN_KEY", ""))
     invite_only: bool = field(default_factory=lambda: _flag("STUDIO_INVITE_ONLY"))   # beta: signup needs an invite code
+    # Cloudflare Turnstile on signup, waitlist, feedback and reset forms; both empty = no check
+    turnstile_site_key: str = field(default_factory=lambda: os.environ.get("TURNSTILE_SITE_KEY", ""))
+    turnstile_secret: str = field(default_factory=lambda: os.environ.get("TURNSTILE_SECRET", ""))
+    rate_limits: bool = field(default_factory=lambda: _flag("STUDIO_RATE_LIMITS", "1"))   # off only in tests
     # Sign in with Google: an OAuth "Web application" client; its redirect URI is <base_url>/auth/google/callback
     google_client_id: str = field(default_factory=lambda: os.environ.get("GOOGLE_CLIENT_ID", ""))
     google_client_secret: str = field(default_factory=lambda: os.environ.get("GOOGLE_CLIENT_SECRET", ""))

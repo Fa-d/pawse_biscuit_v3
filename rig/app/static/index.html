@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&family=Roboto:wght@500&display=swap">
 <link rel="stylesheet" href="/static/style.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie_svg.min.js" defer></script>
+<script src="/static/human.js" defer></script>
 <script src="/static/app.js" defer></script>
 </head>
 <body>
@@ -109,6 +109,7 @@
       <label>Email <input type="email" name="email" required autocomplete="email"></label>
       <label>Password <input type="password" name="password" required minlength="8" autocomplete="current-password"></label>
       <label id="invite-label" hidden>Invite code <input name="invite" autocomplete="off" spellcheck="false" placeholder="PAWS-XXXXXX"></label>
+      <div class="human" aria-live="polite"></div>
       <p class="form-error" id="auth-error" role="alert"></p>
       <button type="submit" class="primary" id="auth-submit">Sign in</button>
     </form>
@@ -125,12 +126,14 @@
       <button type="submit" class="primary">Finish signing in</button>
     </form>
     <p class="switch">No code? <button type="button" class="link" id="google-waitlist">Join the waitlist</button></p>
+    <div class="human" aria-live="polite"></div>
   </div>
   <div id="account-forgot" hidden>
     <h2>Reset your password</h2>
     <p class="dialog-lead">Enter your account's email. We'll send a link to choose a new password; it works for an hour.</p>
     <form id="forgot-form" class="stack">
       <label>Email <input type="email" name="email" required autocomplete="email"></label>
+      <div class="human" aria-live="polite"></div>
       <p class="form-error" id="forgot-error" role="alert"></p>
       <button type="submit" class="primary">Send the link</button>
     </form>
@@ -152,6 +155,17 @@
       <button type="button" class="secondary" id="manage-billing" hidden>Manage subscription</button>
       <button type="button" class="secondary" id="sign-out">Sign out</button>
     </div>
+    <p class="switch"><button type="button" class="link danger" id="delete-open">Delete my account</button></p>
+  </div>
+  <div id="account-delete" hidden>
+    <h2>Delete your account</h2>
+    <p class="dialog-lead">This deletes your account, your saved stickers and your download history. It can't be undone. Unused credits are lost.</p>
+    <form id="delete-form" class="stack">
+      <label>Type your email to confirm <input name="email" type="email" required autocomplete="off"></label>
+      <p class="form-error" id="delete-error" role="alert"></p>
+      <button type="submit" class="primary danger">Delete my account</button>
+    </form>
+    <p class="switch"><button type="button" class="link" id="delete-back">Keep my account</button></p>
   </div>
 </dialog>
 
@@ -200,6 +214,7 @@
       <label><input type="radio" name="kind" value="bug"> Something is broken</label>
     </fieldset>
     <label>What did you expect? <textarea name="note" rows="3" maxlength="500"></textarea></label>
+    <div class="human" aria-live="polite"></div>
     <button type="submit" class="primary">Send</button>
   </form>
 </dialog>

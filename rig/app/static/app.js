@@ -1,5 +1,6 @@
 // Pawse Studio editor. The spec object is the single source of truth: the prompt fills it, chips change it,
-// and every change asks the server for a new Lottie preview, which lottie-web plays here.
+// and every change asks the server for a new preview: a picture (animated WebP, or a PNG still with reduced motion)
+// drawn on the server, so the sticker's vector source never reaches the browser.
 "use strict";
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -57,6 +58,7 @@ async function start() {
   const [vocab, me] = await Promise.all([getJSON("/api/vocab"), getJSON("/api/me")]);
   state.vocab = vocab;
   state.me = me;
+  Human.setKey(me.turnstile);
   buildIdeas();
   buildEditor();
   renderAccount();
@@ -260,11 +262,13 @@ async function runPreview() {
   stage.classList.add("busy");
   $("#stage-state").textContent = "Making your sticker…";
   try {
-    const r = await postJSON("/api/preview", { spec: state.spec });
+    const res = await api("POST", "/api/preview", { spec: state.spec, kind: reduceMotion ? "still" : "anim" });
+    const meta = JSON.parse(res.headers.get("X-Preview") || "{}");
+    const blob = await res.blob();
     if (seq !== state.seq) return;                     // a newer change is already on its way
-    play(r.lottie, r.still, $("#sticker"));
+    show(blob, $("#sticker"), "Sticker preview");
     stage.classList.add("has-sticker");
-    renderNotes(r.notes);
+    renderNotes(meta.notes || []);
     $("#open-report").hidden = false;
   } catch (e) {
     if (seq === state.seq) toast(e.message);
@@ -273,14 +277,13 @@ async function runPreview() {
   }
 }
 
-function play(data, still, box, keep = true) {
-  if (keep && state.anim) state.anim.destroy();
-  box.replaceChildren();
-  const anim = lottie.loadAnimation({ container: box, renderer: "svg", loop: true, autoplay: !reduceMotion && keep, animationData: data,
-    rendererSettings: { preserveAspectRatio: "xMidYMid meet" } });
-  if (reduceMotion || !keep) anim.addEventListener("DOMLoaded", () => anim.goToAndStop(still, true));
-  if (keep) state.anim = anim;
-  return anim;
+// A picture in a box: a Blob from the server (its object URL is freed when replaced) or a URL.
+function show(src, box, alt) {
+  const old = box.querySelector("img");
+  if (old && old.dataset.blob) URL.revokeObjectURL(old.src);
+  const img = el("img", { alt, draggable: false, decoding: "async" });
+  if (src instanceof Blob) { img.src = URL.createObjectURL(src); img.dataset.blob = "1"; } else img.src = src;
+  box.replaceChildren(img);
 }
 
 function renderNotes(notes) {
@@ -350,7 +353,9 @@ const GOOGLE_ERRORS = {
 };
 
 function showAccountView(view) {
-  for (const v of ["out", "in", "forgot", "reset", "google"]) $(`#account-${v}`).hidden = v !== view;
+  for (const v of ["out", "in", "forgot", "reset", "google", "delete"]) $(`#account-${v}`).hidden = v !== view;
+  const box = $(`#account-${view} .human`);
+  if (box && (view !== "out" || authMode === "signup")) Human.prepare(box);   // signing in needs no check
 }
 
 function openAccount(mode, lead) {
@@ -385,6 +390,7 @@ function renderAuthChoices() {
 function setAuthMode(mode) {
   authMode = mode;
   const up = mode === "signup";
+  if (up) Human.prepare($("#auth-form .human"));
   $("#account-title").textContent = up ? "Create a free account" : "Sign in";
   $("#account-lead").textContent = up ? `Free accounts download ${state.me.free_daily} stickers a day.` : "Download stickers and keep the ones you make.";
   $("#auth-submit").textContent = up ? "Create account" : "Sign in";
@@ -471,13 +477,7 @@ async function openCollection() {
       } })));
     sheet.append(li);
   }
-  for (const [i, it] of items.entries()) {             // one at a time, so the first ones show quickly
-    if (!dlg.open) break;
-    try {
-      const r = await postJSON("/api/preview", { spec: it.spec });
-      play(r.lottie, r.still, $$("#sheet .thumb")[i], false);
-    } catch (_) { /* leave the tile empty */ }
-  }
+  for (const [i, it] of items.entries()) show(`/api/stickers/${it.id}/thumb.png`, $$("#sheet .thumb")[i], it.prompt || "Saved sticker");
 }
 
 async function downloadPack(platform, animated) {
@@ -518,7 +518,12 @@ function bindUI() {
     $("#auth-error").textContent = "";
     try {
       const body = { email: f.get("email"), password: f.get("password") };
-      if (authMode === "signup") body.invite = f.get("invite") || "";
+      if (authMode === "signup") {
+        const box = $(".human", e.target);
+        body.invite = f.get("invite") || "";
+        body.turnstile = await Human.token(box);
+        Human.reset(box);
+      }
       await postJSON(authMode === "signup" ? "/api/signup" : "/api/login", body);
       $("#account-dialog").close();
       e.target.reset();
@@ -548,7 +553,10 @@ function bindUI() {
   });
   $("#google-waitlist").addEventListener("click", async () => {
     try {
-      const r = await postJSON("/api/google/waitlist", {});
+      const box = $("#account-google .human");
+      const turnstile = await Human.token(box);
+      Human.reset(box);
+      const r = await postJSON("/api/google/waitlist", { turnstile });
       $("#account-dialog").close();
       await refreshMe();
       toast(`You're on the waitlist as ${r.email}. Your invite will come by email.`);
@@ -556,12 +564,29 @@ function bindUI() {
       $("#google-invite-error").textContent = err.message;
     }
   });
+  $("#delete-open").addEventListener("click", () => { $("#delete-error").textContent = ""; showAccountView("delete"); });
+  $("#delete-back").addEventListener("click", () => showAccountView("in"));
+  $("#delete-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      await postJSON("/api/account/delete", { email: new FormData(e.target).get("email") });
+      e.target.reset();
+      $("#account-dialog").close();
+      await refreshMe();
+      toast("Your account and everything in it is deleted.");
+    } catch (err) {
+      $("#delete-error").textContent = err.message;
+    }
+  });
   $("#forgot-open").addEventListener("click", () => { $("#forgot-error").textContent = ""; showAccountView("forgot"); });
   $("#forgot-back").addEventListener("click", () => showAccountView("out"));
   $("#forgot-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     try {
-      await postJSON("/api/password/forgot", { email: new FormData(e.target).get("email") });
+      const box = $(".human", e.target);
+      const turnstile = await Human.token(box);
+      Human.reset(box);
+      await postJSON("/api/password/forgot", { email: new FormData(e.target).get("email"), turnstile });
       $("#forgot-error").textContent = "";
       e.target.replaceChildren(el("p", { textContent: "If that email has an account, the link is on its way. Check your inbox and spam folder." }));
     } catch (err) {
@@ -580,12 +605,15 @@ function bindUI() {
       $("#reset-error").textContent = err.message;
     }
   });
-  $("#open-report").addEventListener("click", () => $("#report-dialog").showModal());
+  $("#open-report").addEventListener("click", () => { $("#report-dialog").showModal(); Human.prepare($("#report-form .human")); });
   $("#report-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
     try {
-      await postJSON("/api/feedback", { kind: f.get("kind"), note: f.get("note") || "", prompt: state.prompt, spec: state.spec || {} });
+      const box = $(".human", e.target);
+      const turnstile = await Human.token(box);
+      Human.reset(box);
+      await postJSON("/api/feedback", { kind: f.get("kind"), note: f.get("note") || "", prompt: state.prompt, spec: state.spec || {}, turnstile });
       $("#report-dialog").close();
       e.target.reset();
       toast("Thanks. We read every report.");

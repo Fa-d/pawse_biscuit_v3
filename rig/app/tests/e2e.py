@@ -31,13 +31,13 @@ def main(base, out):
             page.screenshot(path=os.path.join(out, f"{name}.png"))
 
         page.goto(base + "/")
-        expect(page.locator("#demo-sticker svg")).to_be_visible(timeout=30000)
-        expect(page.locator("#cast li .cast-sticker svg")).to_have_count(3)
+        expect(page.locator("#demo-sticker img")).to_be_visible(timeout=30000)
+        expect(page.locator("#cast li .cast-sticker img")).to_have_count(3)
         page.wait_for_timeout(1500)
         page.screenshot(path=os.path.join(out, "00-landing.png"), full_page=True)
         page.click("text=Make your first sticker")
         expect(page).to_have_url(base + "/studio")
-        expect(page.locator("#sticker svg")).to_be_visible(timeout=20000)
+        expect(page.locator("#sticker img")).to_be_visible(timeout=20000)
         step("01-first-load")
 
         page.fill("#prompt", "grumpy cat with sunglasses saying 'no.'")
