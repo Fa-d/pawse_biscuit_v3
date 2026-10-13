@@ -88,7 +88,11 @@ PARSER_RULES = [
     ("P32", "A motion suggests its own face when nothing else sets one (eating looks happy, sobbing cries)."),
     ("P33", "A prompt is understood when something in it means a sticker part and few words are left unknown; unknown words get "
             "a 'did you mean' suggestion."),
+    ("P34", "One mascot is drawn per sticker for now: a second animal named ('a cat hugging a dog'), or two of one ('two foxes'), "
+            "is left out with a note that says so, and counts as not understood."),
 ]
+# words before a mascot that mean more than one of it ("two foxes", "a pair of cats")
+PLURAL_WORDS = {"two", "2", "both", "pair", "couple", "twins", "twin", "duo", "three", "3", "few", "several", "many"}
 FILLERS = {"a", "an", "the", "my", "your", "his", "her", "its", "their", "our", "some"}   # dropped from phrases and prompts alike
 
 QUOTES = "\"“”‘’'«»„‚「」『』"
@@ -148,6 +152,7 @@ class Match:
     negated: bool = False
     typed: str = ""         # what was typed when it differs ('clapping', 'slepy')
     end: int = 0
+    dropped: bool = False   # understood, but left out of the sticker (a second mascot, P34)
 
 
 @dataclass
@@ -161,16 +166,20 @@ class ParseResult:
     score: float = 1.0                                    # share of the meaningful words that were understood
     suggestions: dict = field(default_factory=dict)       # unknown word -> a lexicon word it resembles
     fixed: dict = field(default_factory=dict)             # typed word -> word read (typos and word forms)
+    notes: list = field(default_factory=list)             # what was understood but could not be used, in plain words (P34)
 
     def explain(self):
         lines = [f"source: {self.source}   confident: {self.confident}   understood: {self.score:.0%}   template: {self.template or '-'}"]
         for m in self.matches:
             typed = f"  (typed {m.typed!r})" if m.typed else ""
-            lines.append(f"  {m.phrase!r:<22} -> {m.section}:{m.name}{'  (negated)' if m.negated else ''}{typed}")
+            flags = ("  (negated)" if m.negated else "") + ("  (left out)" if m.dropped else "")
+            lines.append(f"  {m.phrase!r:<22} -> {m.section}:{m.name}{flags}{typed}")
         if self.unknown:
             lines.append(f"  not understood: {', '.join(self.unknown)}")
         if self.suggestions:
             lines.append("  did you mean: " + ", ".join(f"{k} -> {v}" for k, v in self.suggestions.items()))
+        for n in self.notes:
+            lines.append(f"  note: {n}")
         return "\n".join(lines)
 
 
@@ -588,25 +597,67 @@ class Parser:
         elif auto_caption and template and self.tpl[template].get("caption"):
             spec.caption = Caption(self.tpl[template]["caption"])
         spec.validate()
+        notes, dropped_words = self._one_mascot(spec, used, words)
 
         # how much was understood
         content = [t.text for t in words if t.text not in self.stop and t.text not in self.neg and t.text != BREAK and not t.text.isdigit()
                    and len(t.text) > 1]
         unknown = [w for w, tk in zip([t.text for t in words], taken) if not tk and w in content]
-        understood = sum(len(m.phrase.split()) for m in used if m.section not in ("strong", "weak"))
+        understood = sum(len(m.phrase.split()) for m in used if m.section not in ("strong", "weak") and not m.dropped)
         has_core = core or hint_mode or any(m.section in ("bases", "colours", "look") for m in used) or bool(caption)
         confident = has_core and (len(unknown) <= max(1.0, 1.5 * understood) if (core or hint_mode) else not unknown)
-        score_ = understood / max(1, understood + len(unknown))
+        score_ = understood / max(1, understood + len(unknown) + dropped_words)
         suggestions = {}
         for w in unknown:
             if not is_word(w):
                 near = self._near(w)
                 if near:
                     suggestions[w] = near
-        res = ParseResult(spec, used, unknown, template, confident, score=round(score_, 2), suggestions=suggestions, fixed=fixed)
+        res = ParseResult(spec, used, unknown, template, confident, score=round(score_, 2), suggestions=suggestions, fixed=fixed,
+                          notes=notes)
         return res
 
     # ---------------------------------------------------------------- helpers
+    def _one_mascot(self, spec, used, words):
+        """P34: a sticker draws one mascot for now.  Every other mascot named is marked as left out, and a note says what was
+        kept; 'two foxes' or 'foxes' draws one fox and says so.  Returns (notes, number of words left out)."""
+        kept = spec.base
+        kept_as, others, plural, dropped_words = None, [], False, 0
+        for m in used:
+            if m.section != "bases" or m.negated:
+                continue
+            entry = self.lex["bases"][m.name]
+            if self._split("bases", entry)[0].get("base", m.name) != kept:
+                m.dropped = True
+                dropped_words += len(m.phrase.split())
+                singular = self._singular(m.phrase, entry)
+                if singular not in others:
+                    others.append(singular)
+                continue
+            kept_as = kept_as or self._singular(m.phrase, entry)
+            before = {words[k].text for k in range(max(0, m.pos - 2), m.pos)}
+            if before & PLURAL_WORDS or self._singular(m.phrase, entry) != m.phrase:
+                plural = True
+
+        animal = kept_as or (REG.bases[kept].animal if kept in REG.bases else kept)
+        notes = []
+        if others:
+            left = others[0] if len(others) == 1 else ", ".join(others[:-1]) + " and " + others[-1]
+            notes.append(f"one mascot fits in a sticker for now, so it's the {animal}; the {left} "
+                         f"{'is' if len(others) == 1 else 'are'} left out")
+        elif plural:
+            notes.append(f"one mascot fits in a sticker for now, so there's one {animal}")
+        return notes, dropped_words
+
+    @staticmethod
+    def _singular(phrase, entry):
+        """'foxes' -> 'fox', 'polar bears' -> 'polar bear', 'kitties' -> 'kitty' when the singular is one of the entry's first
+        three words (its plain nouns; later words include sounds such as 'meows'); anything else as it is."""
+        nouns = [str(w) for w in entry.get("words", [])[:3]]
+        for w in nouns:
+            if phrase in (w + "s", w + "es") or (w.endswith("y") and phrase == w[:-1] + "ies"):
+                return w
+        return phrase
     def _split(self, section, entry):
         """(means, suggests) of a lexicon entry.  v3 entries have one `set:`: the slots the section owns are meant,
         the rest suggested.  v4 entries may say `means:` and `suggests:` themselves."""

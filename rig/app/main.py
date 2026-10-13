@@ -632,8 +632,9 @@ def parse_prompt(body: Prompt, request: Request):
         with db.connect() as c:
             db.add_usage(c, user["id"], "llm")
     return {"spec": r.spec.to_dict(), "confident": r.confident, "source": r.source, "template": r.template,
-            "understood": [{"phrase": m.phrase, "as": m.section, "name": m.name, "negated": m.negated} for m in r.matches],
-            "unknown": r.unknown}
+            "understood": [{"phrase": m.phrase, "as": m.section, "name": m.name, "negated": m.negated, "dropped": m.dropped}
+                           for m in r.matches],
+            "unknown": r.unknown, "notes": r.notes}
 
 
 class SpecBody(BaseModel):

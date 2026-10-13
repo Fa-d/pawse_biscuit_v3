@@ -140,7 +140,7 @@ function renderUnderstood(r) {
     line.append("Understood ");
     r.understood.forEach((m, i) => {
       if (i) line.append(", ");
-      const word = m.negated ? el("s", { textContent: m.phrase }) : el("mark", { textContent: m.phrase });
+      const word = m.negated || m.dropped ? el("s", { textContent: m.phrase }) : el("mark", { textContent: m.phrase });
       line.append(word, ` as ${SECTION_WORD[m.as] || m.as}`);
     });
     line.append(".");
@@ -148,6 +148,9 @@ function renderUnderstood(r) {
   }
   if (r.unknown.length) {
     box.append(el("p", { className: "unsure", textContent: `Didn't use: ${r.unknown.join(", ")}.` }));
+  }
+  for (const note of r.notes || []) {
+    box.append(el("p", { className: "unsure", textContent: `${note.charAt(0).toUpperCase()}${note.slice(1)}.` }));
   }
   if (!r.confident) {
     box.append(el("p", { className: "unsure", textContent: "Not sure what you meant, so here's a friendly default. Try other words, or pick from the options below." }));
