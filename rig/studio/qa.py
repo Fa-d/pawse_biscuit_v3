@@ -38,6 +38,10 @@ GUARANTEES = [
     ("L09", "Every item is checked on every mascot, standing and (when it can) sitting."),
     ("L10", "Every motion is checked at 1, 1.5 and 3 seconds."),
     ("L11", "The original app's 23 clips are drawn exactly as before (byte-identical files)."),
+    ("L12", "Every pair of mascots builds as a scene of two that loops, stays off the canvas edge and fits 64 KB "
+            "(python -m studio.qa_scene; duets join the check in phase 3)."),
+    ("L13", "A paw held on another mascot stays within 4 px of its target (studio/tests/test_v5.py)."),
+    ("L17", "One-mascot stickers, the app's clips and the small effects stay byte-identical to v4 (python -m studio.snapshots --check)."),
 ]
 
 SEAM_MAX = 0.08          # mean absolute difference (0..255) allowed between the first and the last frame

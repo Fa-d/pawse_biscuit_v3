@@ -3,7 +3,8 @@
 
     python3 -m studio.cli "sleepy fox with coffee saying 'monday'" --out out/
     python3 -m studio.cli "happy birthday" --set face=surprised --set effects=confetti,sparkles --formats png,tgs,awebp
-    python3 -m studio.cli --spec spec.json --out out/          # skip the parser: render a saved spec
+    python3 -m studio.cli --spec spec.json --out out/          # skip the parser: render a saved spec (or a scene of two)
+    python3 -m studio.cli "fox waving" --friend pip             # a second mascot next to it (until the parser reads two)
     python3 -m studio.cli "..." --dry                           # only show what was understood
     python3 -m studio.cli --list motions                        # what the library has: motions, props, effects, wear,
                                                                 #   faces, bases, stances, tails, arms, templates, colours
@@ -23,7 +24,22 @@ import time
 from .compose import compose
 from .export import save
 from .parse.fallback import parse
+from .scene_compose import compose_scene
+from .scene_spec import ActorSpec, SceneSpec
 from .spec import Caption, StickerSpec
+
+
+def _mascot(word):
+    """A mascot name ('pip') or a word for it ('dog', 'puppy') -> the mascot's name."""
+    from .registry import ensure_loaded
+    reg = ensure_loaded()
+    if word in reg.bases:
+        return word
+    r = parse(word)
+    hits = [m for m in r.matches if m.section == "bases"]
+    if not hits:
+        raise SystemExit(f"--friend: {word!r} is not a mascot; try one of {', '.join(b.animal for b in reg.bases.values())}")
+    return r.spec.base
 
 
 def apply_set(spec: StickerSpec, items):
@@ -107,7 +123,9 @@ def all_rules():
     from .parse.parser import PARSER_RULES
     from .qa import GUARANTEES
     from .rules import describe
-    return [("Reading a prompt", PARSER_RULES), ("Composing a sticker", describe()), ("What the library guarantees", GUARANTEES)]
+    from .scene_compose import describe as describe_scene
+    return [("Reading a prompt", PARSER_RULES), ("Composing a sticker", describe()), ("Composing a scene of two mascots", describe_scene()),
+            ("What the library guarantees", GUARANTEES)]
 
 
 def check():
@@ -150,6 +168,7 @@ def main(argv=None):
     ap.add_argument("--no-auto-caption", action="store_true")
     ap.add_argument("--watermark", action="store_true", help="free-tier watermark on raster exports")
     ap.add_argument("--dry", action="store_true", help="print the spec and stop")
+    ap.add_argument("--friend", metavar="MASCOT", help="add a second mascot (fox, cat ... or a name such as pip), standing still")
     ap.add_argument("--list", metavar="KIND", help="list the library: motions, props, effects, wear, faces, bases, stances, tails, "
                                                    "arms, templates, colours")
     ap.add_argument("--rules", action="store_true", help="list every rule")
@@ -174,9 +193,15 @@ def main(argv=None):
         print("all good" if not bad else f"{len(bad)} problems")
         return 1 if bad else 0
 
+    scene = None
     if a.spec:
         with open(a.spec) as f:
-            spec = StickerSpec.from_dict(json.load(f))
+            data = json.load(f)
+        if isinstance(data, dict) and "actors" in data:
+            scene = SceneSpec.from_dict(data)
+            spec = scene.actors[0].sticker(scene.caption, scene.seconds, scene.tempo)
+        else:
+            spec = StickerSpec.from_dict(data)
         print("spec from", a.spec)
     elif a.prompt:
         r = parse(a.prompt, llm=a.llm, auto_caption=not a.no_auto_caption)
@@ -187,15 +212,31 @@ def main(argv=None):
     else:
         ap.error("give a prompt or --spec")
     apply_set(spec, a.set)
-    print("spec:", spec.to_json())
+    if scene is not None:
+        scene.actors[0] = ActorSpec.of(spec)
+        scene.caption, scene.seconds, scene.tempo = spec.caption, spec.seconds, spec.tempo
+    if a.friend:
+        base = _mascot(a.friend)
+        scene = scene or SceneSpec.from_sticker(spec)
+        if len(scene.actors) > 1:
+            raise SystemExit("--friend: the scene has two mascots already")
+        scene.actors.append(ActorSpec(base=base))
+    if scene is not None and not scene.solo:
+        print("scene:", scene.to_json())
+    else:
+        print("spec:", spec.to_json())
     if a.dry:
         return 0
 
     t = time.time()
-    doc, info = compose(spec)
+    if scene is not None and not scene.solo:
+        doc, info = compose_scene(scene)
+        name = a.name or scene.key()
+    else:
+        doc, info = compose(spec)
+        name = a.name or spec.key()
     for n in info["notes"]:
         print("  note:", n)
-    name = a.name or spec.key()
     res = save(doc, a.out, name, formats=tuple(f.strip() for f in a.formats.split(",")), still=info["still"], mark=a.watermark)
     for fmt, (path, size, warn) in res.items():
         print(f"  {fmt:<6} {size / 1024:7.1f} KB  {path}{'   ! ' + warn if warn else ''}")
